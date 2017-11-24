@@ -8,6 +8,7 @@ public class FollowCamera : MonoBehaviour
     public Transform target;
     public float xRotation;
     public float yRotation;
+    [Tooltip("If this is TRUE, will update Y-rotation follow target")]
     public bool useTargetYRotation;
     public Vector3 targetOffset;
     public float zoomDistance = 10.0f;
