@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
-public class FollowCameraControls : MonoBehaviour {
+[ExecuteInEditMode]
+public class FollowCameraControls : MonoBehaviour
+{
     public Camera targetCamera;
     public bool updateRotation = true;
     public bool updateZoom = true;
