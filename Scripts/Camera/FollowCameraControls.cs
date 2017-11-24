@@ -6,11 +6,16 @@ public class FollowCameraControls : MonoBehaviour
     public Camera targetCamera;
     public bool updateRotation = true;
     public bool updateZoom = true;
-    public float minXRotation;
-    public float maxXRotation;
+    public bool limitXRotation;
+    public float minXRotation = 0;
+    public float maxXRotation = 90;
+    public bool limitYRotation;
+    public float minYRotation = 0;
+    public float maxYRotation = 360;
     public float startXRotation;
     public float startYRotation;
     public float rotationSpeed;
+    public bool limitZoomDistance;
     public float minZoomDistance;
     public float maxZoomDistance;
     public float startZoomDistance;
@@ -20,6 +25,17 @@ public class FollowCameraControls : MonoBehaviour
     public float damping;
     public Transform target;
     private FollowCamera targetFollowCamera;
+    public FollowCamera TargetFollowCamera
+    {
+        get
+        {
+            if (targetFollowCamera == null)
+                targetFollowCamera = targetCamera.gameObject.GetComponent<FollowCamera>();
+            if (targetFollowCamera == null)
+                targetFollowCamera = targetCamera.gameObject.AddComponent<FollowCamera>();
+            return targetFollowCamera;
+        }
+    }
 
     // Use this for initialization
     void Awake()
@@ -27,36 +43,36 @@ public class FollowCameraControls : MonoBehaviour
         if (targetCamera == null)
             targetCamera = Camera.main;
 
-        targetFollowCamera = targetCamera.gameObject.GetComponent<FollowCamera>();
-        if (targetFollowCamera == null)
-            targetFollowCamera = targetCamera.gameObject.AddComponent<FollowCamera>();
-        targetFollowCamera.xRotation = startXRotation;
-        targetFollowCamera.yRotation = startYRotation;
-        targetFollowCamera.zoomDistance = startZoomDistance;
+        TargetFollowCamera.xRotation = startXRotation;
+        TargetFollowCamera.yRotation = startYRotation;
+        TargetFollowCamera.zoomDistance = startZoomDistance;
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        targetFollowCamera.target = target;
-        targetFollowCamera.targetOffset = targetOffset;
-        targetFollowCamera.damping = damping;
-
+        TargetFollowCamera.target = target;
+        TargetFollowCamera.targetOffset = targetOffset;
+        TargetFollowCamera.damping = damping;
 
         if (updateRotation)
         {
             var mX = InputManager.GetAxis("Mouse X", false);
             var mY = InputManager.GetAxis("Mouse Y", false);
-            targetFollowCamera.xRotation -= mY * rotationSpeed;
-            targetFollowCamera.xRotation = Mathf.Clamp(targetFollowCamera.xRotation, minXRotation, maxXRotation);
-            targetFollowCamera.yRotation += mX * rotationSpeed;
+            TargetFollowCamera.xRotation -= mY * rotationSpeed;
+            if (limitXRotation)
+                TargetFollowCamera.xRotation = Mathf.Clamp(TargetFollowCamera.xRotation, minXRotation, maxXRotation);
+            TargetFollowCamera.yRotation += mX * rotationSpeed;
+            if (limitYRotation)
+                TargetFollowCamera.yRotation = Mathf.Clamp(TargetFollowCamera.yRotation, minYRotation, maxYRotation);
         }
 
         if (updateZoom)
         {
             var mZ = InputManager.GetAxis("Mouse ScrollWheel", false);
-            targetFollowCamera.zoomDistance += mZ * zoomSpeed;
-            targetFollowCamera.zoomDistance = Mathf.Clamp(targetFollowCamera.zoomDistance, minZoomDistance, maxZoomDistance);
+            TargetFollowCamera.zoomDistance += mZ * zoomSpeed;
+            if (limitZoomDistance)
+                TargetFollowCamera.zoomDistance = Mathf.Clamp(TargetFollowCamera.zoomDistance, minZoomDistance, maxZoomDistance);
         }
     }
 }

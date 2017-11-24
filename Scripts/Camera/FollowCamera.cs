@@ -15,7 +15,6 @@ public class FollowCamera : MonoBehaviour
     [Range(0, 65)]
     public float damping = 2.0f;
 
-
     private void FixedUpdate()
     {
         // Early out if we don't have a target
@@ -36,5 +35,14 @@ public class FollowCamera : MonoBehaviour
 
         // Always look at the target
         transform.LookAt(target.transform.position + targetOffset);
+    }
+
+    private void LateUpdate()
+    {
+#if UNITY_EDITOR
+        // Update camera when it's updating edit mode (not play mode)
+        if (!Application.isPlaying && Application.isEditor)
+            FixedUpdate();
+#endif
     }
 }
