@@ -30,6 +30,9 @@ public class FollowCameraControls : MonoBehaviour
         targetFollowCamera = targetCamera.gameObject.GetComponent<FollowCamera>();
         if (targetFollowCamera == null)
             targetFollowCamera = targetCamera.gameObject.AddComponent<FollowCamera>();
+        targetFollowCamera.xRotation = startXRotation;
+        targetFollowCamera.yRotation = startYRotation;
+        targetFollowCamera.zoomDistance = startZoomDistance;
     }
 
     // Update is called once per frame
@@ -37,9 +40,6 @@ public class FollowCameraControls : MonoBehaviour
     {
         targetFollowCamera.target = target;
         targetFollowCamera.targetOffset = targetOffset;
-        targetFollowCamera.xRotation = startXRotation;
-        targetFollowCamera.yRotation = startYRotation;
-        targetFollowCamera.zoomDistance = startZoomDistance;
         targetFollowCamera.damping = damping;
 
 
