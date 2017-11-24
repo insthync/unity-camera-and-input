@@ -8,10 +8,10 @@ public class FollowCameraControls : MonoBehaviour
     public bool updateRotation = true;
     public bool updateZoom = true;
     [Header("General Settings")]
+    public Transform target;
     public Vector3 targetOffset;
     [Range(0, 65)]
     public float damping;
-    public Transform target;
     [Header("X Rotation")]
     public bool limitXRotation;
     public float minXRotation = 0;

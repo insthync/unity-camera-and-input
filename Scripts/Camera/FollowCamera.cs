@@ -6,15 +6,21 @@ public class FollowCamera : MonoBehaviour
 
     // The target we are following
     public Transform target;
+    public Vector3 targetOffset;
+    [Range(0, 65)]
+    public float damping = 2.0f;
+    [Header("Rotation")]
     public float xRotation;
     public float yRotation;
     [Tooltip("If this is TRUE, will update Y-rotation follow target")]
     public bool useTargetYRotation;
-    public Vector3 targetOffset;
+    [Header("Zoom")]
     public float zoomDistance = 10.0f;
-    // Smoothness setting
-    [Range(0, 65)]
-    public float damping = 2.0f;
+    [Header("Zoom by ratio (Currently work well with landscape screen)")]
+    public bool zoomByAspectRatio;
+    public float zoomByAspectRatioWidth;
+    public float zoomByAspectRatioHeight;
+    public float zoomByAspectRationAmount;
 
     private void FixedUpdate()
     {
@@ -36,6 +42,14 @@ public class FollowCamera : MonoBehaviour
 
         // Always look at the target
         transform.LookAt(target.transform.position + targetOffset);
+
+        if (zoomByAspectRatio)
+        {
+            var targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
+            var windowaspect = (float)Screen.width / (float)Screen.height;
+            var scaleheight = windowaspect / targetaspect;
+            zoomDistance = Mathf.Abs(1 - scaleheight) * 10f * zoomByAspectRationAmount;
+        }
     }
 
     private void LateUpdate()
