@@ -24,11 +24,10 @@ public class FollowCamera : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Early out if we don't have a target
-        if (!target) return;
-
-        var wantedPosition = target.position + targetOffset;
-        var wantedYRotation = useTargetYRotation ? target.eulerAngles.y : yRotation;
+        var targetPosition = target == null ? Vector3.zero : target.position;
+        var targetYRotation = target == null ? 0 : target.eulerAngles.y;
+        var wantedPosition = targetPosition + targetOffset;
+        var wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
         // Convert the angle into a rotation
         var currentRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
@@ -41,7 +40,7 @@ public class FollowCamera : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, wantedPosition, damping * Time.deltaTime);
 
         // Always look at the target
-        transform.LookAt(target.transform.position + targetOffset);
+        transform.LookAt(targetPosition + targetOffset);
 
         if (zoomByAspectRatio)
         {
