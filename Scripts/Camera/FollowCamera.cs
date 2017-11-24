@@ -20,7 +20,7 @@ public class FollowCamera : MonoBehaviour
     public bool zoomByAspectRatio;
     public float zoomByAspectRatioWidth;
     public float zoomByAspectRatioHeight;
-    public float zoomByAspectRationAmount;
+    public float zoomByAspectRatioMin;
 
     private void FixedUpdate()
     {
@@ -48,7 +48,10 @@ public class FollowCamera : MonoBehaviour
             var targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
             var windowaspect = (float)Screen.width / (float)Screen.height;
             var scaleheight = windowaspect / targetaspect;
-            zoomDistance = Mathf.Abs(1 - scaleheight) * 10f * zoomByAspectRationAmount;
+            var diffScaleHeight = 1 - scaleheight;
+            if (diffScaleHeight < zoomByAspectRatioMin)
+                diffScaleHeight = zoomByAspectRatioMin;
+            zoomDistance = diffScaleHeight * 20f;
         }
     }
 
