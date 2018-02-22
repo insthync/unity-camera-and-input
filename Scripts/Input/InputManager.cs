@@ -8,6 +8,18 @@ public static class InputManager
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
     public static bool useMobileInputOnNonMobile = false;
 
+    public static bool HasInputSetting()
+    {
+        return InputSettingManager.Singleton != null;
+    }
+
+    public static KeyCode GetInputKeyCode(string keyName)
+    {
+        if (!InputSettingManager.Singleton.Settings.ContainsKey(keyName))
+            return KeyCode.None;
+        return InputSettingManager.Singleton.Settings[keyName];
+    }
+
     public static float GetAxis(string name, bool raw)
     {
         float axis = 0;
@@ -27,6 +39,8 @@ public static class InputManager
     {
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
             return (simulateInputs.ContainsKey(name) && simulateInputs[name].GetButton);
+        if (HasInputSetting())
+            return Input.GetKey(GetInputKeyCode(name));
         return Input.GetButton(name);
     }
 
@@ -34,6 +48,8 @@ public static class InputManager
     {
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
             return (simulateInputs.ContainsKey(name) && simulateInputs[name].GetButtonDown);
+        if (HasInputSetting())
+            return Input.GetKeyDown(GetInputKeyCode(name));
         return Input.GetButtonDown(name);
     }
 
@@ -41,6 +57,8 @@ public static class InputManager
     {
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
             return (simulateInputs.ContainsKey(name) && simulateInputs[name].GetButtonUp);
+        if (HasInputSetting())
+            return Input.GetKeyUp(GetInputKeyCode(name));
         return Input.GetButtonUp(name);
     }
 
