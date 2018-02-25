@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class InputSettingManager : MonoBehaviour
 {
+    [System.Serializable]
     public struct InputSetting
     {
         public string keyName;
