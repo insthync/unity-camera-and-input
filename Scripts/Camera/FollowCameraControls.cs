@@ -11,7 +11,7 @@ public class FollowCameraControls : MonoBehaviour
     public Transform target;
     public Vector3 targetOffset;
     [Range(0, 65)]
-    public float damping;
+    public float damping = 65;
     [Header("X Rotation")]
     public bool limitXRotation;
     public float minXRotation = 0;
@@ -23,14 +23,14 @@ public class FollowCameraControls : MonoBehaviour
     [Header("General Rotation Settings")]
     public float startXRotation;
     public float startYRotation;
-    public float rotationSpeed;
+    public float rotationSpeed = 5;
     [Header("Zoom")]
     public bool limitZoomDistance;
     public float minZoomDistance;
     public float maxZoomDistance;
     [Header("General Zoom Settings")]
     public float startZoomDistance;
-    public float zoomSpeed;
+    public float zoomSpeed = 5;
 
     private FollowCamera targetFollowCamera;
     public FollowCamera TargetFollowCamera
