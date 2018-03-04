@@ -37,7 +37,7 @@ public class FollowCamera : MonoBehaviour
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
         // Update position
-        transform.position = Vector3.Lerp(transform.position, wantedPosition, damping * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, wantedPosition, damping * Time.fixedDeltaTime);
 
         // Always look at the target
         transform.LookAt(targetPosition + targetOffset);
