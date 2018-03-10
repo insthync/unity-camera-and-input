@@ -15,9 +15,10 @@ public static class InputManager
 
     public static KeyCode GetInputKeyCode(string keyName)
     {
-        if (!InputSettingManager.Singleton.Settings.ContainsKey(keyName))
+        KeyCode foundKey;
+        if (!InputSettingManager.Singleton.Settings.TryGetValue(keyName, out foundKey))
             return KeyCode.None;
-        return InputSettingManager.Singleton.Settings[keyName];
+        return foundKey;
     }
 
     public static float GetAxis(string name, bool raw)
@@ -25,8 +26,9 @@ public static class InputManager
         float axis = 0;
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
-            if (axis == 0 && simulateAxis.ContainsKey(name))
-                axis = simulateAxis[name].GetValue;
+            SimulateAxis foundSimulateAxis;
+            if (axis == 0 && simulateAxis.TryGetValue(name, out foundSimulateAxis))
+                axis = foundSimulateAxis.GetValue;
         }
         else
         {
@@ -38,7 +40,10 @@ public static class InputManager
     public static bool GetButton(string name)
     {
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
-            return (simulateInputs.ContainsKey(name) && simulateInputs[name].GetButton);
+        {
+            SimulateButton foundSimulateButton;
+            return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButton);
+        }
         if (HasInputSetting())
             return Input.GetKey(GetInputKeyCode(name));
         return Input.GetButton(name);
@@ -47,7 +52,10 @@ public static class InputManager
     public static bool GetButtonDown(string name)
     {
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
-            return (simulateInputs.ContainsKey(name) && simulateInputs[name].GetButtonDown);
+        {
+            SimulateButton foundSimulateButton;
+            return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonDown);
+        }
         if (HasInputSetting())
             return Input.GetKeyDown(GetInputKeyCode(name));
         return Input.GetButtonDown(name);
@@ -56,7 +64,10 @@ public static class InputManager
     public static bool GetButtonUp(string name)
     {
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
-            return (simulateInputs.ContainsKey(name) && simulateInputs[name].GetButtonUp);
+        {
+            SimulateButton foundSimulateButton;
+            return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonUp);
+        }
         if (HasInputSetting())
             return Input.GetKeyUp(GetInputKeyCode(name));
         return Input.GetButtonUp(name);
