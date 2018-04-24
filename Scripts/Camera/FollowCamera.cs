@@ -22,7 +22,7 @@ public class FollowCamera : MonoBehaviour
     public float zoomByAspectRatioHeight;
     public float zoomByAspectRatioMin;
 
-    private void FixedUpdate()
+    private void Update()
     {
         var targetPosition = target == null ? Vector3.zero : target.position;
         var targetYRotation = target == null ? 0 : target.eulerAngles.y;
@@ -59,7 +59,7 @@ public class FollowCamera : MonoBehaviour
 #if UNITY_EDITOR
         // Update camera when it's updating edit mode (not play mode)
         if (!Application.isPlaying && Application.isEditor)
-            FixedUpdate();
+            Update();
 #endif
     }
 }

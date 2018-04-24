@@ -57,7 +57,7 @@ public class FollowCameraControls : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
         TargetFollowCamera.target = target;
         TargetFollowCamera.targetOffset = targetOffset;
