@@ -12,6 +12,8 @@ public class FollowCameraControls : MonoBehaviour
     public Vector3 targetOffset;
     [Range(0, 65)]
     public float damping = 65;
+    [Range(0, 65)]
+    public float lookAtDamping = 2.0f;
     [Header("X Rotation")]
     public bool limitXRotation;
     public float minXRotation = 0;
@@ -62,6 +64,7 @@ public class FollowCameraControls : MonoBehaviour
         TargetFollowCamera.target = target;
         TargetFollowCamera.targetOffset = targetOffset;
         TargetFollowCamera.damping = damping;
+        TargetFollowCamera.lookAtDamping = lookAtDamping;
 
         if (updateRotation)
         {

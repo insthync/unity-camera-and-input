@@ -3,12 +3,24 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class FollowCamera : MonoBehaviour
 {
+    private Transform cacheTransform;
+    public Transform CacheTransform
+    {
+        get
+        {
+            if (cacheTransform == null)
+                cacheTransform = GetComponent<Transform>();
+            return cacheTransform;
+        }
+    }
 
     // The target we are following
     public Transform target;
     public Vector3 targetOffset;
     [Range(0, 65)]
     public float damping = 2.0f;
+    [Range(0, 65)]
+    public float lookAtDamping = 2.0f;
     [Header("Rotation")]
     public float xRotation;
     public float yRotation;
@@ -37,10 +49,11 @@ public class FollowCamera : MonoBehaviour
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
         // Update position
-        transform.position = Vector3.Lerp(transform.position, wantedPosition, damping * Time.fixedDeltaTime);
+        CacheTransform.position = Vector3.Lerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
 
         // Always look at the target
-        transform.LookAt(targetPosition + targetOffset);
+        Quaternion rotation = Quaternion.LookRotation((targetPosition + targetOffset) - CacheTransform.position);
+        CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, rotation, lookAtDamping * Time.deltaTime);
 
         if (zoomByAspectRatio)
         {
