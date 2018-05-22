@@ -49,7 +49,7 @@ public class FollowCamera : MonoBehaviour
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
         // Update position
-        CacheTransform.position = Vector3.Lerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
+        CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
 
         // Always look at the target
         Quaternion rotation = Quaternion.LookRotation((targetPosition + targetOffset) - CacheTransform.position);
