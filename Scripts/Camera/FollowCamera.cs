@@ -17,10 +17,12 @@ public class FollowCamera : MonoBehaviour
     // The target we are following
     public Transform target;
     public Vector3 targetOffset;
-    [Range(0, 65)]
-    public float damping = 2.0f;
-    [Range(0, 65)]
+    [Header("Follow")]
+    public float damping = 10.0f;
+    public bool dontSmoothFollow;
+    [Header("Look at")]
     public float lookAtDamping = 2.0f;
+    public bool dontSmoothLookAt;
     [Header("Rotation")]
     public float xRotation;
     public float yRotation;
@@ -49,11 +51,19 @@ public class FollowCamera : MonoBehaviour
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
         // Update position
-        CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
+        if (!dontSmoothFollow)
+            CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
+        else
+            CacheTransform.position = wantedPosition;
 
         // Always look at the target
-        Quaternion rotation = Quaternion.LookRotation((targetPosition + targetOffset) - CacheTransform.position);
-        CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, rotation, lookAtDamping * Time.deltaTime);
+        if (!dontSmoothLookAt)
+        {
+            Quaternion lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
+            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * Time.deltaTime);
+        }
+        else
+            CacheTransform.rotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
 
         if (zoomByAspectRatio)
         {

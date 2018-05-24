@@ -10,10 +10,12 @@ public class FollowCameraControls : MonoBehaviour
     [Header("General Settings")]
     public Transform target;
     public Vector3 targetOffset;
-    [Range(0, 65)]
-    public float damping = 65;
-    [Range(0, 65)]
+    [Header("Follow")]
+    public float damping = 10.0f;
+    public bool dontSmoothFollow;
+    [Header("Look at")]
     public float lookAtDamping = 2.0f;
+    public bool dontSmoothLookAt;
     [Header("X Rotation")]
     public bool limitXRotation;
     public float minXRotation = 0;
@@ -64,7 +66,9 @@ public class FollowCameraControls : MonoBehaviour
         TargetFollowCamera.target = target;
         TargetFollowCamera.targetOffset = targetOffset;
         TargetFollowCamera.damping = damping;
+        TargetFollowCamera.dontSmoothFollow = dontSmoothFollow;
         TargetFollowCamera.lookAtDamping = lookAtDamping;
+        TargetFollowCamera.dontSmoothLookAt = dontSmoothLookAt;
 
         if (updateRotation)
         {
