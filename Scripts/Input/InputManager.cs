@@ -142,7 +142,7 @@ public static class InputManager
     {
         private int lastPressedFrame = -5;
         private int releasedFrame = -5;
-        private bool pressed;
+        private bool pressed = false;
 
         public void Press()
         {
