@@ -14,23 +14,23 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     private int touchId;
     private Vector2 previousTouchPosition;
 
-    public void OnPointerDown(PointerEventData data)
+    public void OnPointerDown(PointerEventData eventData)
     {
         if (isDragging)
             return;
 
         isDragging = true;
         previousTouchPosition = Input.mousePosition;
-        touchId = data.pointerId;
+        touchId = eventData.pointerId;
         if (Application.isMobilePlatform)
             previousTouchPosition = Input.touches[touchId].position;
     }
 
-    public void OnPointerUp(PointerEventData data)
+    public void OnPointerUp(PointerEventData eventData)
     {
         if (!isDragging)
             return;
-        if (data.pointerId != touchId)
+        if (eventData.pointerId != touchId)
             return;
 
         isDragging = false;
@@ -41,7 +41,10 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     private void Update()
     {
         if (!isDragging)
+        {
+            UpdateVirtualAxes(Vector3.zero);
             return;
+        }
 
         var currentPosition = Input.mousePosition;
         if (Application.isMobilePlatform)
