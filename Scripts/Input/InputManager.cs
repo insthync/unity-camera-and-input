@@ -29,6 +29,13 @@ public static class InputManager
             SimulateAxis foundSimulateAxis;
             if (axis == 0 && simulateAxis.TryGetValue(name, out foundSimulateAxis))
                 axis = foundSimulateAxis.GetValue;
+            if (raw)
+            {
+                if (axis > 0)
+                    axis = 1;
+                if (axis < 0)
+                    axis = -1;
+            }
         }
         else
         {
