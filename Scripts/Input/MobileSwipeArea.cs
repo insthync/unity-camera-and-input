@@ -11,8 +11,8 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     public float ySensitivity = 1f;
 
     private bool isDragging = false;
-    private int touchId;
-    private Vector3 previousTouchPosition;
+    private int touchId = -1;
+    private Vector2 previousTouchPosition;
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -30,12 +30,12 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         if (!isDragging)
             return;
+
         if (eventData.pointerId != touchId)
             return;
 
         isDragging = false;
         touchId = -1;
-        UpdateVirtualAxes(Vector3.zero);
     }
 
     private void Update()
@@ -46,17 +46,18 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             return;
         }
 
-        var currentPosition = Input.mousePosition;
+        var currentPosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
         if (Application.isMobilePlatform)
             currentPosition = Input.touches[touchId].position;
-        Vector3 pointerDelta;
-        pointerDelta = currentPosition - previousTouchPosition;
+
+        var pointerDelta = currentPosition - previousTouchPosition;
+        // Set previous touch position to use next frame
         previousTouchPosition = currentPosition;
-        var axes = new Vector3(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity, 0);
-        UpdateVirtualAxes(axes);
+        // Update virtual axes
+        UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity));
     }
 
-    public void UpdateVirtualAxes(Vector3 value)
+    public void UpdateVirtualAxes(Vector2 value)
     {
         if (useAxisX)
             InputManager.SetAxis(axisXName, value.x);

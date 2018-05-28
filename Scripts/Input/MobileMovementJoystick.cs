@@ -16,7 +16,7 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPoint
     private int touchId;
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerPosition;
-    private Vector3 startDragPosition;
+    private Vector2 startDragPosition;
 
     private void Start()
     {
@@ -32,7 +32,7 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPoint
 
         isDragging = true;
         touchId = data.pointerId;
-        movementController.position = new Vector3(data.position.x, data.position.y, transform.position.z);
+        movementController.position = new Vector2(data.position.x, data.position.y);
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
         startDragPosition = movementController.position;
@@ -42,6 +42,7 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPoint
     {
         if (!isDragging)
             return;
+
         if (data.pointerId != touchId)
             return;
 
@@ -50,27 +51,25 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPoint
         movementController.position = defaultControllerPosition;
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
-
-        if (useAxisX)
-            InputManager.SetAxis(axisXName, 0);
-
-        if (useAxisY)
-            InputManager.SetAxis(axisYName, 0);
     }
 
 
     private void Update()
     {
         if (!isDragging)
+        {
+            UpdateVirtualAxes(Vector3.zero);
             return;
+        }
 
-        Vector3 newPos = Vector3.zero;
+        var newPos = Vector2.zero;
 
         var currentPosition = Input.mousePosition;
         if (Application.isMobilePlatform)
             currentPosition = Input.touches[touchId].position;
-        var allowedPos = new Vector3(currentPosition.x, currentPosition.y, 0) - startDragPosition;
-        allowedPos = Vector3.ClampMagnitude(allowedPos, movementRange);
+
+        var allowedPos = new Vector2(currentPosition.x, currentPosition.y) - startDragPosition;
+        allowedPos = Vector2.ClampMagnitude(allowedPos, movementRange);
 
         if (useAxisX)
             newPos.x = allowedPos.x;
@@ -78,19 +77,18 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPoint
         if (useAxisY)
             newPos.y = allowedPos.y;
 
-        movementController.position = new Vector3(startDragPosition.x + newPos.x, startDragPosition.y + newPos.y, startDragPosition.z + newPos.z);
-        UpdateVirtualAxes(movementController.position);
+        var movePosition = new Vector2(startDragPosition.x + newPos.x, startDragPosition.y + newPos.y);
+        movementController.position = movePosition;
+        // Update virtual axes
+        UpdateVirtualAxes((startDragPosition - movePosition) / movementRange * -1);
     }
 
-    private void UpdateVirtualAxes(Vector3 value)
+    public void UpdateVirtualAxes(Vector2 value)
     {
-        var delta = startDragPosition - value;
-        delta.y = -delta.y;
-        delta /= movementRange;
         if (useAxisX)
-            InputManager.SetAxis(axisXName, -delta.x);
+            InputManager.SetAxis(axisXName, value.x);
 
         if (useAxisY)
-            InputManager.SetAxis(axisYName, delta.y);
+            InputManager.SetAxis(axisYName, value.y);
     }
 }
