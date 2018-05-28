@@ -11,8 +11,18 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
     public float ySensitivity = 1f;
 
     private bool isDragging = false;
-    private int touchId = -1;
     private Vector2 previousTouchPosition;
+    private int touchId = -1;
+
+    public void OnPointerDown(int touchId)
+    {
+        if (Application.isMobilePlatform && touchId < 0)
+            return;
+        AddTouchId(touchId);
+        isDragging = true;
+        this.touchId = touchId;
+        previousTouchPosition = GetPointerPosition(touchId);
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -23,13 +33,7 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
         if (ContainsTouchId(touchId))
             return;
 
-        AddTouchId(touchId);
-
-        isDragging = true;
-        previousTouchPosition = Input.mousePosition;
-        this.touchId = touchId;
-        if (Application.isMobilePlatform)
-            previousTouchPosition = Input.touches[touchId].position;
+        OnPointerDown(touchId);
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -54,9 +58,7 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
             return;
         }
 
-        var currentPosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-        if (Application.isMobilePlatform)
-            currentPosition = Input.touches[touchId].position;
+        var currentPosition = GetPointerPosition(touchId);
 
         var pointerDelta = currentPosition - previousTouchPosition;
         // Set previous touch position to use next frame

@@ -13,16 +13,29 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     [Tooltip("This is the button to control movement")]
     public RectTransform movementController;
     private bool isDragging = false;
-    private int touchId;
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerPosition;
     private Vector2 startDragPosition;
+    private int touchId;
 
     private void Start()
     {
         if (movementBackground != null)
             backgroundOffset = movementBackground.position - movementController.position;
         defaultControllerPosition = movementController.position;
+    }
+
+    public void OnPointerDown(int touchId)
+    {
+        if (Application.isMobilePlatform && touchId < 0)
+            return;
+        AddTouchId(touchId);
+        isDragging = true;
+        this.touchId = touchId;
+        movementController.position = GetPointerPosition(touchId);
+        if (movementBackground != null)
+            movementBackground.position = backgroundOffset + movementController.position;
+        startDragPosition = movementController.position;
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -34,14 +47,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         if (ContainsTouchId(touchId))
             return;
 
-        AddTouchId(touchId);
-
-        isDragging = true;
-        this.touchId = touchId;
-        movementController.position = new Vector2(eventData.position.x, eventData.position.y);
-        if (movementBackground != null)
-            movementBackground.position = backgroundOffset + movementController.position;
-        startDragPosition = movementController.position;
+        OnPointerDown(touchId);
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -72,11 +78,9 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
         var newPos = Vector2.zero;
 
-        var currentPosition = Input.mousePosition;
-        if (Application.isMobilePlatform)
-            currentPosition = Input.touches[touchId].position;
+        var currentPosition = GetPointerPosition(touchId);
 
-        var allowedPos = new Vector2(currentPosition.x, currentPosition.y) - startDragPosition;
+        var allowedPos = currentPosition - startDragPosition;
         allowedPos = Vector2.ClampMagnitude(allowedPos, movementRange);
 
         if (useAxisX)
@@ -85,7 +89,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         if (useAxisY)
             newPos.y = allowedPos.y;
 
-        var movePosition = new Vector2(startDragPosition.x + newPos.x, startDragPosition.y + newPos.y);
+        var movePosition = startDragPosition + newPos;
         movementController.position = movePosition;
         // Update virtual axes
         UpdateVirtualAxes((startDragPosition - movePosition) / movementRange * -1);

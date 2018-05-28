@@ -8,7 +8,7 @@ public class MobileInputComponent : MonoBehaviour
 
     public static void AddTouchId(int id)
     {
-        if (id < 0)
+        if (id < 0 || touchIds.Contains(id))
             return;
         touchIds.Add(id);
     }
@@ -26,5 +26,10 @@ public class MobileInputComponent : MonoBehaviour
     public static void ClearTouchId()
     {
         touchIds.Clear();
+    }
+
+    public static Vector2 GetPointerPosition(int id)
+    {
+        return Application.isMobilePlatform ? Input.touches[id].position : new Vector2(Input.mousePosition.x, Input.mousePosition.y);
     }
 }

@@ -10,15 +10,10 @@ public class MobilePinchArea : MobileInputComponent, IPointerDownHandler, IPoint
     private int touchId1 = -1;
     private int touchId2 = -1;
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnPointerDown(int touchId)
     {
-        if (isDragging)
+        if (Application.isMobilePlatform && touchId < 0)
             return;
-
-        var touchId = eventData.pointerId;
-        if (ContainsTouchId(touchId))
-            return;
-
         if (touchId1 == -1)
         {
             touchId1 = touchId;
@@ -29,9 +24,20 @@ public class MobilePinchArea : MobileInputComponent, IPointerDownHandler, IPoint
             touchId2 = touchId;
             AddTouchId(touchId);
         }
-
         if (touchId1 != -1 && touchId2 != -1)
             isDragging = true;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (isDragging)
+            return;
+
+        var touchId = eventData.pointerId;
+        if (ContainsTouchId(touchId))
+            return;
+
+        OnPointerDown(touchId);
     }
 
     public void OnPointerUp(PointerEventData eventData)
