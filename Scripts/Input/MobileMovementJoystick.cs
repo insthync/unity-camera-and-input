@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler, IPointerUpHandler
 {
     public int movementRange = 150;
     public bool useAxisX = true;
@@ -25,26 +25,34 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IPoint
         defaultControllerPosition = movementController.position;
     }
 
-    public void OnPointerDown(PointerEventData data)
+    public void OnPointerDown(PointerEventData eventData)
     {
         if (isDragging)
             return;
 
+        var touchId = eventData.pointerId;
+        if (ContainsTouchId(touchId))
+            return;
+
+        AddTouchId(touchId);
+
         isDragging = true;
-        touchId = data.pointerId;
-        movementController.position = new Vector2(data.position.x, data.position.y);
+        this.touchId = touchId;
+        movementController.position = new Vector2(eventData.position.x, eventData.position.y);
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
         startDragPosition = movementController.position;
     }
 
-    public void OnPointerUp(PointerEventData data)
+    public void OnPointerUp(PointerEventData eventData)
     {
         if (!isDragging)
             return;
-
-        if (data.pointerId != touchId)
+        
+        if (eventData.pointerId != touchId)
             return;
+
+        RemoveTouchId(touchId);
 
         isDragging = false;
         touchId = -1;

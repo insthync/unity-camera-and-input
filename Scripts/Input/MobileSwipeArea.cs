@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPointerUpHandler
 {
     public bool useAxisX = true;
     public bool useAxisY = true;
@@ -19,9 +19,15 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         if (isDragging)
             return;
 
+        var touchId = eventData.pointerId;
+        if (ContainsTouchId(touchId))
+            return;
+
+        AddTouchId(touchId);
+
         isDragging = true;
         previousTouchPosition = Input.mousePosition;
-        touchId = eventData.pointerId;
+        this.touchId = touchId;
         if (Application.isMobilePlatform)
             previousTouchPosition = Input.touches[touchId].position;
     }
@@ -33,6 +39,8 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
         if (eventData.pointerId != touchId)
             return;
+
+        RemoveTouchId(touchId);
 
         isDragging = false;
         touchId = -1;

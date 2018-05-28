@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobilePinchArea : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class MobilePinchArea : MobileInputComponent, IPointerDownHandler, IPointerUpHandler
 {
     public string axisName = "Mouse ScrollWheel";
     public float sensitivity = 1f;
@@ -16,11 +16,19 @@ public class MobilePinchArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             return;
 
         var touchId = eventData.pointerId;
+        if (ContainsTouchId(touchId))
+            return;
 
         if (touchId1 == -1)
+        {
             touchId1 = touchId;
+            AddTouchId(touchId);
+        }
         else if (touchId2 == -1)
+        {
             touchId2 = touchId;
+            AddTouchId(touchId);
+        }
 
         if (touchId1 != -1 && touchId2 != -1)
             isDragging = true;
@@ -31,14 +39,16 @@ public class MobilePinchArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         if (!isDragging)
             return;
 
-        if (eventData.pointerId == touchId1)
+        var touchId = eventData.pointerId;
+        if (touchId == touchId1)
         {
+            RemoveTouchId(touchId);
             isDragging = false;
             touchId1 = -1;
         }
-
-        if (eventData.pointerId == touchId2)
+        if (touchId == touchId2)
         {
+            RemoveTouchId(touchId);
             isDragging = false;
             touchId2 = -1;
         }
