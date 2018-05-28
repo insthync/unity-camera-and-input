@@ -52,13 +52,12 @@ public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         Vector3 pointerDelta;
         pointerDelta = currentPosition - previousTouchPosition;
         previousTouchPosition = currentPosition;
-        UpdateVirtualAxes(new Vector3(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity, 0));
+        var axes = new Vector3(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity, 0);
+        UpdateVirtualAxes(axes);
     }
 
     public void UpdateVirtualAxes(Vector3 value)
     {
-        value = value.normalized;
-
         if (useAxisX)
             InputManager.SetAxis(axisXName, value.x);
 
