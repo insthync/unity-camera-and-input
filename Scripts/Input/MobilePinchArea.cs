@@ -77,8 +77,8 @@ public class MobilePinchArea : MobileInputComponent, IPointerDownHandler, IPoint
         Vector2 touch2PrevPos = touch2.position - touch2.deltaPosition;
 
         // Find the magnitude of the vector (the distance) between the touches in each frame.
-        float prevTouchDeltaMag = (touch1PrevPos - touch2PrevPos).sqrMagnitude;
-        float touchDeltaMag = (touch1.position - touch2.position).sqrMagnitude;
+        float prevTouchDeltaMag = (touch1PrevPos - touch2PrevPos).magnitude;
+        float touchDeltaMag = (touch1.position - touch2.position).magnitude;
 
         // Find the difference in the distances between each frame.
         float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
