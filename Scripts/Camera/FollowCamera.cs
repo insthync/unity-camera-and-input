@@ -1,4 +1,6 @@
+using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Jobs;
 
 [ExecuteInEditMode]
 public class FollowCamera : MonoBehaviour
@@ -36,22 +38,100 @@ public class FollowCamera : MonoBehaviour
     public float zoomByAspectRatioHeight;
     public float zoomByAspectRatioMin;
 
+    // Job
+    private TransformAccessArray followJobTransforms;
+    private FollowCameraJob followJob;
+    private JobHandle followJobHandle;
+
     // Improve Garbage collector
     private Vector3 targetPosition;
     private float targetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
-    private Quaternion currentRotation;
-    private Quaternion lookAtRotation;
     private float targetaspect;
     private float windowaspect;
     private float scaleheight;
     private float diffScaleHeight;
 
+    private void Awake()
+    {
+        followJobTransforms = new TransformAccessArray(new Transform[] { CacheTransform });
+    }
+
+    private void OnDisable()
+    {
+        followJobTransforms.Dispose();
+        followJobHandle.Complete();
+    }
+
     private void Update()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
         targetYRotation = target == null ? 0 : target.eulerAngles.y;
+
+        if (zoomByAspectRatio)
+        {
+            targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
+            windowaspect = (float)Screen.width / (float)Screen.height;
+            scaleheight = windowaspect / targetaspect;
+            diffScaleHeight = 1 - scaleheight;
+            if (diffScaleHeight < zoomByAspectRatioMin)
+                diffScaleHeight = zoomByAspectRatioMin;
+            zoomDistance = diffScaleHeight * 20f;
+        }
+
+        followJob = new FollowCameraJob()
+        {
+            targetPosition = targetPosition,
+            targetYRotation = targetYRotation,
+            targetOffset = targetOffset,
+            damping = damping,
+            dontSmoothFollow = dontSmoothFollow,
+            lookAtDamping = lookAtDamping,
+            dontSmoothLookAt = dontSmoothLookAt,
+            xRotation = xRotation,
+            yRotation = yRotation,
+            useTargetYRotation = useTargetYRotation,
+            zoomDistance = zoomDistance,
+            deltaTime = Time.deltaTime,
+        };
+        followJobHandle = followJob.Schedule(followJobTransforms);
+        JobHandle.ScheduleBatchedJobs();
+    }
+
+    private void LateUpdate()
+    {
+#if UNITY_EDITOR
+        // Update camera when it's updating edit mode (not play mode)
+        if (!Application.isPlaying && Application.isEditor)
+            Update();
+#endif
+        followJobHandle.Complete();
+    }
+}
+
+public struct FollowCameraJob : IJobParallelForTransform
+{
+    public Vector3 targetPosition;
+    public float targetYRotation;
+    public Vector3 targetOffset;
+    public float damping;
+    public bool dontSmoothFollow;
+    public float lookAtDamping;
+    public bool dontSmoothLookAt;
+    public float xRotation;
+    public float yRotation;
+    public bool useTargetYRotation;
+    public float zoomDistance;
+    public float deltaTime;
+
+    private Vector3 wantedPosition;
+    private float wantedYRotation;
+    private Quaternion currentRotation;
+    private Quaternion lookAtRotation;
+
+    public void Execute(int index, TransformAccess transform)
+    {
         wantedPosition = targetPosition + targetOffset;
         wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
@@ -64,35 +144,15 @@ public class FollowCamera : MonoBehaviour
 
         // Update position
         if (!dontSmoothFollow)
-            CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
+            transform.position = Vector3.Slerp(transform.position, wantedPosition, damping * deltaTime);
         else
-            CacheTransform.position = wantedPosition;
+            transform.position = wantedPosition;
 
-        lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
+        lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - transform.position);
         // Always look at the target
         if (!dontSmoothLookAt)
-            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookAtRotation, lookAtDamping * deltaTime);
         else
-            CacheTransform.rotation = lookAtRotation;
-
-        if (zoomByAspectRatio)
-        {
-            targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
-            windowaspect = (float)Screen.width / (float)Screen.height;
-            scaleheight = windowaspect / targetaspect;
-            diffScaleHeight = 1 - scaleheight;
-            if (diffScaleHeight < zoomByAspectRatioMin)
-                diffScaleHeight = zoomByAspectRatioMin;
-            zoomDistance = diffScaleHeight * 20f;
-        }
-    }
-
-    private void LateUpdate()
-    {
-#if UNITY_EDITOR
-        // Update camera when it's updating edit mode (not play mode)
-        if (!Application.isPlaying && Application.isEditor)
-            Update();
-#endif
+            transform.rotation = lookAtRotation;
     }
 }
