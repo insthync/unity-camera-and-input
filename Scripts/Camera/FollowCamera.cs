@@ -36,19 +36,38 @@ public class FollowCamera : MonoBehaviour
     public float zoomByAspectRatioHeight;
     public float zoomByAspectRatioMin;
 
+    // Improve Garbage collector
+    private Vector3 targetPosition;
+    private float targetYRotation;
+    private Vector3 wantedPosition;
+    private float wantedYRotation;
+    private Quaternion currentRotation;
+    private Quaternion lookAtRotation;
+    private float targetaspect;
+    private float windowaspect;
+    private float scaleheight;
+    private float diffScaleHeight;
+
     private void Update()
     {
-        var targetPosition = target == null ? Vector3.zero : target.position;
-        var targetYRotation = target == null ? 0 : target.eulerAngles.y;
-        var wantedPosition = targetPosition + targetOffset;
-        var wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
+        targetPosition = target == null ? Vector3.zero : target.position;
+        targetYRotation = target == null ? 0 : target.eulerAngles.y;
+        wantedPosition = targetPosition + targetOffset;
+        wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
         // Convert the angle into a rotation
-        var currentRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
+        currentRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
 
         // Set the position of the camera on the x-z plane to:
         // distance meters behind the target
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
+
+        lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
+        // Always look at the target
+        if (!dontSmoothLookAt)
+            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * Time.deltaTime);
+        else
+            CacheTransform.rotation = lookAtRotation;
 
         // Update position
         if (!dontSmoothFollow)
@@ -56,21 +75,12 @@ public class FollowCamera : MonoBehaviour
         else
             CacheTransform.position = wantedPosition;
 
-        // Always look at the target
-        if (!dontSmoothLookAt)
-        {
-            Quaternion lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
-            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * Time.deltaTime);
-        }
-        else
-            CacheTransform.rotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
-
         if (zoomByAspectRatio)
         {
-            var targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
-            var windowaspect = (float)Screen.width / (float)Screen.height;
-            var scaleheight = windowaspect / targetaspect;
-            var diffScaleHeight = 1 - scaleheight;
+            targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
+            windowaspect = (float)Screen.width / (float)Screen.height;
+            scaleheight = windowaspect / targetaspect;
+            diffScaleHeight = 1 - scaleheight;
             if (diffScaleHeight < zoomByAspectRatioMin)
                 diffScaleHeight = zoomByAspectRatioMin;
             zoomDistance = diffScaleHeight * 20f;
