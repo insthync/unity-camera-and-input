@@ -53,7 +53,7 @@ public class FollowCamera : MonoBehaviour
     private float scaleheight;
     private float diffScaleHeight;
 
-    private void Awake()
+    private void OnEnable()
     {
         followJobTransforms = new TransformAccessArray(new Transform[] { CacheTransform });
     }
