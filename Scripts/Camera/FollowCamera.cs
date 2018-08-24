@@ -41,17 +41,32 @@ public class FollowCamera : MonoBehaviour
     private float targetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
-    private Quaternion currentRotation;
-    private Quaternion lookAtRotation;
     private float targetaspect;
     private float windowaspect;
     private float scaleheight;
     private float diffScaleHeight;
+    private float deltaTime;
+    private Quaternion currentRotation;
+    private Quaternion lookAtRotation;
 
-    private void Update()
+    protected virtual void Update()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
         targetYRotation = target == null ? 0 : target.eulerAngles.y;
+
+        if (zoomByAspectRatio)
+        {
+            targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
+            windowaspect = (float)Screen.width / (float)Screen.height;
+            scaleheight = windowaspect / targetaspect;
+            diffScaleHeight = 1 - scaleheight;
+            if (diffScaleHeight < zoomByAspectRatioMin)
+                diffScaleHeight = zoomByAspectRatioMin;
+            zoomDistance = diffScaleHeight * 20f;
+        }
+
+        deltaTime = Time.deltaTime;
+
         wantedPosition = targetPosition + targetOffset;
         wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
@@ -64,30 +79,19 @@ public class FollowCamera : MonoBehaviour
 
         // Update position
         if (!dontSmoothFollow)
-            CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * Time.deltaTime);
+            transform.position = Vector3.Slerp(transform.position, wantedPosition, damping * deltaTime);
         else
-            CacheTransform.position = wantedPosition;
+            transform.position = wantedPosition;
 
-        lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - CacheTransform.position);
+        lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - transform.position);
         // Always look at the target
         if (!dontSmoothLookAt)
-            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookAtRotation, lookAtDamping * deltaTime);
         else
-            CacheTransform.rotation = lookAtRotation;
-
-        if (zoomByAspectRatio)
-        {
-            targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
-            windowaspect = (float)Screen.width / (float)Screen.height;
-            scaleheight = windowaspect / targetaspect;
-            diffScaleHeight = 1 - scaleheight;
-            if (diffScaleHeight < zoomByAspectRatioMin)
-                diffScaleHeight = zoomByAspectRatioMin;
-            zoomDistance = diffScaleHeight * 20f;
-        }
+            transform.rotation = lookAtRotation;
     }
 
-    private void LateUpdate()
+    protected virtual void LateUpdate()
     {
 #if UNITY_EDITOR
         // Update camera when it's updating edit mode (not play mode)

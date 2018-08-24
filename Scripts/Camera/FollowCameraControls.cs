@@ -1,21 +1,11 @@
 ﻿using UnityEngine;
 
 [ExecuteInEditMode]
-public class FollowCameraControls : MonoBehaviour
+public class FollowCameraControls : FollowCamera
 {
-    public Camera targetCamera;
     [Header("Controls")]
     public bool updateRotation = true;
     public bool updateZoom = true;
-    [Header("General Settings")]
-    public Transform target;
-    public Vector3 targetOffset;
-    [Header("Follow")]
-    public float damping = 10.0f;
-    public bool dontSmoothFollow;
-    [Header("Look at")]
-    public float lookAtDamping = 2.0f;
-    public bool dontSmoothLookAt;
     [Header("X Rotation")]
     public bool limitXRotation;
     public float minXRotation = 0;
@@ -35,59 +25,29 @@ public class FollowCameraControls : MonoBehaviour
     [Header("General Zoom Settings")]
     public float startZoomDistance;
     public float zoomSpeed = 5;
-
-    private FollowCamera targetFollowCamera;
-    public FollowCamera TargetFollowCamera
+    
+    protected override void Update()
     {
-        get
-        {
-            if (targetFollowCamera == null)
-                targetFollowCamera = targetCamera.gameObject.GetComponent<FollowCamera>();
-            if (targetFollowCamera == null)
-                targetFollowCamera = targetCamera.gameObject.AddComponent<FollowCamera>();
-            return targetFollowCamera;
-        }
-    }
-
-    // Use this for initialization
-    void Awake()
-    {
-        if (targetCamera == null)
-            targetCamera = Camera.main;
-
-        TargetFollowCamera.xRotation = startXRotation;
-        TargetFollowCamera.yRotation = startYRotation;
-        TargetFollowCamera.zoomDistance = startZoomDistance;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        TargetFollowCamera.target = target;
-        TargetFollowCamera.targetOffset = targetOffset;
-        TargetFollowCamera.damping = damping;
-        TargetFollowCamera.dontSmoothFollow = dontSmoothFollow;
-        TargetFollowCamera.lookAtDamping = lookAtDamping;
-        TargetFollowCamera.dontSmoothLookAt = dontSmoothLookAt;
-
         if (updateRotation)
         {
             var mX = InputManager.GetAxis("Mouse X", false);
             var mY = InputManager.GetAxis("Mouse Y", false);
-            TargetFollowCamera.xRotation -= mY * rotationSpeed;
+            xRotation -= mY * rotationSpeed;
             if (limitXRotation)
-                TargetFollowCamera.xRotation = Mathf.Clamp(TargetFollowCamera.xRotation, minXRotation, maxXRotation);
-            TargetFollowCamera.yRotation += mX * rotationSpeed;
+                xRotation = Mathf.Clamp(xRotation, minXRotation, maxXRotation);
+            yRotation += mX * rotationSpeed;
             if (limitYRotation)
-                TargetFollowCamera.yRotation = Mathf.Clamp(TargetFollowCamera.yRotation, minYRotation, maxYRotation);
+                yRotation = Mathf.Clamp(yRotation, minYRotation, maxYRotation);
         }
 
         if (updateZoom)
         {
             var mZ = InputManager.GetAxis("Mouse ScrollWheel", false);
-            TargetFollowCamera.zoomDistance += mZ * zoomSpeed;
+            zoomDistance += mZ * zoomSpeed;
             if (limitZoomDistance)
-                TargetFollowCamera.zoomDistance = Mathf.Clamp(TargetFollowCamera.zoomDistance, minZoomDistance, maxZoomDistance);
+                zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
         }
+
+        base.Update();
     }
 }
