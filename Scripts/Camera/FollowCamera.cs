@@ -64,7 +64,7 @@ public class FollowCamera : MonoBehaviour
         followJobHandle.Complete();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
         targetYRotation = target == null ? 0 : target.eulerAngles.y;
@@ -99,7 +99,7 @@ public class FollowCamera : MonoBehaviour
         JobHandle.ScheduleBatchedJobs();
     }
 
-    private void LateUpdate()
+    protected virtual void LateUpdate()
     {
 #if UNITY_EDITOR
         // Update camera when it's updating edit mode (not play mode)
