@@ -14,7 +14,17 @@ public class FollowCamera : MonoBehaviour
         }
     }
 
-    // The target we are following
+    public Camera CacheCamera
+    {
+        get
+        {
+            if (targetCamera == null)
+                targetCamera = GetComponent<Camera>();
+            return targetCamera;
+        }
+    }
+
+    public Camera targetCamera;
     public Transform target;
     public Vector3 targetOffset;
     [Header("Follow")]
@@ -64,6 +74,9 @@ public class FollowCamera : MonoBehaviour
                 diffScaleHeight = zoomByAspectRatioMin;
             zoomDistance = diffScaleHeight * 20f;
         }
+
+        if (CacheCamera != null && CacheCamera.orthographic)
+            CacheCamera.orthographicSize = zoomDistance;
 
         deltaTime = Time.deltaTime;
 
