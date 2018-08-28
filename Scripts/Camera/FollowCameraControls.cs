@@ -25,7 +25,14 @@ public class FollowCameraControls : FollowCamera
     [Header("General Zoom Settings")]
     public float startZoomDistance;
     public float zoomSpeed = 5;
-    
+
+    private void Start()
+    {
+        xRotation = startXRotation;
+        yRotation = startYRotation;
+        zoomDistance = startZoomDistance;
+    }
+
     protected override void Update()
     {
         if (updateRotation)
