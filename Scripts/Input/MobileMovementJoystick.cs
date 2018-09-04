@@ -16,6 +16,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     private Vector3 defaultControllerPosition;
     private Vector2 startDragPosition;
     private int pointerId;
+    private int correctPointerId;
     private bool isDragging;
 
     private void Start()
@@ -54,10 +55,11 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
         var newPos = Vector2.zero;
 
-        if (pointerId > Input.touchCount - 1)
-            pointerId = Input.touchCount - 1;
+        correctPointerId = pointerId;
+        if (correctPointerId > Input.touchCount - 1)
+            correctPointerId = Input.touchCount - 1;
 
-        var currentPosition = GetPointerPosition(pointerId);
+        var currentPosition = GetPointerPosition(correctPointerId);
 
         var allowedPos = currentPosition - startDragPosition;
         allowedPos = Vector2.ClampMagnitude(allowedPos, movementRange);

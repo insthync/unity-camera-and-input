@@ -11,6 +11,7 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
     public float ySensitivity = 1f;
 
     private int pointerId;
+    private int correctPointerId;
     private bool isDragging = false;
     private Vector2 previousTouchPosition;
 
@@ -34,8 +35,9 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
             return;
         }
 
-        if (pointerId > Input.touchCount - 1)
-            pointerId = Input.touchCount - 1;
+        correctPointerId = pointerId;
+        if (correctPointerId > Input.touchCount - 1)
+            correctPointerId = Input.touchCount - 1;
 
         var currentPosition = GetPointerPosition(pointerId);
 
