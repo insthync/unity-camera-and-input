@@ -54,6 +54,9 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
         var newPos = Vector2.zero;
 
+        if (pointerId > Input.touchCount - 1)
+            pointerId = Input.touchCount - 1;
+
         var currentPosition = GetPointerPosition(pointerId);
 
         var allowedPos = currentPosition - startDragPosition;
