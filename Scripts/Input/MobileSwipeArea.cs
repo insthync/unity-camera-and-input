@@ -34,6 +34,9 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
             return;
         }
 
+        if (pointerId > Input.touchCount - 1)
+            pointerId = Input.touchCount - 1;
+
         var currentPosition = GetPointerPosition(pointerId);
 
         var pointerDelta = currentPosition - previousTouchPosition;
