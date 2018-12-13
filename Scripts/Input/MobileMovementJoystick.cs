@@ -13,7 +13,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     [Tooltip("This is the button to control movement")]
     public RectTransform movementController;
     private Vector3 backgroundOffset;
-    private Vector3 defaultControllerPosition;
+    private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
     private int pointerId;
     private int correctPointerId;
@@ -23,7 +23,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     {
         if (movementBackground != null)
             backgroundOffset = movementBackground.position - movementController.position;
-        defaultControllerPosition = movementController.position;
+        defaultControllerLocalPosition = movementController.localPosition;
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -39,7 +39,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        movementController.position = defaultControllerPosition;
+        movementController.localPosition = defaultControllerLocalPosition;
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
         isDragging = false;
