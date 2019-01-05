@@ -53,15 +53,15 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
             return;
         }
 
-        var newPos = Vector2.zero;
+        Vector2 newPos = Vector2.zero;
 
         correctPointerId = pointerId;
         if (correctPointerId > Input.touchCount - 1)
             correctPointerId = Input.touchCount - 1;
 
-        var currentPosition = GetPointerPosition(correctPointerId);
+        Vector2 currentPosition = GetPointerPosition(correctPointerId);
 
-        var allowedPos = currentPosition - startDragPosition;
+        Vector2 allowedPos = currentPosition - startDragPosition;
         allowedPos = Vector2.ClampMagnitude(allowedPos, movementRange);
 
         if (useAxisX)
@@ -70,7 +70,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         if (useAxisY)
             newPos.y = allowedPos.y;
 
-        var movePosition = startDragPosition + newPos;
+        Vector2 movePosition = startDragPosition + newPos;
         movementController.position = movePosition;
         // Update virtual axes
         UpdateVirtualAxes((startDragPosition - movePosition) / movementRange * -1);

@@ -37,8 +37,8 @@ public class FollowCameraControls : FollowCamera
     {
         if (updateRotation)
         {
-            var mX = InputManager.GetAxis("Mouse X", false);
-            var mY = InputManager.GetAxis("Mouse Y", false);
+            float mX = InputManager.GetAxis("Mouse X", false);
+            float mY = InputManager.GetAxis("Mouse Y", false);
             xRotation -= mY * rotationSpeed;
             if (limitXRotation)
                 xRotation = Mathf.Clamp(xRotation, minXRotation, maxXRotation);
@@ -49,7 +49,7 @@ public class FollowCameraControls : FollowCamera
 
         if (updateZoom)
         {
-            var mZ = InputManager.GetAxis("Mouse ScrollWheel", false);
+            float mZ = InputManager.GetAxis("Mouse ScrollWheel", false);
             zoomDistance += mZ * zoomSpeed;
             if (limitZoomDistance)
                 zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);

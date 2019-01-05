@@ -84,7 +84,7 @@ public static class InputManager
     {
         if (!simulateInputs.ContainsKey(name))
         {
-            var inputData = new SimulateButton();
+            SimulateButton inputData = new SimulateButton();
             simulateInputs.Add(name, inputData);
         }
         simulateInputs[name].Press();
@@ -94,7 +94,7 @@ public static class InputManager
     {
         if (!simulateInputs.ContainsKey(name))
         {
-            var inputData = new SimulateButton();
+            SimulateButton inputData = new SimulateButton();
             simulateInputs.Add(name, inputData);
         }
         simulateInputs[name].Release();
@@ -104,7 +104,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            var inputData = new SimulateAxis();
+            SimulateAxis inputData = new SimulateAxis();
             simulateAxis.Add(name, inputData);
         }
         simulateAxis[name].Update(1f);
@@ -114,7 +114,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            var inputData = new SimulateAxis();
+            SimulateAxis inputData = new SimulateAxis();
             simulateAxis.Add(name, inputData);
         }
         simulateAxis[name].Update(-1f);
@@ -124,7 +124,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            var inputData = new SimulateAxis();
+            SimulateAxis inputData = new SimulateAxis();
             simulateAxis.Add(name, inputData);
         }
         simulateAxis[name].Update(0);
@@ -134,7 +134,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            var inputData = new SimulateAxis();
+            SimulateAxis inputData = new SimulateAxis();
             simulateAxis.Add(name, inputData);
         }
         simulateAxis[name].Update(value);

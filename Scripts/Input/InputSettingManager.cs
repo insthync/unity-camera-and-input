@@ -27,7 +27,7 @@ public class InputSettingManager : MonoBehaviour
         Singleton = GetComponent<InputSettingManager>();
         DontDestroyOnLoad(gameObject);
 
-        foreach (var setting in settings)
+        foreach (InputSetting setting in settings)
         {
             Settings[setting.keyName] = setting.keyCode;
         }
