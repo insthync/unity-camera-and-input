@@ -39,9 +39,9 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
         if (correctPointerId > Input.touchCount - 1)
             correctPointerId = Input.touchCount - 1;
 
-        var currentPosition = GetPointerPosition(pointerId);
+        Vector2 currentPosition = GetPointerPosition(pointerId);
 
-        var pointerDelta = currentPosition - previousTouchPosition;
+        Vector2 pointerDelta = currentPosition - previousTouchPosition;
         // Set previous touch position to use next frame
         previousTouchPosition = currentPosition;
         // Update virtual axes
