@@ -5,6 +5,8 @@ public class FollowCameraControls : FollowCamera
 {
     [Header("Controls")]
     public bool updateRotation = true;
+    public bool updateRotationX = false;
+    public bool updateRotationY = false;
     public bool updateZoom = true;
     [Header("X Rotation")]
     public bool limitXRotation;
@@ -35,13 +37,17 @@ public class FollowCameraControls : FollowCamera
 
     protected override void Update()
     {
-        if (updateRotation)
+        if (updateRotation || updateRotationX)
         {
-            float mX = InputManager.GetAxis("Mouse X", false);
             float mY = InputManager.GetAxis("Mouse Y", false);
             xRotation -= mY * rotationSpeed;
             if (limitXRotation)
                 xRotation = Mathf.Clamp(xRotation, minXRotation, maxXRotation);
+        }
+
+        if (updateRotation || updateRotationY)
+        {
+            float mX = InputManager.GetAxis("Mouse X", false);
             yRotation += mX * rotationSpeed;
             if (limitYRotation)
                 yRotation = Mathf.Clamp(yRotation, minYRotation, maxYRotation);
