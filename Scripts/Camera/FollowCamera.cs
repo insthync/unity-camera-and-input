@@ -62,6 +62,7 @@ public class FollowCamera : MonoBehaviour
     protected virtual void Update()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
+        targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * target.up) + (targetOffset.z * CacheTransform.forward);
         targetYRotation = target == null ? 0 : target.eulerAngles.y;
 
         if (zoomByAspectRatio)
@@ -80,7 +81,7 @@ public class FollowCamera : MonoBehaviour
 
         deltaTime = Time.deltaTime;
 
-        wantedPosition = targetPosition + targetOffset;
+        wantedPosition = targetPosition;
         wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
         // Convert the angle into a rotation
@@ -96,7 +97,7 @@ public class FollowCamera : MonoBehaviour
         else
             transform.position = wantedPosition;
 
-        lookAtRotation = Quaternion.LookRotation(targetPosition + targetOffset - transform.position);
+        lookAtRotation = Quaternion.LookRotation(targetPosition - transform.position);
         // Always look at the target
         if (!dontSmoothLookAt)
             transform.rotation = Quaternion.Slerp(transform.rotation, lookAtRotation, lookAtDamping * deltaTime);
