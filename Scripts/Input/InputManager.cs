@@ -8,9 +8,9 @@ public static class InputManager
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
     public static bool useMobileInputOnNonMobile = false;
 
-    public static bool HasInputSetting()
+    public static bool HasInputSetting(string keyName)
     {
-        return InputSettingManager.Singleton != null;
+        return InputSettingManager.Singleton != null && InputSettingManager.Singleton.Settings.ContainsKey(keyName);
     }
 
     public static KeyCode GetInputKeyCode(string keyName)
@@ -51,7 +51,7 @@ public static class InputManager
             SimulateButton foundSimulateButton;
             return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButton);
         }
-        if (HasInputSetting())
+        if (HasInputSetting(name))
             return Input.GetKey(GetInputKeyCode(name));
         return Input.GetButton(name);
     }
@@ -63,7 +63,7 @@ public static class InputManager
             SimulateButton foundSimulateButton;
             return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonDown);
         }
-        if (HasInputSetting())
+        if (HasInputSetting(name))
             return Input.GetKeyDown(GetInputKeyCode(name));
         return Input.GetButtonDown(name);
     }
@@ -75,7 +75,7 @@ public static class InputManager
             SimulateButton foundSimulateButton;
             return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonUp);
         }
-        if (HasInputSetting())
+        if (HasInputSetting(name))
             return Input.GetKeyUp(GetInputKeyCode(name));
         return Input.GetButtonUp(name);
     }
