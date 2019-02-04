@@ -24,6 +24,17 @@ public class FollowCamera : MonoBehaviour
         }
     }
 
+    private Transform cacheCameraTransform;
+    public Transform CacheCameraTransform
+    {
+        get
+        {
+            if (cacheCameraTransform == null && CacheCamera != null)
+                cacheCameraTransform = CacheCamera.GetComponent<Transform>();
+            return cacheCameraTransform;
+        }
+    }
+
     public Camera targetCamera;
     public Transform target;
     public Vector3 targetOffset;
