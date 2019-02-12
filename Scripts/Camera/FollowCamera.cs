@@ -70,7 +70,7 @@ public class FollowCamera : MonoBehaviour
     private Quaternion currentRotation;
     private Quaternion lookAtRotation;
 
-    protected virtual void Update()
+    protected virtual void LateUpdate()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
         Vector3 upVector = target == null ? Vector3.up : target.up;
@@ -115,14 +115,5 @@ public class FollowCamera : MonoBehaviour
             CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
         else
             CacheTransform.rotation = lookAtRotation;
-    }
-
-    protected virtual void LateUpdate()
-    {
-#if UNITY_EDITOR
-        // Update camera when it's updating edit mode (not play mode)
-        if (!Application.isPlaying && Application.isEditor)
-            Update();
-#endif
     }
 }

@@ -35,7 +35,7 @@ public class FollowCameraControls : FollowCamera
         zoomDistance = startZoomDistance;
     }
 
-    protected override void Update()
+    protected override void LateUpdate()
     {
         if (updateRotation || updateRotationX)
         {
@@ -61,6 +61,6 @@ public class FollowCameraControls : FollowCamera
                 zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
         }
 
-        base.Update();
+        base.LateUpdate();
     }
 }
