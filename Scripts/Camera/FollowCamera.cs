@@ -73,7 +73,8 @@ public class FollowCamera : MonoBehaviour
     protected virtual void Update()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
-        targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * target.up) + (targetOffset.z * CacheTransform.forward);
+        Vector3 upVector = target == null ? Vector3.up : target.up;
+        targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * upVector) + (targetOffset.z * CacheTransform.forward);
         targetYRotation = target == null ? 0 : target.eulerAngles.y;
 
         if (zoomByAspectRatio)
