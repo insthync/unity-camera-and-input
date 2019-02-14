@@ -27,16 +27,34 @@ public class FollowCameraControls : FollowCamera
     [Header("General Zoom Settings")]
     public float startZoomDistance;
     public float zoomSpeed = 5;
+    [Header("Save Camera")]
+    public bool isSaveCamera;
+    public string savePrefsPrefix = "GAMEPLAY";
 
     private void Start()
     {
         xRotation = startXRotation;
         yRotation = startYRotation;
         zoomDistance = startZoomDistance;
+
+        if (isSaveCamera)
+        {
+            xRotation = PlayerPrefs.GetFloat(savePrefsPrefix + "_XRotation", xRotation);
+            yRotation = PlayerPrefs.GetFloat(savePrefsPrefix + "_YRotation", yRotation);
+            zoomDistance = PlayerPrefs.GetFloat(savePrefsPrefix + "_ZoomDistance", zoomDistance);
+        }
     }
 
     protected override void LateUpdate()
     {
+        if (isSaveCamera)
+        {
+            PlayerPrefs.SetFloat(savePrefsPrefix + "_XRotation", xRotation);
+            PlayerPrefs.SetFloat(savePrefsPrefix + "_YRotation", yRotation);
+            PlayerPrefs.SetFloat(savePrefsPrefix + "_ZoomDistance", zoomDistance);
+            PlayerPrefs.Save();
+        }
+
         if (updateRotation || updateRotationX)
         {
             float mY = InputManager.GetAxis("Mouse Y", false);
