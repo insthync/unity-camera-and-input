@@ -56,7 +56,13 @@ public class FollowCamera : MonoBehaviour
     public float zoomByAspectRatioWidth;
     public float zoomByAspectRatioHeight;
     public float zoomByAspectRatioMin;
+    [Header("Wall hit spring")]
+    public bool enableWallHitSpring;
+    public float wallHitSpringDistance = 5f;
+    public LayerMask wallHitLayerMask = ~1;
 
+
+    private Ray debugRay;
     // Improve Garbage collector
     private Vector3 targetPosition;
     private float targetYRotation;
@@ -69,6 +75,15 @@ public class FollowCamera : MonoBehaviour
     private float deltaTime;
     private Quaternion currentRotation;
     private Quaternion lookAtRotation;
+    private RaycastHit[] tempHits;
+
+    private void OnDrawGizmos()
+    {
+#if UNITY_EDITOR
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(debugRay.origin, debugRay.origin + debugRay.direction * wallHitSpringDistance);
+#endif
+    }
 
     protected virtual void LateUpdate()
     {
@@ -103,17 +118,40 @@ public class FollowCamera : MonoBehaviour
         // distance meters behind the target
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
-        // Update position
         if (!dontSmoothFollow)
             CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * deltaTime);
         else
             CacheTransform.position = wantedPosition;
 
-        lookAtRotation = Quaternion.LookRotation(targetPosition - CacheTransform.position);
+        // Update rotation
+        lookAtRotation = Quaternion.LookRotation(targetPosition - wantedPosition);
         // Always look at the target
         if (!dontSmoothLookAt)
-            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
+            CacheTransform.rotation = Quaternion.Lerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
         else
             CacheTransform.rotation = lookAtRotation;
+
+        if (enableWallHitSpring)
+        {
+            Ray hitRay = new Ray(targetPosition, lookAtRotation * -Vector3.forward);
+#if UNITY_EDITOR
+            debugRay = hitRay;
+#endif
+            tempHits = Physics.RaycastAll(hitRay, wallHitSpringDistance, wallHitLayerMask);
+            for (int i = 0; i < tempHits.Length; i++)
+            {
+                if (tempHits[i].collider != null)
+                {
+                    wantedPosition = tempHits[i].point;
+                    break;
+                }
+            }
+        }
+
+        // Update position
+        if (!dontSmoothFollow)
+            CacheTransform.position = Vector3.Lerp(CacheTransform.position, wantedPosition, damping * deltaTime);
+        else
+            CacheTransform.position = wantedPosition;
     }
 }
