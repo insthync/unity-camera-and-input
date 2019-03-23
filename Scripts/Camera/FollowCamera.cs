@@ -58,11 +58,8 @@ public class FollowCamera : MonoBehaviour
     public float zoomByAspectRatioMin;
     [Header("Wall hit spring")]
     public bool enableWallHitSpring;
-    public float wallHitSpringDistance = 5f;
     public LayerMask wallHitLayerMask = ~1;
-
-
-    private Ray debugRay;
+    
     // Improve Garbage collector
     private Vector3 targetPosition;
     private float targetYRotation;
@@ -75,13 +72,15 @@ public class FollowCamera : MonoBehaviour
     private float deltaTime;
     private Quaternion currentRotation;
     private Quaternion lookAtRotation;
+    private Ray tempRay;
     private RaycastHit[] tempHits;
+    private float tempDistance;
 
     private void OnDrawGizmos()
     {
 #if UNITY_EDITOR
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(debugRay.origin, debugRay.origin + debugRay.direction * wallHitSpringDistance);
+        Gizmos.DrawLine(tempRay.origin, tempRay.origin + tempRay.direction * tempDistance);
 #endif
     }
 
@@ -128,17 +127,16 @@ public class FollowCamera : MonoBehaviour
 
         if (enableWallHitSpring)
         {
-            Ray hitRay = new Ray(targetPosition, lookAtRotation * -Vector3.forward);
-#if UNITY_EDITOR
-            debugRay = hitRay;
-#endif
-            tempHits = Physics.RaycastAll(hitRay, wallHitSpringDistance, wallHitLayerMask);
+            float nearest = float.MaxValue;
+            tempRay = new Ray(targetPosition, lookAtRotation * -Vector3.forward);
+            tempDistance = Vector3.Distance(targetPosition, wantedPosition);
+            tempHits = Physics.RaycastAll(tempRay, tempDistance, wallHitLayerMask);
             for (int i = 0; i < tempHits.Length; i++)
             {
-                if (tempHits[i].collider != null)
+                if (tempHits[i].distance < nearest)
                 {
+                    nearest = tempHits[i].distance;
                     wantedPosition = tempHits[i].point;
-                    break;
                 }
             }
         }
