@@ -85,7 +85,7 @@ public class FollowCamera : MonoBehaviour
 #endif
     }
 
-    protected virtual void LateUpdate()
+    protected virtual void FixedUpdate()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
         Vector3 upVector = target == null ? Vector3.up : target.up;
@@ -122,7 +122,7 @@ public class FollowCamera : MonoBehaviour
         lookAtRotation = Quaternion.LookRotation(targetPosition - wantedPosition);
         // Always look at the target
         if (!dontSmoothLookAt)
-            CacheTransform.rotation = Quaternion.Lerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
+            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
         else
             CacheTransform.rotation = lookAtRotation;
 
@@ -145,7 +145,7 @@ public class FollowCamera : MonoBehaviour
 
         // Update position
         if (!dontSmoothFollow)
-            CacheTransform.position = Vector3.Lerp(CacheTransform.position, wantedPosition, damping * deltaTime);
+            CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * deltaTime);
         else
             CacheTransform.position = wantedPosition;
     }

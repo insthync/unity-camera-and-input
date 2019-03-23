@@ -45,7 +45,7 @@ public class FollowCameraControls : FollowCamera
         }
     }
 
-    protected override void LateUpdate()
+    private void Update()
     {
         if (isSaveCamera)
         {
@@ -78,7 +78,5 @@ public class FollowCameraControls : FollowCamera
             if (limitZoomDistance)
                 zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
         }
-
-        base.LateUpdate();
     }
 }
