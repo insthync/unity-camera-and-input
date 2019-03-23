@@ -118,11 +118,6 @@ public class FollowCamera : MonoBehaviour
         // distance meters behind the target
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
-        if (!dontSmoothFollow)
-            CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * deltaTime);
-        else
-            CacheTransform.position = wantedPosition;
-
         // Update rotation
         lookAtRotation = Quaternion.LookRotation(targetPosition - wantedPosition);
         // Always look at the target
