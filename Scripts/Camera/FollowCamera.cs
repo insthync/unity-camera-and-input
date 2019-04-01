@@ -84,7 +84,7 @@ public class FollowCamera : MonoBehaviour
 #endif
     }
 
-    protected virtual void FixedUpdate()
+    protected virtual void LateUpdate()
     {
         targetPosition = target == null ? Vector3.zero : target.position;
         Vector3 upVector = target == null ? Vector3.up : target.up;
@@ -117,13 +117,7 @@ public class FollowCamera : MonoBehaviour
         // distance meters behind the target
         wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
 
-        // Update rotation
         lookAtRotation = Quaternion.LookRotation(targetPosition - wantedPosition);
-        // Always look at the target
-        if (!dontSmoothLookAt)
-            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
-        else
-            CacheTransform.rotation = lookAtRotation;
 
         if (enableWallHitSpring)
         {
@@ -143,8 +137,14 @@ public class FollowCamera : MonoBehaviour
 
         // Update position
         if (!dontSmoothFollow)
-            CacheTransform.position = Vector3.Slerp(CacheTransform.position, wantedPosition, damping * deltaTime);
+            CacheTransform.position = Vector3.Lerp(CacheTransform.position, wantedPosition, damping * deltaTime);
         else
             CacheTransform.position = wantedPosition;
+
+        // Update rotation
+        if (!dontSmoothLookAt)
+            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
+        else
+            CacheTransform.rotation = lookAtRotation;
     }
 }
