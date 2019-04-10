@@ -58,8 +58,9 @@ public class FollowCamera : MonoBehaviour
     public float zoomByAspectRatioMin;
     [Header("Wall hit spring")]
     public bool enableWallHitSpring;
-    public LayerMask wallHitLayerMask = ~1;
-    
+    public LayerMask wallHitLayerMask = -1;
+    public QueryTriggerInteraction wallHitQueryTriggerInteraction = QueryTriggerInteraction.Ignore;
+
     // Improve Garbage collector
     private Vector3 targetPosition;
     private float targetYRotation;
@@ -124,7 +125,7 @@ public class FollowCamera : MonoBehaviour
             float nearest = float.MaxValue;
             tempRay = new Ray(targetPosition, lookAtRotation * -Vector3.forward);
             tempDistance = Vector3.Distance(targetPosition, wantedPosition);
-            tempHits = Physics.RaycastAll(tempRay, tempDistance, wallHitLayerMask);
+            tempHits = Physics.RaycastAll(tempRay, tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
             for (int i = 0; i < tempHits.Length; i++)
             {
                 if (tempHits[i].distance < nearest)
