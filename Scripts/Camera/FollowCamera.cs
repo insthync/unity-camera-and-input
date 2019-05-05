@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class FollowCamera : MonoBehaviour
@@ -51,11 +52,16 @@ public class FollowCamera : MonoBehaviour
     public bool useTargetYRotation;
     [Header("Zoom")]
     public float zoomDistance = 10.0f;
-    [Header("Zoom by ratio (Currently work well with landscape screen)")]
+    [Header("Zoom by ratio")]
     public bool zoomByAspectRatio;
-    public float zoomByAspectRatioWidth;
-    public float zoomByAspectRatioHeight;
-    public float zoomByAspectRatioMin;
+    public List<ZoomByAspectRatioSetting> zoomByAspectRatioSettings = new List<ZoomByAspectRatioSetting>()
+    {
+        new ZoomByAspectRatioSetting() { width = 16, height = 9, zoomDistance = 0.0001f },
+        new ZoomByAspectRatioSetting() { width = 16, height = 10, zoomDistance = 1.75f },
+        new ZoomByAspectRatioSetting() { width = 3, height = 2, zoomDistance = 3f },
+        new ZoomByAspectRatioSetting() { width = 4, height = 3, zoomDistance = 5.5f },
+        new ZoomByAspectRatioSetting() { width = 5, height = 4, zoomDistance = 7 },
+    };
     [Header("Wall hit spring")]
     public bool enableWallHitSpring;
     public LayerMask wallHitLayerMask = -1;
@@ -66,10 +72,7 @@ public class FollowCamera : MonoBehaviour
     private float targetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
-    private float targetaspect;
     private float windowaspect;
-    private float scaleheight;
-    private float diffScaleHeight;
     private float deltaTime;
     private Quaternion currentRotation;
     private Quaternion lookAtRotation;
@@ -94,14 +97,21 @@ public class FollowCamera : MonoBehaviour
 
         if (zoomByAspectRatio)
         {
-            targetaspect = zoomByAspectRatioWidth / zoomByAspectRatioHeight;
-            windowaspect = (float)Screen.width / (float)Screen.height;
-            scaleheight = windowaspect / targetaspect;
-            diffScaleHeight = 1 - scaleheight;
-            if (diffScaleHeight < zoomByAspectRatioMin)
-                diffScaleHeight = zoomByAspectRatioMin;
-            zoomDistance = diffScaleHeight * 20f;
+            windowaspect = CacheCamera.aspect;
+            zoomByAspectRatioSettings.Sort();
+            foreach (ZoomByAspectRatioSetting data in zoomByAspectRatioSettings)
+            {
+                if (windowaspect + windowaspect * 0.025f > data.Aspect() &&
+                    windowaspect - windowaspect * 0.025f < data.Aspect())
+                {
+                    zoomDistance = data.zoomDistance;
+                    break;
+                }
+            }
         }
+
+        if (zoomDistance == 0f)
+            zoomDistance = 0.0001f;
 
         if (CacheCamera != null && CacheCamera.orthographic)
             CacheCamera.orthographicSize = zoomDistance;
@@ -147,5 +157,25 @@ public class FollowCamera : MonoBehaviour
             CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
         else
             CacheTransform.rotation = lookAtRotation;
+    }
+
+    [System.Serializable]
+    public struct ZoomByAspectRatioSetting : System.IComparable
+    {
+        public int width;
+        public int height;
+        public float zoomDistance;
+
+        public float Aspect()
+        {
+            return (float)width / (float)height;
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (!(obj is ZoomByAspectRatioSetting))
+                return 0;
+            return Aspect().CompareTo(((ZoomByAspectRatioSetting)obj).Aspect());
+        }
     }
 }
