@@ -39,7 +39,14 @@ public static class InputManager
         }
         else
         {
-            axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
+            try
+            {
+                axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
+            }
+            catch
+            {
+                Debug.LogError("[Input Manager] Axis [" + name + "] is not exists");
+            }
         }
         return axis;
     }
@@ -52,8 +59,18 @@ public static class InputManager
             return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButton);
         }
         if (HasInputSetting(name))
+        {
             return Input.GetKey(GetInputKeyCode(name));
-        return Input.GetButton(name);
+        }
+        try
+        {
+            return Input.GetButton(name);
+        }
+        catch
+        {
+            Debug.LogError("[Input Manager] Button [" + name + "] is not exists");
+            return false;
+        }
     }
 
     public static bool GetButtonDown(string name)
@@ -64,8 +81,18 @@ public static class InputManager
             return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonDown);
         }
         if (HasInputSetting(name))
+        {
             return Input.GetKeyDown(GetInputKeyCode(name));
-        return Input.GetButtonDown(name);
+        }
+        try
+        {
+            return Input.GetButtonDown(name);
+        }
+        catch
+        {
+            Debug.LogError("[Input Manager] Button [" + name + "] is not exists");
+            return false;
+        }
     }
 
     public static bool GetButtonUp(string name)
@@ -76,8 +103,18 @@ public static class InputManager
             return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonUp);
         }
         if (HasInputSetting(name))
+        {
             return Input.GetKeyUp(GetInputKeyCode(name));
-        return Input.GetButtonUp(name);
+        }
+        try
+        {
+            return Input.GetButtonUp(name);
+        }
+        catch
+        {
+            Debug.LogError("[Input Manager] Button [" + name + "] is not exists");
+            return false;
+        }
     }
 
     public static void SetButtonDown(string name)
@@ -109,7 +146,7 @@ public static class InputManager
         }
         simulateAxis[name].Update(1f);
     }
-    
+
     public static void SetAxisNegative(string name)
     {
         if (!simulateAxis.ContainsKey(name))
@@ -129,7 +166,7 @@ public static class InputManager
         }
         simulateAxis[name].Update(0);
     }
-    
+
     public static void SetAxis(string name, float value)
     {
         if (!simulateAxis.ContainsKey(name))
