@@ -17,6 +17,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
+    private int defaultSiblingIndex;
     private int pointerId;
     private int correctPointerId;
     private bool isDragging;
@@ -36,7 +37,10 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         else
             movementController.position = GetPointerPosition(eventData.pointerId);
         if (SetAsLastSiblingOnDrag)
+        {
+            defaultSiblingIndex = transform.GetSiblingIndex();
             transform.SetAsLastSibling();
+        }
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
         startDragPosition = movementController.position;
@@ -46,6 +50,8 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (SetAsLastSiblingOnDrag)
+            transform.SetSiblingIndex(defaultSiblingIndex);
         movementController.localPosition = defaultControllerLocalPosition;
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
