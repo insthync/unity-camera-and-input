@@ -10,10 +10,19 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     public string axisYName = "Vertical";
     public bool fixControllerPosition;
     public bool SetAsLastSiblingOnDrag;
+    [SerializeField]
+    private bool interactable = true;
     [Tooltip("Container which showing as area that able to control movement")]
     public RectTransform movementBackground;
     [Tooltip("This is the button to control movement")]
     public RectTransform movementController;
+
+    public bool Interactable
+    {
+        get { return interactable; }
+        set { interactable = value; }
+    }
+
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
@@ -31,6 +40,9 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!Interactable || isDragging)
+            return;
+
         pointerId = eventData.pointerId;
         if (fixControllerPosition)
             movementController.localPosition = defaultControllerLocalPosition;
