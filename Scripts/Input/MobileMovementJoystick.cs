@@ -66,8 +66,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         }
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
-        startDragPosition = movementController.position;
-        currentPosition = GetPointerPosition(correctPointerId);
+        currentPosition = startDragPosition = movementController.position;
         UpdateVirtualAxes(Vector3.zero);
         isDragging = true;
     }
