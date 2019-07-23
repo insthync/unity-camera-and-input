@@ -23,6 +23,11 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         set { interactable = value; }
     }
 
+    public bool IsDragging
+    {
+        get { return isDragging; }
+    }
+
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
