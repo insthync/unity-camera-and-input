@@ -121,8 +121,7 @@ public static class InputManager
     {
         if (!simulateInputs.ContainsKey(name))
         {
-            SimulateButton inputData = new SimulateButton();
-            simulateInputs.Add(name, inputData);
+            simulateInputs.Add(name, new SimulateButton());
         }
         simulateInputs[name].Press();
     }
@@ -131,8 +130,7 @@ public static class InputManager
     {
         if (!simulateInputs.ContainsKey(name))
         {
-            SimulateButton inputData = new SimulateButton();
-            simulateInputs.Add(name, inputData);
+            simulateInputs.Add(name, new SimulateButton());
         }
         simulateInputs[name].Release();
     }
@@ -141,8 +139,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            SimulateAxis inputData = new SimulateAxis();
-            simulateAxis.Add(name, inputData);
+            simulateAxis.Add(name, new SimulateAxis());
         }
         simulateAxis[name].Update(1f);
     }
@@ -151,8 +148,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            SimulateAxis inputData = new SimulateAxis();
-            simulateAxis.Add(name, inputData);
+            simulateAxis.Add(name, new SimulateAxis());
         }
         simulateAxis[name].Update(-1f);
     }
@@ -161,8 +157,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            SimulateAxis inputData = new SimulateAxis();
-            simulateAxis.Add(name, inputData);
+            simulateAxis.Add(name, new SimulateAxis());
         }
         simulateAxis[name].Update(0);
     }
@@ -171,8 +166,7 @@ public static class InputManager
     {
         if (!simulateAxis.ContainsKey(name))
         {
-            SimulateAxis inputData = new SimulateAxis();
-            simulateAxis.Add(name, inputData);
+            simulateAxis.Add(name, new SimulateAxis());
         }
         simulateAxis[name].Update(value);
     }
