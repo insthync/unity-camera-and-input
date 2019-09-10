@@ -36,6 +36,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
+    private Vector2 startDragLocalPosition;
     private int defaultSiblingIndex;
     private int pointerId;
     private int correctPointerId;
@@ -67,6 +68,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
         currentPosition = startDragPosition = movementController.position;
+        startDragLocalPosition = movementController.localPosition;
         UpdateVirtualAxes(Vector3.zero);
         isDragging = true;
     }
@@ -89,7 +91,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
             return;
         }
 
-        Vector2 newPos = Vector2.zero;
+        Vector2 newOffset = Vector2.zero;
 
         correctPointerId = pointerId;
         if (correctPointerId > Input.touchCount - 1)
@@ -97,19 +99,18 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
         currentPosition = GetPointerPosition(correctPointerId);
 
-        Vector2 allowedPos = currentPosition - startDragPosition;
-        allowedPos = Vector2.ClampMagnitude(allowedPos, movementRange);
+        Vector2 allowedOffset = currentPosition - startDragPosition;
+        allowedOffset = Vector2.ClampMagnitude(allowedOffset, movementRange);
 
         if (useAxisX)
-            newPos.x = allowedPos.x;
+            newOffset.x = allowedOffset.x;
 
         if (useAxisY)
-            newPos.y = allowedPos.y;
-
-        Vector2 movePosition = startDragPosition + newPos;
-        movementController.position = movePosition;
+            newOffset.y = allowedOffset.y;
+        
+        movementController.localPosition = startDragLocalPosition + newOffset;
         // Update virtual axes
-        UpdateVirtualAxes((startDragPosition - movePosition) / movementRange * -1);
+        UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffset)) / movementRange * -1);
     }
 
     public void UpdateVirtualAxes(Vector2 value)
