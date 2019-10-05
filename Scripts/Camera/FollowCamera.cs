@@ -39,12 +39,6 @@ public class FollowCamera : MonoBehaviour
     public Camera targetCamera;
     public Transform target;
     public Vector3 targetOffset;
-    [Header("Follow")]
-    public float damping = 10.0f;
-    public bool dontSmoothFollow;
-    [Header("Look at")]
-    public float lookAtDamping = 2.0f;
-    public bool dontSmoothLookAt;
     [Header("Rotation")]
     public float xRotation;
     public float yRotation;
@@ -69,13 +63,13 @@ public class FollowCamera : MonoBehaviour
 
     // Improve Garbage collector
     private Vector3 targetPosition;
+    private Quaternion targetRotation;
     private float targetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
     private float windowaspect;
     private float deltaTime;
-    private Quaternion currentRotation;
-    private Quaternion lookAtRotation;
+    private Quaternion wantedRotation;
     private Ray tempRay;
     private RaycastHit[] tempHits;
     private float tempDistance;
@@ -118,22 +112,20 @@ public class FollowCamera : MonoBehaviour
 
         deltaTime = Time.deltaTime;
 
-        wantedPosition = targetPosition;
         wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
         // Convert the angle into a rotation
-        currentRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
+        targetRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
+        wantedRotation = targetRotation;
 
         // Set the position of the camera on the x-z plane to:
         // distance meters behind the target
-        wantedPosition -= currentRotation * Vector3.forward * zoomDistance;
-
-        lookAtRotation = Quaternion.LookRotation(targetPosition - wantedPosition);
+        wantedPosition = targetPosition - (wantedRotation * Vector3.forward * zoomDistance);
 
         if (enableWallHitSpring)
         {
             float nearest = float.MaxValue;
-            tempRay = new Ray(targetPosition, lookAtRotation * -Vector3.forward);
+            tempRay = new Ray(targetPosition, wantedRotation * -Vector3.forward);
             tempDistance = Vector3.Distance(targetPosition, wantedPosition);
             tempHits = Physics.RaycastAll(tempRay, tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
             for (int i = 0; i < tempHits.Length; i++)
@@ -146,17 +138,9 @@ public class FollowCamera : MonoBehaviour
             }
         }
 
-        // Update position
-        if (!dontSmoothFollow)
-            CacheTransform.position = Vector3.Lerp(CacheTransform.position, wantedPosition, damping * deltaTime);
-        else
-            CacheTransform.position = wantedPosition;
-
-        // Update rotation
-        if (!dontSmoothLookAt)
-            CacheTransform.rotation = Quaternion.Slerp(CacheTransform.rotation, lookAtRotation, lookAtDamping * deltaTime);
-        else
-            CacheTransform.rotation = lookAtRotation;
+        // Update position & rotation
+        CacheTransform.position = wantedPosition;
+        CacheTransform.rotation = wantedRotation;
     }
 
     [System.Serializable]
