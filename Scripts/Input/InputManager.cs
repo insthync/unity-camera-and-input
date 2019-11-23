@@ -45,7 +45,7 @@ public static class InputManager
             }
             catch
             {
-                Debug.LogError("[Input Manager] Axis [" + name + "] is not exists");
+                axis = 0;
             }
         }
         return axis;
@@ -68,7 +68,6 @@ public static class InputManager
         }
         catch
         {
-            Debug.LogError("[Input Manager] Button [" + name + "] is not exists");
             return false;
         }
     }
@@ -90,7 +89,6 @@ public static class InputManager
         }
         catch
         {
-            Debug.LogError("[Input Manager] Button [" + name + "] is not exists");
             return false;
         }
     }
@@ -112,7 +110,6 @@ public static class InputManager
         }
         catch
         {
-            Debug.LogError("[Input Manager] Button [" + name + "] is not exists");
             return false;
         }
     }
