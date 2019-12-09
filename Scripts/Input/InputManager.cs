@@ -13,14 +13,6 @@ public static class InputManager
         return InputSettingManager.Singleton != null && InputSettingManager.Singleton.Settings.ContainsKey(keyName);
     }
 
-    public static KeyCode GetInputKeyCode(string keyName)
-    {
-        KeyCode foundKey;
-        if (!InputSettingManager.Singleton.Settings.TryGetValue(keyName, out foundKey))
-            return KeyCode.None;
-        return foundKey;
-    }
-
     public static float GetAxis(string name, bool raw)
     {
         float axis = 0;
@@ -60,7 +52,12 @@ public static class InputManager
         }
         if (HasInputSetting(name))
         {
-            return Input.GetKey(GetInputKeyCode(name));
+            HashSet<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            foreach (KeyCode keyCode in keyCodes)
+            {
+                if (Input.GetKey(keyCode))
+                    return true;
+            }
         }
         try
         {
@@ -81,7 +78,12 @@ public static class InputManager
         }
         if (HasInputSetting(name))
         {
-            return Input.GetKeyDown(GetInputKeyCode(name));
+            HashSet<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            foreach (KeyCode keyCode in keyCodes)
+            {
+                if (Input.GetKeyDown(keyCode))
+                    return true;
+            }
         }
         try
         {
@@ -102,7 +104,12 @@ public static class InputManager
         }
         if (HasInputSetting(name))
         {
-            return Input.GetKeyUp(GetInputKeyCode(name));
+            HashSet<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            foreach (KeyCode keyCode in keyCodes)
+            {
+                if (Input.GetKeyUp(keyCode))
+                    return true;
+            }
         }
         try
         {

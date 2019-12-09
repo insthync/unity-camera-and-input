@@ -15,7 +15,7 @@ public class InputSettingManager : MonoBehaviour
 
     public InputSetting[] settings;
 
-    public readonly Dictionary<string, KeyCode> Settings = new Dictionary<string, KeyCode>();
+    internal readonly Dictionary<string, HashSet<KeyCode>> Settings = new Dictionary<string, HashSet<KeyCode>>();
 
     private void Awake()
     {
@@ -27,9 +27,15 @@ public class InputSettingManager : MonoBehaviour
         Singleton = GetComponent<InputSettingManager>();
         DontDestroyOnLoad(gameObject);
 
-        foreach (InputSetting setting in settings)
+        if (settings != null && settings.Length > 0)
         {
-            Settings[setting.keyName] = setting.keyCode;
+            foreach (InputSetting setting in settings)
+            {
+                if (!Settings.ContainsKey(setting.keyName))
+                    Settings[setting.keyName] = new HashSet<KeyCode>();
+                if (!Settings[setting.keyName].Contains(setting.keyCode))
+                    Settings[setting.keyName].Add(setting.keyCode);
+            }
         }
     }
 }
