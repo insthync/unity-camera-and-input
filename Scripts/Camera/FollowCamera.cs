@@ -4,38 +4,6 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class FollowCamera : MonoBehaviour
 {
-    private Transform cacheTransform;
-    public Transform CacheTransform
-    {
-        get
-        {
-            if (cacheTransform == null)
-                cacheTransform = GetComponent<Transform>();
-            return cacheTransform;
-        }
-    }
-
-    public Camera CacheCamera
-    {
-        get
-        {
-            if (targetCamera == null)
-                targetCamera = GetComponent<Camera>();
-            return targetCamera;
-        }
-    }
-
-    private Transform cacheCameraTransform;
-    public Transform CacheCameraTransform
-    {
-        get
-        {
-            if (cacheCameraTransform == null && CacheCamera != null)
-                cacheCameraTransform = CacheCamera.GetComponent<Transform>();
-            return cacheCameraTransform;
-        }
-    }
-
     public Camera targetCamera;
     public Transform target;
     public Vector3 targetOffset;
@@ -61,6 +29,16 @@ public class FollowCamera : MonoBehaviour
     public LayerMask wallHitLayerMask = -1;
     public QueryTriggerInteraction wallHitQueryTriggerInteraction = QueryTriggerInteraction.Ignore;
 
+    // Properties
+    public Transform CacheTransform { get; private set; }
+
+    public Camera CacheCamera
+    {
+        get { return targetCamera; }
+    }
+
+    public Transform CacheCameraTransform { get; private set; }
+
     // Improve Garbage collector
     private Vector3 targetPosition;
     private Quaternion targetRotation;
@@ -80,6 +58,14 @@ public class FollowCamera : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawLine(tempRay.origin, tempRay.origin + tempRay.direction * tempDistance);
 #endif
+    }
+
+    protected virtual void Awake()
+    {
+        CacheTransform = transform;
+        if (targetCamera == null)
+            targetCamera = GetComponent<Camera>();
+        CacheCameraTransform = CacheCamera.transform;
     }
 
     protected virtual void LateUpdate()

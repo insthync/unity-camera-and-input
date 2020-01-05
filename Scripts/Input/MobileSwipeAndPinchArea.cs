@@ -5,29 +5,16 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(MobilePinchArea))]
 public class MobileSwipeAndPinchArea : MobileInputComponent, IPointerDownHandler, IPointerUpHandler
 {
-    private MobileSwipeArea cacheMobileSwipeArea;
-    public MobileSwipeArea CacheMobileSwipeArea
-    {
-        get
-        {
-            if (cacheMobileSwipeArea == null)
-                cacheMobileSwipeArea = GetComponent<MobileSwipeArea>();
-            return cacheMobileSwipeArea;
-        }
-    }
-
-    private MobilePinchArea cacheMobilePinchArea;
-    public MobilePinchArea CacheMobilePinchArea
-    {
-        get
-        {
-            if (cacheMobilePinchArea == null)
-                cacheMobilePinchArea = GetComponent<MobilePinchArea>();
-            return cacheMobilePinchArea;
-        }
-    }
+    public MobileSwipeArea CacheMobileSwipeArea { get; private set; }
+    public MobilePinchArea CacheMobilePinchArea { get; private set; }
 
     private int pointerCount = 0;
+
+    private void Awake()
+    {
+        CacheMobileSwipeArea = GetComponent<MobileSwipeArea>();
+        CacheMobilePinchArea = GetComponent<MobilePinchArea>();
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
