@@ -46,7 +46,6 @@ public class FollowCamera : MonoBehaviour
     private Vector3 wantedPosition;
     private float wantedYRotation;
     private float windowaspect;
-    private float deltaTime;
     private Quaternion wantedRotation;
     private Ray tempRay;
     private RaycastHit[] tempHits;
@@ -62,14 +61,23 @@ public class FollowCamera : MonoBehaviour
 
     protected virtual void Awake()
     {
+        PrepareComponents();
+    }
+
+    private void PrepareComponents()
+    {
         CacheTransform = transform;
         if (targetCamera == null)
             targetCamera = GetComponent<Camera>();
         CacheCameraTransform = CacheCamera.transform;
     }
 
-    protected virtual void LateUpdate()
+    private void LateUpdate()
     {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            PrepareComponents();
+#endif
         targetPosition = target == null ? Vector3.zero : target.position;
         Vector3 upVector = target == null ? Vector3.up : target.up;
         targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * upVector) + (targetOffset.z * CacheTransform.forward);
@@ -95,8 +103,6 @@ public class FollowCamera : MonoBehaviour
 
         if (CacheCamera != null && CacheCamera.orthographic)
             CacheCamera.orthographicSize = zoomDistance;
-
-        deltaTime = Time.deltaTime;
 
         wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
 
