@@ -31,14 +31,13 @@ public class FollowCamera : MonoBehaviour
 
     // Properties
     public Transform CacheTransform { get; private set; }
+    public Transform CacheCameraTransform { get; private set; }
 
     public Camera CacheCamera
     {
         get { return targetCamera; }
     }
-
-    public Transform CacheCameraTransform { get; private set; }
-
+    
     // Improve Garbage collector
     private Vector3 targetPosition;
     private Quaternion targetRotation;
@@ -101,7 +100,7 @@ public class FollowCamera : MonoBehaviour
         if (zoomDistance == 0f)
             zoomDistance = 0.0001f;
 
-        if (CacheCamera != null && CacheCamera.orthographic)
+        if (CacheCamera.orthographic)
             CacheCamera.orthographicSize = zoomDistance;
 
         wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
