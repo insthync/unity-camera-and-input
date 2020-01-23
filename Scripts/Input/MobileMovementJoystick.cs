@@ -9,9 +9,12 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
     public bool fixControllerPosition;
-    public bool SetAsLastSiblingOnDrag;
     [SerializeField]
     private bool interactable = true;
+    [SerializeField]
+    private bool setAsLastSiblingOnDrag;
+    [SerializeField]
+    private bool hideWhileIdle;
     [Tooltip("Container which showing as area that able to control movement")]
     public RectTransform movementBackground;
     [Tooltip("This is the button to control movement")]
@@ -23,6 +26,18 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         set { interactable = value; }
     }
 
+    public bool SetAsLastSiblingOnDrag
+    {
+        get { return setAsLastSiblingOnDrag; }
+        set { setAsLastSiblingOnDrag = value; }
+    }
+
+    public bool HideWhileIdle
+    {
+        get { return hideWhileIdle; }
+        set { hideWhileIdle = value; }
+    }
+
     public bool IsDragging
     {
         get { return isDragging; }
@@ -32,7 +47,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     {
         get { return currentPosition; }
     }
-
+    
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
@@ -42,11 +57,25 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     private int correctPointerId;
     private bool isDragging;
     private Vector2 currentPosition;
+    private CanvasGroup canvasGroup;
+    private float defaultCanvasGroupAlpha;
 
     private void Start()
     {
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            defaultCanvasGroupAlpha = 1f;
+        }
+        else
+        {
+            defaultCanvasGroupAlpha = canvasGroup.alpha;
+        }
         if (movementBackground != null)
+        {
             backgroundOffset = movementBackground.position - movementController.position;
+        }
         defaultControllerLocalPosition = movementController.localPosition;
     }
 
@@ -87,9 +116,12 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     {
         if (!isDragging)
         {
+            canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
             UpdateVirtualAxes(Vector3.zero);
             return;
         }
+
+        canvasGroup.alpha = defaultCanvasGroupAlpha;
 
         Vector2 newOffset = Vector2.zero;
 
