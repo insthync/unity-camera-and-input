@@ -37,11 +37,17 @@ public class FollowCamera : MonoBehaviour
     {
         get { return targetCamera; }
     }
-    
+
     // Improve Garbage collector
+    private bool targetIsNull;
     private Vector3 targetPosition;
+    private Vector3 targetUp;
     private Quaternion targetRotation;
     private float targetYRotation;
+    private Vector3 prevTargetPosition;
+    private Vector3 prevTargetUp;
+    private Quaternion prevTargetRotation;
+    private float prevTargetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
     private float windowaspect;
@@ -77,10 +83,11 @@ public class FollowCamera : MonoBehaviour
         if (!Application.isPlaying)
             PrepareComponents();
 #endif
-        targetPosition = target == null ? Vector3.zero : target.position;
-        Vector3 upVector = target == null ? Vector3.up : target.up;
-        targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * upVector) + (targetOffset.z * CacheTransform.forward);
-        targetYRotation = target == null ? 0 : target.eulerAngles.y;
+        targetIsNull = target == null;
+        prevTargetPosition = targetPosition = targetIsNull ? prevTargetPosition : target.position;
+        prevTargetUp = targetUp = targetIsNull ? prevTargetUp : target.up;
+        targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * targetUp) + (targetOffset.z * CacheTransform.forward);
+        prevTargetYRotation = targetYRotation = targetIsNull ? prevTargetYRotation : target.eulerAngles.y;
 
         if (zoomByAspectRatio)
         {
