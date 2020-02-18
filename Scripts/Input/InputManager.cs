@@ -20,7 +20,7 @@ public static class InputManager
         {
             SimulateAxis foundSimulateAxis;
             if (axis == 0 && simulateAxis.TryGetValue(name, out foundSimulateAxis))
-                axis = foundSimulateAxis.GetValue;
+                axis = foundSimulateAxis.Value;
             if (raw)
             {
                 if (axis > 0)
@@ -48,7 +48,7 @@ public static class InputManager
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButton);
+            return simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.Pressed;
         }
         if (HasInputSetting(name))
         {
@@ -74,7 +74,7 @@ public static class InputManager
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonDown);
+            return simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonDown;
         }
         if (HasInputSetting(name))
         {
@@ -100,7 +100,7 @@ public static class InputManager
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.GetButtonUp);
+            return simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonUp;
         }
         if (HasInputSetting(name))
         {
@@ -184,50 +184,40 @@ public static class InputManager
     {
         private int lastPressedFrame = -5;
         private int releasedFrame = -5;
-        private bool pressed = false;
+
+        public bool Pressed { get; private set; }
 
         public void Press()
         {
-            if (pressed)
+            if (Pressed)
                 return;
-            pressed = true;
+            Pressed = true;
             lastPressedFrame = Time.frameCount;
         }
 
         public void Release()
         {
-            pressed = false;
+            Pressed = false;
             releasedFrame = Time.frameCount;
         }
 
-        public bool GetButton
-        {
-            get { return pressed; }
-        }
-
-        public bool GetButtonDown
+        public bool ButtonDown
         {
             get { return lastPressedFrame - Time.frameCount == -1; }
         }
 
-        public bool GetButtonUp
+        public bool ButtonUp
         {
-            get { return (releasedFrame == Time.frameCount - 1); }
+            get { return releasedFrame == Time.frameCount - 1; }
         }
     }
 
     public class SimulateAxis
     {
-        private float value;
-
+        public float Value { get; private set; }
         public void Update(float value)
         {
-            this.value = value;
-        }
-
-        public float GetValue
-        {
-            get { return value; }
+            Value = value;
         }
     }
 }

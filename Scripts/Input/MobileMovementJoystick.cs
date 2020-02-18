@@ -40,12 +40,12 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
     public bool IsDragging
     {
-        get { return isDragging; }
+        get; private set;
     }
 
     public Vector2 CurrentPosition
     {
-        get { return currentPosition; }
+        get; private set;
     }
     
     private Vector3 backgroundOffset;
@@ -55,8 +55,6 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     private int defaultSiblingIndex;
     private int pointerId;
     private int correctPointerId;
-    private bool isDragging;
-    private Vector2 currentPosition;
     private CanvasGroup canvasGroup;
     private float defaultCanvasGroupAlpha;
 
@@ -81,7 +79,7 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!Interactable || isDragging)
+        if (!Interactable || IsDragging)
             return;
 
         pointerId = eventData.pointerId;
@@ -96,10 +94,10 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         }
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
-        currentPosition = startDragPosition = movementController.position;
+        CurrentPosition = startDragPosition = movementController.position;
         startDragLocalPosition = movementController.localPosition;
         UpdateVirtualAxes(Vector3.zero);
-        isDragging = true;
+        IsDragging = true;
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -109,12 +107,12 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         movementController.localPosition = defaultControllerLocalPosition;
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
-        isDragging = false;
+        IsDragging = false;
     }
 
     private void Update()
     {
-        if (!isDragging)
+        if (!IsDragging)
         {
             canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
             UpdateVirtualAxes(Vector3.zero);
@@ -129,9 +127,9 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         if (correctPointerId > Input.touchCount - 1)
             correctPointerId = Input.touchCount - 1;
 
-        currentPosition = GetPointerPosition(correctPointerId);
+        CurrentPosition = GetPointerPosition(correctPointerId);
 
-        Vector2 allowedOffset = currentPosition - startDragPosition;
+        Vector2 allowedOffset = CurrentPosition - startDragPosition;
         allowedOffset = Vector2.ClampMagnitude(allowedOffset, movementRange);
 
         if (useAxisX)
