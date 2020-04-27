@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
+    internal static readonly HashSet<int> JoystickTouches = new HashSet<int>();
     public int movementRange = 150;
     public bool useAxisX = true;
     public bool useAxisY = true;
@@ -47,7 +49,7 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragH
     {
         get; private set;
     }
-    
+
     private Vector3 backgroundOffset;
     private Vector3 defaultControllerLocalPosition;
     private Vector2 startDragPosition;
@@ -84,7 +86,7 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragH
     {
         if (!Interactable || IsDragging)
             return;
-        
+
         if (fixControllerPosition)
             movementController.localPosition = defaultControllerLocalPosition;
         else
@@ -99,6 +101,8 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragH
         CurrentPosition = startDragPosition = movementController.position;
         startDragLocalPosition = movementController.localPosition;
         UpdateVirtualAxes(Vector3.zero);
+        if (!JoystickTouches.Contains(eventData.pointerId))
+            JoystickTouches.Add(eventData.pointerId);
         IsDragging = true;
         SetDraggingState();
     }
@@ -111,6 +115,8 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragH
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
         UpdateVirtualAxes(Vector3.zero);
+        if (JoystickTouches.Contains(eventData.pointerId))
+            JoystickTouches.Remove(eventData.pointerId);
         IsDragging = false;
         SetIdleState();
     }
