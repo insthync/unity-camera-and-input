@@ -100,19 +100,12 @@ public class MobileSwipeArea : MonoBehaviour
             return;
         }
 
-        switch (touches[0].phase)
-        {
-            case TouchPhase.Began:
-                OnPointerDown(touches[0].position);
-                break;
-            case TouchPhase.Moved:
-            case TouchPhase.Stationary:
-                OnDrag(touches[0].position);
-                break;
-            case TouchPhase.Ended:
-                OnPointerUp();
-                break;
-        }
+        if (touches[0].phase == TouchPhase.Began && !isDragging)
+            OnPointerDown(touches[0].position);
+
+        if (touches[0].phase == TouchPhase.Moved ||
+            touches[0].phase == TouchPhase.Stationary)
+            OnDrag(touches[0].position);
     }
 
     private void OnPointerDown(Vector2 pointerPosition)
@@ -128,11 +121,11 @@ public class MobileSwipeArea : MonoBehaviour
 
     private void OnDrag(Vector2 pointerPosition)
     {
-        // Store a touch position
-        Vector2 currentPosition = pointerPosition;
-        Vector2 pointerDelta = currentPosition - previousTouchPosition;
+        if (!isDragging)
+            return;
+        Vector2 pointerDelta = pointerPosition - previousTouchPosition;
         // Set previous touch position to use next frame
-        previousTouchPosition = currentPosition;
+        previousTouchPosition = pointerPosition;
         // Update virtual axes
         UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity));
     }
