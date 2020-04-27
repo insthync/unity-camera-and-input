@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler, IPointerUpHandler
+public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     public int movementRange = 150;
     public bool useAxisX = true;
@@ -53,8 +53,6 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
     private Vector2 startDragPosition;
     private Vector2 startDragLocalPosition;
     private int defaultSiblingIndex;
-    private int pointerId;
-    private int correctPointerId;
     private CanvasGroup canvasGroup;
     private float defaultCanvasGroupAlpha;
 
@@ -64,40 +62,45 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         if (canvasGroup == null)
         {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            canvasGroup.alpha = 1f;
             defaultCanvasGroupAlpha = 1f;
         }
         else
         {
+            // Prepare defualt group alpha
             defaultCanvasGroupAlpha = canvasGroup.alpha;
         }
         if (movementBackground != null)
         {
+            // Prepare background offset, it will be used to calculate joystick movement
             backgroundOffset = movementBackground.position - movementController.position;
         }
         defaultControllerLocalPosition = movementController.localPosition;
+        defaultSiblingIndex = transform.GetSiblingIndex();
+        SetIdleState();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!Interactable || IsDragging)
             return;
-
-        pointerId = eventData.pointerId;
+        
         if (fixControllerPosition)
             movementController.localPosition = defaultControllerLocalPosition;
         else
-            movementController.position = GetPointerPosition(eventData.pointerId);
+            movementController.position = eventData.position;
+
         if (SetAsLastSiblingOnDrag)
-        {
-            defaultSiblingIndex = transform.GetSiblingIndex();
             transform.SetAsLastSibling();
-        }
+
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
+
         CurrentPosition = startDragPosition = movementController.position;
         startDragLocalPosition = movementController.localPosition;
         UpdateVirtualAxes(Vector3.zero);
         IsDragging = true;
+        SetDraggingState();
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -107,40 +110,36 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
         movementController.localPosition = defaultControllerLocalPosition;
         if (movementBackground != null)
             movementBackground.position = backgroundOffset + movementController.position;
+        UpdateVirtualAxes(Vector3.zero);
         IsDragging = false;
+        SetIdleState();
     }
 
-    private void Update()
+
+    public void OnDrag(PointerEventData eventData)
     {
         if (!IsDragging)
         {
-            canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
-            UpdateVirtualAxes(Vector3.zero);
+            // It will be true while it's Interactable 
             return;
         }
 
-        canvasGroup.alpha = defaultCanvasGroupAlpha;
+        // Get cursor position
+        CurrentPosition = eventData.position;
 
-        Vector2 newOffset = Vector2.zero;
+        Vector2 allowedOffsets = CurrentPosition - startDragPosition;
+        allowedOffsets = Vector2.ClampMagnitude(allowedOffsets, movementRange);
 
-        correctPointerId = pointerId;
-        if (correctPointerId > Input.touchCount - 1)
-            correctPointerId = Input.touchCount - 1;
-
-        CurrentPosition = GetPointerPosition(correctPointerId);
-
-        Vector2 allowedOffset = CurrentPosition - startDragPosition;
-        allowedOffset = Vector2.ClampMagnitude(allowedOffset, movementRange);
-
+        // Prepare offsets
+        Vector2 newOffsets = Vector2.zero;
         if (useAxisX)
-            newOffset.x = allowedOffset.x;
-
+            newOffsets.x = allowedOffsets.x;
         if (useAxisY)
-            newOffset.y = allowedOffset.y;
-        
-        movementController.localPosition = startDragLocalPosition + newOffset;
+            newOffsets.y = allowedOffsets.y;
+
+        movementController.localPosition = startDragLocalPosition + newOffsets;
         // Update virtual axes
-        UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffset)) / movementRange * -1);
+        UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffsets)) / movementRange * -1);
     }
 
     public void UpdateVirtualAxes(Vector2 value)
@@ -150,5 +149,15 @@ public class MobileMovementJoystick : MobileInputComponent, IPointerDownHandler,
 
         if (useAxisY)
             InputManager.SetAxis(axisYName, value.y);
+    }
+
+    private void SetIdleState()
+    {
+        canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
+    }
+
+    private void SetDraggingState()
+    {
+        canvasGroup.alpha = defaultCanvasGroupAlpha;
     }
 }

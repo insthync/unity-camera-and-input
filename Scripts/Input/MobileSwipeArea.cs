@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPointerUpHandler
+public class MobileSwipeArea : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     public bool useAxisX = true;
     public bool useAxisY = true;
@@ -9,38 +9,37 @@ public class MobileSwipeArea : MobileInputComponent, IPointerDownHandler, IPoint
     public string axisYName = "Vertical";
     public float xSensitivity = 1f;
     public float ySensitivity = 1f;
+    
+    public bool isDragging
+    {
+        get; private set;
+    }
 
-    private int pointerId;
-    private int correctPointerId;
-    private bool isDragging = false;
     private Vector2 previousTouchPosition;
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        pointerId = eventData.pointerId;
-        previousTouchPosition = GetPointerPosition(pointerId);
-        isDragging = true;
+        isDragging = !Application.isMobilePlatform ? true : Input.touchCount == 1;
+        if (isDragging)
+            previousTouchPosition = eventData.position;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        isDragging = false;
+        isDragging = !Application.isMobilePlatform ? false : Input.touchCount == 1;
     }
 
-    private void Update()
+
+    public void OnDrag(PointerEventData eventData)
     {
-        if (!isDragging)
+        if (!isDragging || (Application.isMobilePlatform && Input.touchCount != 1))
         {
             UpdateVirtualAxes(Vector3.zero);
             return;
         }
 
-        correctPointerId = pointerId;
-        if (correctPointerId > Input.touchCount - 1)
-            correctPointerId = Input.touchCount - 1;
-
-        Vector2 currentPosition = GetPointerPosition(pointerId);
-
+        // Store a touch.
+        Vector2 currentPosition = eventData.position;
         Vector2 pointerDelta = currentPosition - previousTouchPosition;
         // Set previous touch position to use next frame
         previousTouchPosition = currentPosition;
