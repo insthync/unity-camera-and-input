@@ -45,18 +45,14 @@ public class MobileSwipeArea : MonoBehaviour
         EventSystem.current.RaycastAll(tempPointer, raycastResults);
         if (raycastResults != null && raycastResults.Count > 0)
         {
-            for (int j = 0; j < raycastResults.Count; ++j)
+            if (raycastResults[0].gameObject == gameObject)
             {
-                if (raycastResults[j].gameObject == gameObject)
+                if (!isDragging && Input.GetMouseButton(0))
                 {
-                    if (!isDragging && Input.GetMouseButton(0))
-                    {
-                        OnPointerDown(Input.mousePosition);
-                        return;
-                    }
-                    hasPointer = true;
-                    break;
+                    OnPointerDown(Input.mousePosition);
+                    return;
                 }
+                hasPointer = true;
             }
         }
 
@@ -80,16 +76,11 @@ public class MobileSwipeArea : MonoBehaviour
             tempPointer = new PointerEventData(EventSystem.current);
             tempPointer.position = Input.touches[i].position;
             EventSystem.current.RaycastAll(tempPointer, raycastResults);
-            if (raycastResults != null && raycastResults.Count > 0)
+            if (raycastResults != null && raycastResults.Count == 1)
             {
-                for (int j = 0; j < raycastResults.Count; ++j)
-                {
-                    if (raycastResults[j].gameObject == gameObject)
-                    {
-                        touches.Add(Input.touches[i]);
-                        break;
-                    }
-                }
+                if (raycastResults[0].gameObject == gameObject &&
+                    !MobileMovementJoystick.JoystickTouches.Contains(Input.touches[i].fingerId))
+                    touches.Add(Input.touches[i]);
             }
         }
 
@@ -112,11 +103,13 @@ public class MobileSwipeArea : MonoBehaviour
     {
         isDragging = true;
         previousTouchPosition = pointerPosition;
+        UpdateVirtualAxes(Vector2.zero);
     }
 
     private void OnPointerUp()
     {
         isDragging = false;
+        UpdateVirtualAxes(Vector2.zero);
     }
 
     private void OnDrag(Vector2 pointerPosition)
@@ -127,7 +120,7 @@ public class MobileSwipeArea : MonoBehaviour
         // Set previous touch position to use next frame
         previousTouchPosition = pointerPosition;
         // Update virtual axes
-        UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity));
+        UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
     }
 
     public void UpdateVirtualAxes(Vector2 value)

@@ -42,18 +42,14 @@ public class MobilePinchArea : MonoBehaviour
         EventSystem.current.RaycastAll(tempPointer, raycastResults);
         if (raycastResults != null && raycastResults.Count > 0)
         {
-            for (int j = 0; j < raycastResults.Count; ++j)
+            if (raycastResults[0].gameObject == gameObject)
             {
-                if (raycastResults[j].gameObject == gameObject)
+                if (!isZooming && Input.GetMouseButton(1))
                 {
-                    if (!isZooming && Input.GetMouseButton(1))
-                    {
-                        OnPointerDown(Input.mousePosition, -Input.mousePosition);
-                        return;
-                    }
-                    hasPointer = true;
-                    break;
+                    OnPointerDown(Input.mousePosition, -Input.mousePosition);
+                    return;
                 }
+                hasPointer = true;
             }
         }
 
@@ -66,7 +62,7 @@ public class MobilePinchArea : MonoBehaviour
 
         if (hasPointer)
         {
-            OnZoom(Input.mousePosition, -Input.mousePosition);
+            OnZoom_Standalone(Input.mousePosition, -Input.mousePosition);
         }
     }
 
@@ -79,16 +75,11 @@ public class MobilePinchArea : MonoBehaviour
             tempPointer = new PointerEventData(EventSystem.current);
             tempPointer.position = Input.touches[i].position;
             EventSystem.current.RaycastAll(tempPointer, raycastResults);
-            if (raycastResults != null && raycastResults.Count > 0)
+            if (raycastResults != null && raycastResults.Count == 1)
             {
-                for (int j = 0; j < raycastResults.Count; ++j)
-                {
-                    if (raycastResults[j].gameObject == gameObject)
-                    {
-                        touches.Add(Input.touches[i]);
-                        break;
-                    }
-                }
+                if (raycastResults[0].gameObject == gameObject &&
+                    !MobileMovementJoystick.JoystickTouches.Contains(Input.touches[i].fingerId))
+                    touches.Add(Input.touches[i]);
             }
         }
 
@@ -99,14 +90,14 @@ public class MobilePinchArea : MonoBehaviour
             return;
         }
 
-        if (touches[touches.Count - 1].phase == TouchPhase.Began && !isZooming)
-            OnPointerDown(touches[touches.Count - 1].position, touches[touches.Count - 2].position);
+        if (touches[1].phase == TouchPhase.Began && !isZooming)
+            OnPointerDown(touches[0].position, touches[1].position);
 
-        if (touches[touches.Count - 1].phase == TouchPhase.Moved ||
-            touches[touches.Count - 1].phase == TouchPhase.Stationary ||
-            touches[touches.Count - 2].phase == TouchPhase.Began ||
-            touches[touches.Count - 2].phase == TouchPhase.Stationary)
-            OnZoom(touches[touches.Count - 1].position, touches[touches.Count - 2].position);
+        if (touches[0].phase == TouchPhase.Moved ||
+            touches[0].phase == TouchPhase.Stationary ||
+            touches[1].phase == TouchPhase.Moved ||
+            touches[1].phase == TouchPhase.Stationary)
+            OnZoom_Mobile(touches[0], touches[1]);
     }
 
     private void OnPointerDown(Vector2 pointerPosition1, Vector2 pointerPosition2)
@@ -114,14 +105,16 @@ public class MobilePinchArea : MonoBehaviour
         isZooming = true;
         previousTouchPosition1 = pointerPosition1;
         previousTouchPosition2 = pointerPosition2;
+        InputManager.SetAxis(axisName, 0f);
     }
 
     private void OnPointerUp()
     {
         isZooming = false;
+        InputManager.SetAxis(axisName, 0f);
     }
 
-    private void OnZoom(Vector2 pointerPosition1, Vector2 pointerPosition2)
+    private void OnZoom_Standalone(Vector2 pointerPosition1, Vector2 pointerPosition2)
     {
         if (!isZooming)
             return;
@@ -134,6 +127,22 @@ public class MobilePinchArea : MonoBehaviour
         previousTouchPosition1 = pointerPosition1;
         previousTouchPosition2 = pointerPosition2;
         // Update virtual axes
-        InputManager.SetAxis(axisName, deltaMagnitudeDiff * sensitivity);
+        InputManager.SetAxis(axisName, deltaMagnitudeDiff * sensitivity * Time.deltaTime * 100f);
+    }
+
+    private void OnZoom_Mobile(Touch touch1, Touch touch2)
+    {
+        if (!isZooming)
+            return;
+        // Find the position in the previous frame of each touch.
+        Vector2 touch1PrevPos = touch1.position - touch1.deltaPosition;
+        Vector2 touch2PrevPos = touch2.position - touch2.deltaPosition;
+        // Find the magnitude of the vector (the distance) between the touches in each frame.
+        float prevTouchDeltaMag = (touch1PrevPos - touch2PrevPos).magnitude;
+        float touchDeltaMag = (touch1.position - touch2.position).magnitude;
+        // Find the difference in the distances between each frame.
+        float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
+        // Update virtual axes
+        InputManager.SetAxis(axisName, deltaMagnitudeDiff * sensitivity * Time.deltaTime * 100f);
     }
 }
