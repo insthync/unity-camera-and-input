@@ -25,6 +25,11 @@ public class MobilePinchArea : MonoBehaviour
         graphic.raycastTarget = true;
     }
 
+    private void OnDisable()
+    {
+        InputManager.SetAxis(axisName, 0f);
+    }
+
     public void Update()
     {
         if (Application.isMobilePlatform)

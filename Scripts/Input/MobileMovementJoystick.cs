@@ -82,6 +82,11 @@ public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragH
         SetIdleState();
     }
 
+    private void OnDisable()
+    {
+        UpdateVirtualAxes(Vector2.zero);
+    }
+
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!Interactable || IsDragging)

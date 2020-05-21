@@ -28,6 +28,11 @@ public class MobileSwipeArea : MonoBehaviour
         graphic.raycastTarget = true;
     }
 
+    private void OnDisable()
+    {
+        UpdateVirtualAxes(Vector2.zero);
+    }
+
     public void Update()
     {
         if (Application.isMobilePlatform)
