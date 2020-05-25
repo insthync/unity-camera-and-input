@@ -30,7 +30,6 @@ public class FollowCamera : MonoBehaviour
     public QueryTriggerInteraction wallHitQueryTriggerInteraction = QueryTriggerInteraction.Ignore;
 
     // Properties
-    public Transform CacheTransform { get; private set; }
     public Transform CacheCameraTransform { get; private set; }
 
     public Camera CacheCamera
@@ -71,7 +70,6 @@ public class FollowCamera : MonoBehaviour
 
     private void PrepareComponents()
     {
-        CacheTransform = transform;
         if (targetCamera == null)
             targetCamera = GetComponent<Camera>();
         CacheCameraTransform = CacheCamera.transform;
@@ -86,7 +84,7 @@ public class FollowCamera : MonoBehaviour
         targetIsNull = target == null;
         prevTargetPosition = targetPosition = targetIsNull ? prevTargetPosition : target.position;
         prevTargetUp = targetUp = targetIsNull ? prevTargetUp : target.up;
-        targetPosition += (targetOffset.x * CacheTransform.right) + (targetOffset.y * targetUp) + (targetOffset.z * CacheTransform.forward);
+        targetPosition += (targetOffset.x * CacheCameraTransform.right) + (targetOffset.y * targetUp) + (targetOffset.z * CacheCameraTransform.forward);
         prevTargetYRotation = targetYRotation = targetIsNull ? prevTargetYRotation : target.eulerAngles.y;
 
         if (zoomByAspectRatio)
@@ -137,8 +135,8 @@ public class FollowCamera : MonoBehaviour
         }
 
         // Update position & rotation
-        CacheTransform.position = wantedPosition;
-        CacheTransform.rotation = wantedRotation;
+        CacheCameraTransform.position = wantedPosition;
+        CacheCameraTransform.rotation = wantedRotation;
     }
 
     [System.Serializable]
