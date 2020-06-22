@@ -3,6 +3,6 @@ using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(MobileSwipeArea))]
 [RequireComponent(typeof(MobilePinchArea))]
-public class MobileSwipeAndPinchArea : MonoBehaviour
+public class MobileSwipeAndPinchArea : MonoBehaviour, IMobileInputArea
 {
 }

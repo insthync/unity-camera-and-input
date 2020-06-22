@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MobileSwipeArea : MonoBehaviour
+public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 {
     public bool useAxisX = true;
     public bool useAxisY = true;

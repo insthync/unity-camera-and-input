@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobileInputButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
 {
     public string keyName;
 

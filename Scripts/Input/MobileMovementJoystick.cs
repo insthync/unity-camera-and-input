@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MobileMovementJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     internal static readonly HashSet<int> JoystickTouches = new HashSet<int>();
     public int movementRange = 150;

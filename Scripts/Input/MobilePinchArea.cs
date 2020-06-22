@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MobilePinchArea : MonoBehaviour
+public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 {
     public string axisName = "Mouse ScrollWheel";
     public float sensitivity = 1f;
