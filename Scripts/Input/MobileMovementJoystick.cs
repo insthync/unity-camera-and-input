@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
@@ -8,8 +10,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     public int movementRange = 150;
     public bool useAxisX = true;
     public bool useAxisY = true;
+    public bool useButtons = false;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
+    public string[] buttonKeyNames;
     public bool fixControllerPosition;
     [SerializeField]
     private bool interactable = true;
@@ -17,10 +21,29 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private bool setAsLastSiblingOnDrag;
     [SerializeField]
     private bool hideWhileIdle;
+    [Header("Controller Background")]
     [Tooltip("Container which showing as area that able to control movement")]
-    public RectTransform movementBackground;
+    [SerializeField]
+    [FormerlySerializedAs("movementBackground")]
+    private RectTransform controllerBackground;
+    [SerializeField]
+    private float backgroundAlphaWhileIdling = 1f;
+    [SerializeField]
+    private float backgroundAlphaWhileMoving = 1f;
+    [Header("Controller Handler")]
     [Tooltip("This is the button to control movement")]
-    public RectTransform movementController;
+    [SerializeField]
+    [FormerlySerializedAs("movementController")]
+    private RectTransform controllerHandler;
+    [SerializeField]
+    private float handlerAlphaWhileIdling = 1f;
+    [SerializeField]
+    private float handlerAlphaWhileMoving = 1f;
+    [Header("Events")]
+    [SerializeField]
+    private UnityEvent onPointerDown;
+    [SerializeField]
+    private UnityEvent onPointerUp;
 
     public bool Interactable
     {
@@ -57,6 +80,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private int defaultSiblingIndex;
     private CanvasGroup canvasGroup;
     private float defaultCanvasGroupAlpha;
+    private CanvasGroup backgroundCanvasGroup;
+    private CanvasGroup handlerCanvasGroup;
 
     private void Start()
     {
@@ -72,12 +97,23 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             // Prepare defualt group alpha
             defaultCanvasGroupAlpha = canvasGroup.alpha;
         }
-        if (movementBackground != null)
+        if (controllerBackground != null)
         {
             // Prepare background offset, it will be used to calculate joystick movement
-            backgroundOffset = movementBackground.position - movementController.position;
+            backgroundOffset = controllerBackground.position - controllerHandler.position;
+            // Get canvas group, will use it to change alpha later
+            backgroundCanvasGroup = controllerBackground.GetComponent<CanvasGroup>();
+            if (backgroundCanvasGroup != null)
+                backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
         }
-        defaultControllerLocalPosition = movementController.localPosition;
+        if (controllerHandler != null)
+        {
+            // Get canvas group, will use it to change alpha later
+            handlerCanvasGroup = controllerHandler.GetComponent<CanvasGroup>();
+            if (handlerCanvasGroup != null)
+                handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
+        }
+        defaultControllerLocalPosition = controllerHandler.localPosition;
         defaultSiblingIndex = transform.GetSiblingIndex();
         SetIdleState();
     }
@@ -92,19 +128,33 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         if (!Interactable || IsDragging)
             return;
 
+        if (useButtons && buttonKeyNames != null)
+        {
+            foreach (string buttonKeyName in buttonKeyNames)
+                InputManager.SetButtonDown(buttonKeyName);
+        }
+
+        onPointerDown.Invoke();
+
         if (fixControllerPosition)
-            movementController.localPosition = defaultControllerLocalPosition;
+            controllerHandler.localPosition = defaultControllerLocalPosition;
         else
-            movementController.position = eventData.position;
+            controllerHandler.position = eventData.position;
 
         if (SetAsLastSiblingOnDrag)
             transform.SetAsLastSibling();
 
-        if (movementBackground != null)
-            movementBackground.position = backgroundOffset + movementController.position;
+        if (controllerBackground != null)
+            controllerBackground.position = backgroundOffset + controllerHandler.position;
 
-        CurrentPosition = startDragPosition = movementController.position;
-        startDragLocalPosition = movementController.localPosition;
+        if (backgroundCanvasGroup != null)
+            backgroundCanvasGroup.alpha = backgroundAlphaWhileMoving;
+
+        if (handlerCanvasGroup != null)
+            handlerCanvasGroup.alpha = handlerAlphaWhileMoving;
+
+        CurrentPosition = startDragPosition = controllerHandler.position;
+        startDragLocalPosition = controllerHandler.localPosition;
         UpdateVirtualAxes(Vector3.zero);
         if (!JoystickTouches.Contains(eventData.pointerId))
             JoystickTouches.Add(eventData.pointerId);
@@ -116,9 +166,26 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     {
         if (SetAsLastSiblingOnDrag)
             transform.SetSiblingIndex(defaultSiblingIndex);
-        movementController.localPosition = defaultControllerLocalPosition;
-        if (movementBackground != null)
-            movementBackground.position = backgroundOffset + movementController.position;
+
+        if (useButtons && buttonKeyNames != null)
+        {
+            foreach (string buttonKeyName in buttonKeyNames)
+                InputManager.SetButtonUp(buttonKeyName);
+        }
+
+        onPointerUp.Invoke();
+
+        controllerHandler.localPosition = defaultControllerLocalPosition;
+
+        if (controllerBackground != null)
+            controllerBackground.position = backgroundOffset + controllerHandler.position;
+
+        if (backgroundCanvasGroup != null)
+            backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
+
+        if (handlerCanvasGroup != null)
+            handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
+
         UpdateVirtualAxes(Vector3.zero);
         if (JoystickTouches.Contains(eventData.pointerId))
             JoystickTouches.Remove(eventData.pointerId);
@@ -148,7 +215,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         if (useAxisY)
             newOffsets.y = allowedOffsets.y;
 
-        movementController.localPosition = startDragLocalPosition + newOffsets;
+        controllerHandler.localPosition = startDragLocalPosition + newOffsets;
         // Update virtual axes
         UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffsets)) / movementRange * -1);
     }
