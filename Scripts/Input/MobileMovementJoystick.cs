@@ -13,6 +13,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     public bool useButtons = false;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
+    public float axisXScale = 1f;
+    public float axisYScale = 1f;
     public string[] buttonKeyNames;
     public bool fixControllerPosition;
     [SerializeField]
@@ -223,10 +225,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     public void UpdateVirtualAxes(Vector2 value)
     {
         if (useAxisX)
-            InputManager.SetAxis(axisXName, value.x);
+            InputManager.SetAxis(axisXName, value.x * axisXScale);
 
         if (useAxisY)
-            InputManager.SetAxis(axisYName, value.y);
+            InputManager.SetAxis(axisYName, value.y * axisYScale);
     }
 
     private void SetIdleState()
