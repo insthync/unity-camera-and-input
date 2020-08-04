@@ -7,22 +7,45 @@ using UnityEngine.Serialization;
 public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     internal static readonly HashSet<int> JoystickTouches = new HashSet<int>();
+    public enum EMode
+    {
+        Default,
+        SwipeArea
+    }
+    [Header("Joystick Settings")]
     public int movementRange = 150;
+    public bool fixControllerPosition;
     public bool useAxisX = true;
     public bool useAxisY = true;
-    public bool useButtons = false;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
-    public float axisXScale = 1f;
-    public float axisYScale = 1f;
-    public string[] buttonKeyNames;
-    public bool fixControllerPosition;
+    [SerializeField]
+    private EMode mode = EMode.Default;
     [SerializeField]
     private bool interactable = true;
     [SerializeField]
     private bool setAsLastSiblingOnDrag;
     [SerializeField]
     private bool hideWhileIdle;
+
+    [Header("Default Mode Settings")]
+    [SerializeField]
+    private float axisXScale = 1f;
+    [SerializeField]
+    private float axisYScale = 1f;
+
+    [Header("Swipe Area Mode Settings")]
+    [SerializeField]
+    private float xSensitivity = 1f;
+    [SerializeField]
+    private float ySensitivity = 1f;
+
+    [Header("Button Events Settings")]
+    [SerializeField]
+    private bool useButtons = false;
+    [SerializeField]
+    private string[] buttonKeyNames;
+
     [Header("Controller Background")]
     [Tooltip("Container which showing as area that able to control movement")]
     [SerializeField]
@@ -32,6 +55,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private float backgroundAlphaWhileIdling = 1f;
     [SerializeField]
     private float backgroundAlphaWhileMoving = 1f;
+
     [Header("Controller Handler")]
     [Tooltip("This is the button to control movement")]
     [SerializeField]
@@ -41,6 +65,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private float handlerAlphaWhileIdling = 1f;
     [SerializeField]
     private float handlerAlphaWhileMoving = 1f;
+
     [Header("Events")]
     [SerializeField]
     private UnityEvent onPointerDown;
@@ -204,7 +229,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             return;
         }
 
-        // Get cursor position
+        Vector2 pointerDelta = eventData.position - CurrentPosition; // Current Position actually is previous pointer position
+        // Get cursor position (Also using it as previous touch position to use next frame)
         CurrentPosition = eventData.position;
 
         Vector2 allowedOffsets = CurrentPosition - startDragPosition;
@@ -218,8 +244,17 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             newOffsets.y = allowedOffsets.y;
 
         controllerHandler.localPosition = startDragLocalPosition + newOffsets;
+
         // Update virtual axes
-        UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffsets)) / movementRange * -1);
+        switch (mode)
+        {
+            case EMode.SwipeArea:
+                UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
+                break;
+            default:
+                UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffsets)) / movementRange * -1);
+                break;
+        }
     }
 
     public void UpdateVirtualAxes(Vector2 value)
