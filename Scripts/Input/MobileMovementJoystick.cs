@@ -109,6 +109,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private float defaultCanvasGroupAlpha;
     private CanvasGroup backgroundCanvasGroup;
     private CanvasGroup handlerCanvasGroup;
+    private bool swipping;
 
     private void Start()
     {
@@ -152,11 +153,11 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     private void LateUpdate()
     {
-        switch (mode)
+        if (swipping)
         {
-            case EMode.SwipeArea:
-                UpdateVirtualAxes(Vector2.zero);
-                break;
+            swipping = false;
+            // Clear axis movement after swipped
+            UpdateVirtualAxes(Vector2.zero);
         }
     }
 
@@ -260,6 +261,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         {
             case EMode.SwipeArea:
                 UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
+                swipping = true;
                 break;
             default:
                 UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffsets)) / movementRange * -1);
