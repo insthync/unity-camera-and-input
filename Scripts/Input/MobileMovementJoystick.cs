@@ -155,9 +155,9 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     {
         if (swipping)
         {
-            swipping = false;
             // Clear axis movement after swipped
             UpdateVirtualAxes(Vector2.zero);
+            swipping = false;
         }
     }
 
