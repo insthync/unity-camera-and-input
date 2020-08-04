@@ -9,10 +9,12 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
     public bool useAxisY = true;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
-    public float xSensitivity = 1f;
-    public float ySensitivity = 1f;
+    [SerializeField]
+    private float xSensitivity = 1f;
+    [SerializeField]
+    private float ySensitivity = 1f;
 
-    public bool isDragging
+    public bool IsDragging
     {
         get; private set;
     }
@@ -52,7 +54,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
         {
             if (raycastResults[0].gameObject == gameObject)
             {
-                if (!isDragging && Input.GetMouseButton(0))
+                if (!IsDragging && Input.GetMouseButton(0))
                 {
                     OnPointerDown(Input.mousePosition);
                     return;
@@ -63,7 +65,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 
         if (!hasPointer || !Input.GetMouseButton(0))
         {
-            if (isDragging)
+            if (IsDragging)
                 OnPointerUp();
             return;
         }
@@ -91,12 +93,12 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 
         if (touches.Count != 1)
         {
-            if (isDragging)
+            if (IsDragging)
                 OnPointerUp();
             return;
         }
 
-        if (touches[0].phase == TouchPhase.Began && !isDragging)
+        if (touches[0].phase == TouchPhase.Began && !IsDragging)
             OnPointerDown(touches[0].position);
 
         if (touches[0].phase == TouchPhase.Moved ||
@@ -106,20 +108,20 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 
     private void OnPointerDown(Vector2 pointerPosition)
     {
-        isDragging = true;
+        IsDragging = true;
         previousTouchPosition = pointerPosition;
         UpdateVirtualAxes(Vector2.zero);
     }
 
     private void OnPointerUp()
     {
-        isDragging = false;
+        IsDragging = false;
         UpdateVirtualAxes(Vector2.zero);
     }
 
     private void OnDrag(Vector2 pointerPosition)
     {
-        if (!isDragging)
+        if (!IsDragging)
             return;
         Vector2 pointerDelta = pointerPosition - previousTouchPosition;
         // Set previous touch position to use next frame

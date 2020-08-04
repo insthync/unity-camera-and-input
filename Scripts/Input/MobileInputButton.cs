@@ -3,7 +3,8 @@ using UnityEngine.EventSystems;
 
 public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
 {
-    public string keyName;
+    [SerializeField]
+    private string keyName;
 
     public void OnPointerDown(PointerEventData eventData)
     {

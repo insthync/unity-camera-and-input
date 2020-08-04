@@ -6,9 +6,10 @@ using UnityEngine.UI;
 public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 {
     public string axisName = "Mouse ScrollWheel";
-    public float sensitivity = 1f;
+    [SerializeField]
+    private float sensitivity = 1f;
 
-    public bool isZooming
+    public bool IsZooming
     {
         get; private set;
     }
@@ -49,7 +50,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
         {
             if (raycastResults[0].gameObject == gameObject)
             {
-                if (!isZooming && Input.GetMouseButton(1))
+                if (!IsZooming && Input.GetMouseButton(1))
                 {
                     OnPointerDown(Input.mousePosition, -Input.mousePosition);
                     return;
@@ -60,7 +61,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
         if (!hasPointer || !Input.GetMouseButton(1))
         {
-            if (isZooming)
+            if (IsZooming)
                 OnPointerUp();
             return;
         }
@@ -90,12 +91,12 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
         if (touches.Count < 2)
         {
-            if (isZooming)
+            if (IsZooming)
                 OnPointerUp();
             return;
         }
 
-        if (touches[1].phase == TouchPhase.Began && !isZooming)
+        if (touches[1].phase == TouchPhase.Began && !IsZooming)
             OnPointerDown(touches[0].position, touches[1].position);
 
         if (touches[0].phase == TouchPhase.Moved ||
@@ -107,7 +108,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
     private void OnPointerDown(Vector2 pointerPosition1, Vector2 pointerPosition2)
     {
-        isZooming = true;
+        IsZooming = true;
         previousTouchPosition1 = pointerPosition1;
         previousTouchPosition2 = pointerPosition2;
         InputManager.SetAxis(axisName, 0f);
@@ -115,13 +116,13 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
     private void OnPointerUp()
     {
-        isZooming = false;
+        IsZooming = false;
         InputManager.SetAxis(axisName, 0f);
     }
 
     private void OnZoom_Standalone(Vector2 pointerPosition1, Vector2 pointerPosition2)
     {
-        if (!isZooming)
+        if (!IsZooming)
             return;
         // Find the magnitude of the vector (the distance) between the touches in each frame.
         float prevTouchDeltaMag = (previousTouchPosition1 - previousTouchPosition2).magnitude;
@@ -137,7 +138,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
     private void OnZoom_Mobile(Touch touch1, Touch touch2)
     {
-        if (!isZooming)
+        if (!IsZooming)
             return;
         // Find the position in the previous frame of each touch.
         Vector2 touch1PrevPos = touch1.position - touch1.deltaPosition;
