@@ -150,6 +150,16 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         UpdateVirtualAxes(Vector2.zero);
     }
 
+    private void LateUpdate()
+    {
+        switch (mode)
+        {
+            case EMode.SwipeArea:
+                UpdateVirtualAxes(Vector2.zero);
+                break;
+        }
+    }
+
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!Interactable || IsDragging)
@@ -260,10 +270,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     public void UpdateVirtualAxes(Vector2 value)
     {
         if (useAxisX)
-            InputManager.SetAxis(axisXName, value.x * axisXScale);
+            InputManager.SetAxis(axisXName, value.x * (mode == EMode.SwipeArea ? 1f : axisXScale));
 
         if (useAxisY)
-            InputManager.SetAxis(axisYName, value.y * axisYScale);
+            InputManager.SetAxis(axisYName, value.y * (mode == EMode.SwipeArea ? 1f : axisYScale));
     }
 
     private void SetIdleState()
