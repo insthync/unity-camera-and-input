@@ -14,6 +14,8 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
     public string saveKey = "_ANY_KEY_NAME_";
     [Tooltip("Default position will be used when there is no saved position")]
     public Vector2 defaultPosition;
+    [Tooltip("If this is `TRUE` it will be able to move and save position")]
+    public bool isEditMode;
     [Tooltip("If this is `TRUE` it will save to player prefs when end drag")]
     public bool autoSave;
 
@@ -49,11 +51,15 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
 
     public void ResetPosition()
     {
+        if (!isEditMode)
+            return;
         RectTransform.anchoredPosition = defaultPosition;
     }
 
     public void SavePosition()
     {
+        if (!isEditMode)
+            return;
         SavedPosition = RectTransform.anchoredPosition;
     }
 
@@ -74,11 +80,15 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (!isEditMode)
+            return;
         lastMousePosition = eventData.position;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!isEditMode)
+            return;
         Vector2 currentMousePosition = eventData.position;
         Vector2 diff = currentMousePosition - lastMousePosition;
         Vector3 newPosition = RectTransform.position + new Vector3(diff.x, diff.y);
@@ -88,6 +98,8 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (!isEditMode)
+            return;
         if (autoSave)
             SavePosition();
     }
