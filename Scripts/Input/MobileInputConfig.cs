@@ -7,7 +7,7 @@ using UnityEditor;
 #endif
 
 [RequireComponent(typeof(CanvasGroup))]
-public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
+public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
 {
     public const string KEY_X = "_X";
     public const string KEY_Y = "_Y";
@@ -204,8 +204,24 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
     [ContextMenu("Set Default Position By Current Position")]
     public void SetDefaultPositionByCurrentPosition()
     {
-        defaultPosition = RectTransform.anchoredPosition;
+        defaultPosition = CurrentPosition;
         Debug.Log("[MobileInputPositionSave] Set default position to: " + defaultPosition);
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Set Default Scale By Current Scale")]
+    public void SetDefaultScaleByCurrentScale()
+    {
+        defaultScale = CurrentScale;
+        Debug.Log("[MobileInputScaleSave] Set default scale to: " + defaultScale);
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Set Default Alpha By Current Alpha")]
+    public void SetDefaultAlphaByCurrentAlpha()
+    {
+        defaultAlpha = CurrentAlpha;
+        Debug.Log("[MobileInputAlphaSave] Set default alpha to: " + defaultAlpha);
         EditorUtility.SetDirty(this);
     }
 #endif
@@ -241,7 +257,7 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
         if (!isEditMode)
             return;
         // Tell manager to edit this
-        MobileInputPositionSaveManager manager = FindObjectOfType<MobileInputPositionSaveManager>();
+        MobileInputConfigManager manager = FindObjectOfType<MobileInputConfigManager>();
         manager.SelectMobileInput(this);
     }
 }

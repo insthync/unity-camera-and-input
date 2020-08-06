@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MobileInputPositionSaveManager : MonoBehaviour
+public class MobileInputConfigManager : MonoBehaviour
 {
     [Header("Editing UI Element")]
     public GameObject uiRoot;
@@ -12,7 +12,7 @@ public class MobileInputPositionSaveManager : MonoBehaviour
 
     public void TurnOnEditMode()
     {
-        var comps = GetComponentsInChildren<MobileInputPositionSave>();
+        var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.isEditMode = true;
@@ -21,7 +21,7 @@ public class MobileInputPositionSaveManager : MonoBehaviour
 
     public void TurnOffEditMode()
     {
-        var comps = GetComponentsInChildren<MobileInputPositionSave>();
+        var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.isEditMode = false;
@@ -30,7 +30,7 @@ public class MobileInputPositionSaveManager : MonoBehaviour
 
     public void LoadPositions()
     {
-        var comps = GetComponentsInChildren<MobileInputPositionSave>();
+        var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.LoadPosition();
@@ -39,7 +39,7 @@ public class MobileInputPositionSaveManager : MonoBehaviour
 
     public void SavePositions()
     {
-        var comps = GetComponentsInChildren<MobileInputPositionSave>();
+        var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.SavePosition();
@@ -48,14 +48,14 @@ public class MobileInputPositionSaveManager : MonoBehaviour
 
     public void ResetPositions()
     {
-        var comps = GetComponentsInChildren<MobileInputPositionSave>();
+        var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.ResetPosition();
         }
     }
 
-    public void SelectMobileInput(MobileInputPositionSave input)
+    public void SelectMobileInput(MobileInputConfig input)
     {
         if (!input)
         {
