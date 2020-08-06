@@ -22,6 +22,15 @@ public class MobileInputPositionSaveManager : MonoBehaviour
         }
     }
 
+    public void LoadPositions()
+    {
+        var comps = GetComponentsInChildren<MobileInputPositionSave>();
+        foreach (var comp in comps)
+        {
+            comp.LoadPosition();
+        }
+    }
+
     public void SavePositions()
     {
         var comps = GetComponentsInChildren<MobileInputPositionSave>();
