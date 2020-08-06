@@ -28,30 +28,37 @@ public class MobileInputConfigManager : MonoBehaviour
         }
     }
 
-    public void LoadPositions()
+    public void LoadConfig()
     {
-        var comps = GetComponentsInChildren<MobileInputConfig>();
+        var comps = FindObjectsOfType<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.LoadPosition();
+            comp.LoadScale();
+            comp.LoadAlpha();
         }
     }
 
-    public void SavePositions()
+    public void SaveConfig()
     {
         var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.SavePosition();
+            comp.SaveScale();
+            comp.SaveAlpha();
         }
+        LoadConfig();
     }
 
-    public void ResetPositions()
+    public void ResetConfig()
     {
         var comps = GetComponentsInChildren<MobileInputConfig>();
         foreach (var comp in comps)
         {
             comp.ResetPosition();
+            comp.ResetScale();
+            comp.ResetAlpha();
         }
     }
 
