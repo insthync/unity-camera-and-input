@@ -35,6 +35,10 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
         }
     }
 
+    public RectTransform RectTransform
+    {
+        get { return transform as RectTransform; }
+    }
 
     private Vector2 lastMousePosition;
 
@@ -45,44 +49,28 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
 
     public void ResetPosition()
     {
-        transform.localPosition = defaultPosition;
+        RectTransform.anchoredPosition = defaultPosition;
     }
 
     public void SavePosition()
     {
-        SavedPosition = transform.localPosition;
+        SavedPosition = RectTransform.anchoredPosition;
     }
 
     public void LoadPosition()
     {
-        transform.localPosition = SavedPosition;
+        RectTransform.anchoredPosition = SavedPosition;
     }
 
 #if UNITY_EDITOR
     [ContextMenu("Set Default Position By Current Position")]
     public void SetDefaultPositionByCurrentPosition()
     {
-        defaultPosition = transform.localPosition;
+        defaultPosition = RectTransform.anchoredPosition;
         Debug.Log("[MobileInputPositionSave] Set default position to: " + defaultPosition);
         EditorUtility.SetDirty(this);
     }
 #endif
-
-    private bool IsRectTransformInsideSreen(RectTransform rectTransform)
-    {
-        Vector3[] corners = new Vector3[4];
-        rectTransform.GetWorldCorners(corners);
-        int visibleCorners = 0;
-        Rect rect = new Rect(0, 0, Screen.width, Screen.height);
-        foreach (Vector3 corner in corners)
-        {
-            if (rect.Contains(corner))
-            {
-                visibleCorners++;
-            }
-        }
-        return visibleCorners == 4;
-    }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -93,15 +81,8 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
     {
         Vector2 currentMousePosition = eventData.position;
         Vector2 diff = currentMousePosition - lastMousePosition;
-        RectTransform rect = GetComponent<RectTransform>();
-
-        Vector3 newPosition = rect.position + new Vector3(diff.x, diff.y, transform.position.z);
-        Vector3 oldPos = rect.position;
-        rect.position = newPosition;
-        if (!IsRectTransformInsideSreen(rect))
-        {
-            rect.position = oldPos;
-        }
+        Vector3 newPosition = RectTransform.position + new Vector3(diff.x, diff.y);
+        RectTransform.position = newPosition;
         lastMousePosition = currentMousePosition;
     }
 
