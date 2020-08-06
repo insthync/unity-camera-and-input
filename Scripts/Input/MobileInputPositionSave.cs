@@ -58,6 +58,12 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
         }
     }
 
+    public Vector2 CurrentPosition
+    {
+        get { return RectTransform.anchoredPosition; }
+        set { RectTransform.anchoredPosition = value; }
+    }
+
     public float SavedScale
     {
         get
@@ -71,6 +77,12 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
         }
     }
 
+    public float CurrentScale
+    {
+        get { return RectTransform.localScale.x; }
+        set { RectTransform.localScale = Vector3.one * value; }
+    }
+
     public float SavedAlpha
     {
         get
@@ -82,6 +94,12 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
             PlayerPrefs.SetFloat(SaveKeyAlpha, value);
             PlayerPrefs.Save();
         }
+    }
+
+    public float CurrentAlpha
+    {
+        get { return CanvasGroup.alpha; }
+        set { CanvasGroup.alpha = value; }
     }
     #endregion
 
@@ -103,7 +121,7 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
 
     private Vector2 lastMousePosition;
 
-    private void Start()
+    private void OnEnable()
     {
         LoadPosition();
         LoadScale();
@@ -114,72 +132,72 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
     {
         if (!isEditMode)
             return;
-        RectTransform.anchoredPosition = defaultPosition;
+        CurrentPosition = defaultPosition;
     }
 
     public void SavePosition()
     {
         if (!isEditMode)
             return;
-        SavedPosition = RectTransform.anchoredPosition;
+        SavedPosition = CurrentPosition;
     }
 
     public void LoadPosition()
     {
-        RectTransform.anchoredPosition = SavedPosition;
+        CurrentPosition = SavedPosition;
     }
 
     public void ResetScale()
     {
         if (!isEditMode)
             return;
-        RectTransform.localScale = Vector3.one * defaultScale;
+        CurrentScale = defaultScale;
     }
 
     public void SaveScale()
     {
         if (!isEditMode)
             return;
-        SavedScale = RectTransform.localScale.x;
+        SavedScale = CurrentScale;
     }
 
     public void LoadScale()
     {
         CanvasGroup.alpha = SavedAlpha;
-        RectTransform.localScale = Vector3.one * SavedScale;
+        CurrentScale = SavedScale;
     }
 
     public void SetScale(float amount)
     {
         amount = amount < minScale ? minScale : amount;
         amount = amount > maxScale ? maxScale : amount;
-        RectTransform.localScale = Vector3.one * amount;
+        CurrentScale = amount;
     }
 
     public void ResetAlpha()
     {
         if (!isEditMode)
             return;
-        CanvasGroup.alpha = defaultAlpha;
+        CurrentAlpha = defaultAlpha;
     }
 
     public void SaveAlpha()
     {
         if (!isEditMode)
             return;
-        SavedAlpha = CanvasGroup.alpha;
+        SavedAlpha = CurrentAlpha;
     }
 
     public void LoadAlpha()
     {
-        SavedAlpha = SavedAlpha;
+        CurrentAlpha = SavedAlpha;
     }
 
     public void SetAlpha(float amount)
     {
         amount = amount < minAlpha ? minAlpha : amount;
         amount = amount > maxAlpha ? maxAlpha : amount;
-        CanvasGroup.alpha = amount;
+        CurrentAlpha = amount;
     }
 
 #if UNITY_EDITOR
@@ -223,5 +241,7 @@ public class MobileInputPositionSave : MonoBehaviour, IBeginDragHandler, IDragHa
         if (!isEditMode)
             return;
         // Tell manager to edit this
+        MobileInputPositionSaveManager manager = FindObjectOfType<MobileInputPositionSaveManager>();
+        manager.SelectMobileInput(this);
     }
 }
