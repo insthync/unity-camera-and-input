@@ -109,6 +109,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private float defaultCanvasGroupAlpha;
     private CanvasGroup backgroundCanvasGroup;
     private CanvasGroup handlerCanvasGroup;
+    private MobileInputConfig config;
     private bool swipping;
 
     private void Start()
@@ -118,12 +119,6 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
             canvasGroup.alpha = 1f;
-            defaultCanvasGroupAlpha = 1f;
-        }
-        else
-        {
-            // Prepare defualt group alpha
-            defaultCanvasGroupAlpha = canvasGroup.alpha;
         }
         if (controllerBackground != null)
         {
@@ -141,9 +136,22 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             if (handlerCanvasGroup != null)
                 handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
         }
+        config = GetComponent<MobileInputConfig>();
+        if (config != null)
+        {
+            // Updating default canvas group alpha when loading new config
+            config.onLoadAlpha += OnLoadAlpha;
+        }
+        defaultCanvasGroupAlpha = canvasGroup.alpha;
         defaultControllerLocalPosition = controllerHandler.localPosition;
         defaultSiblingIndex = transform.GetSiblingIndex();
         SetIdleState();
+    }
+
+    private void OnDestroy()
+    {
+        if (config != null)
+            config.onLoadAlpha -= OnLoadAlpha;
     }
 
     private void OnDisable()
@@ -286,5 +294,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private void SetDraggingState()
     {
         canvasGroup.alpha = defaultCanvasGroupAlpha;
+    }
+
+    public void OnLoadAlpha(float alpha)
+    {
+        defaultCanvasGroupAlpha = alpha;
     }
 }
