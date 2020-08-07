@@ -44,7 +44,9 @@ public class FollowCameraControls : FollowCamera
     public float zoomSpeed = 5;
 
     [Header("Aim Assistance")]
-    public bool enableAimAssistance;
+    public bool enableAimAssistance = false;
+    public bool enableAimAssistanceX = true;
+    public bool enableAimAssistanceY = true;
     public float aimAssistanceRadius = 0.5f;
     public float aimAssistanceDistance = 10f;
     public LayerMask aimAssistanceLayerMask;
@@ -137,8 +139,10 @@ public class FollowCameraControls : FollowCamera
                 Vector3 targetCenter = aimAssistanceCastHit.collider.bounds.center;
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
-                xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistanceXSpeed * deltaTime);
-                yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistanceYSpeed * deltaTime);
+                if (enableAimAssistanceX)
+                    xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistanceXSpeed * deltaTime);
+                if (enableAimAssistanceY)
+                    yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistanceYSpeed * deltaTime);
             }
         }
     }
