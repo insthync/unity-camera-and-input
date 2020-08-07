@@ -103,6 +103,15 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
     }
     #endregion
 
+    #region Events
+    public System.Action<Vector3> onLoadPosition;
+    public System.Action<float> onLoadScale;
+    public System.Action<float> onLoadAlpha;
+    public System.Action<Vector3> onSavePosition;
+    public System.Action<float> onSaveScale;
+    public System.Action<float> onSaveAlpha;
+    #endregion
+
     public RectTransform RectTransform
     {
         get { return transform as RectTransform; }
@@ -140,11 +149,13 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (!isEditMode)
             return;
         SavedPosition = CurrentPosition;
+        onSavePosition?.Invoke(CurrentPosition);
     }
 
     public void LoadPosition()
     {
         CurrentPosition = SavedPosition;
+        onLoadPosition?.Invoke(CurrentPosition);
     }
 
     public void ResetScale()
@@ -159,12 +170,14 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (!isEditMode)
             return;
         SavedScale = CurrentScale;
+        onSaveScale?.Invoke(CurrentScale);
     }
 
     public void LoadScale()
     {
         CanvasGroup.alpha = SavedAlpha;
         CurrentScale = SavedScale;
+        onLoadScale?.Invoke(CurrentScale);
     }
 
     public void SetScale(float amount)
@@ -186,11 +199,13 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (!isEditMode)
             return;
         SavedAlpha = CurrentAlpha;
+        onSaveAlpha?.Invoke(CurrentAlpha);
     }
 
     public void LoadAlpha()
     {
         CurrentAlpha = SavedAlpha;
+        onLoadAlpha?.Invoke(CurrentAlpha);
     }
 
     public void SetAlpha(float amount)
