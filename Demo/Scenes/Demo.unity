@@ -1953,7 +1953,7 @@ MonoBehaviour:
   updateRotationX: 0
   updateRotationY: 0
   updateZoom: 1
-  limitXRotation: 0
+  limitXRotation: 1
   minXRotation: -45
   maxXRotation: 45
   smoothRotateX: 0
@@ -1979,7 +1979,8 @@ MonoBehaviour:
   aimAssistanceLayerMask:
     serializedVersion: 2
     m_Bits: 2
-  aimAssistanceGizmosColor: {r: 0, g: 1, b: 0, a: 1}
+  aimAssistanceXSpeed: 10
+  aimAssistanceYSpeed: 10
   isSaveCamera: 0
   savePrefsPrefix: GAMEPLAY
 --- !u!81 &1459269234
