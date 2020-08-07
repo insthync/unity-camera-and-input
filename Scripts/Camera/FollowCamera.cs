@@ -45,7 +45,6 @@ public class FollowCamera : MonoBehaviour
     private float targetYRotation;
     private Vector3 prevTargetPosition;
     private Vector3 prevTargetUp;
-    private Quaternion prevTargetRotation;
     private float prevTargetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
@@ -55,7 +54,7 @@ public class FollowCamera : MonoBehaviour
     private RaycastHit[] tempHits;
     private float tempDistance;
 
-    private void OnDrawGizmos()
+    protected virtual void OnDrawGizmos()
     {
 #if UNITY_EDITOR
         Gizmos.color = Color.red;

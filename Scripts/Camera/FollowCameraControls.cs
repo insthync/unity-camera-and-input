@@ -48,7 +48,8 @@ public class FollowCameraControls : FollowCamera
     public float aimAssistanceRadius = 0.5f;
     public float aimAssistanceDistance = 10f;
     public LayerMask aimAssistanceLayerMask;
-    public Color aimAssistanceGizmosColor = Color.green;
+    public float aimAssistanceXSpeed = 10f;
+    public float aimAssistanceYSpeed = 10f;
 
     [Header("Save Camera")]
     public bool isSaveCamera;
@@ -112,13 +113,13 @@ public class FollowCameraControls : FollowCamera
 
         // X rotation smooth
         if (smoothRotateX)
-            xVelocity = Mathf.Lerp(xVelocity, 0, deltaTime * rotateXSmoothing);
+            xVelocity = Mathf.LerpAngle(xVelocity, 0, deltaTime * rotateXSmoothing);
         else
             xVelocity = 0f;
 
         // Y rotation smooth
         if (smoothRotateY)
-            yVelocity = Mathf.Lerp(yVelocity, 0, deltaTime * rotateYSmoothing);
+            yVelocity = Mathf.LerpAngle(yVelocity, 0, deltaTime * rotateYSmoothing);
         else
             yVelocity = 0f;
 
@@ -128,18 +129,23 @@ public class FollowCameraControls : FollowCamera
         else
             zoomVelocity = 0f;
 
-        if (enableAimAssistance)
+        if (enableAimAssistance && Application.isPlaying)
         {
             if (Physics.SphereCast(CacheCameraTransform.position, aimAssistanceRadius, CacheCameraTransform.forward, out aimAssistanceCastHit, aimAssistanceDistance, aimAssistanceLayerMask))
             {
                 // Set `xRotation`, `yRotation` by hit object's position
-
+                Vector3 targetCenter = aimAssistanceCastHit.collider.bounds.center;
+                Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
+                Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
+                xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistanceXSpeed * deltaTime);
+                yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistanceYSpeed * deltaTime);
             }
         }
     }
 
-    private void OnDrawGizmos()
+    protected override void OnDrawGizmos()
     {
+        base.OnDrawGizmos();
         Gizmos.color = Color.green;
         Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance);
         Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance, aimAssistanceRadius);
