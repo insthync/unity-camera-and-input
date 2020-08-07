@@ -43,6 +43,13 @@ public class FollowCameraControls : FollowCamera
     public float startZoomDistance;
     public float zoomSpeed = 5;
 
+    [Header("Aim Assistance")]
+    public bool enableAimAssistance;
+    public float aimAssistanceRadius = 0.5f;
+    public float aimAssistanceDistance = 10f;
+    public LayerMask aimAssistanceLayerMask;
+    public Color aimAssistanceGizmosColor = Color.green;
+
     [Header("Save Camera")]
     public bool isSaveCamera;
     public string savePrefsPrefix = "GAMEPLAY";
@@ -50,6 +57,7 @@ public class FollowCameraControls : FollowCamera
     private float xVelocity;
     private float yVelocity;
     private float zoomVelocity;
+    private RaycastHit aimAssistanceCastHit;
 
     private void Start()
     {
@@ -76,6 +84,7 @@ public class FollowCameraControls : FollowCamera
         }
 
         float deltaTime = Time.deltaTime;
+
         // X rotation
         if (updateRotation || updateRotationX)
             xVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed;
@@ -118,6 +127,22 @@ public class FollowCameraControls : FollowCamera
             zoomVelocity = Mathf.Lerp(zoomVelocity, 0, deltaTime * zoomSmoothing);
         else
             zoomVelocity = 0f;
+
+        if (enableAimAssistance)
+        {
+            if (Physics.SphereCast(CacheCameraTransform.position, aimAssistanceRadius, CacheCameraTransform.forward, out aimAssistanceCastHit, aimAssistanceDistance, aimAssistanceLayerMask))
+            {
+                // Set `xRotation`, `yRotation` by hit object's position
+
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance);
+        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance, aimAssistanceRadius);
     }
 
     private float ClampAngleBetweenMinAndMax(float angle, float min, float max)
