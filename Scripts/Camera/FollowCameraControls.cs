@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [ExecuteInEditMode]
 public class FollowCameraControls : FollowCamera
@@ -52,6 +53,7 @@ public class FollowCameraControls : FollowCamera
     public LayerMask aimAssistLayerMask;
     public float aimAssistXSpeed = 10f;
     public float aimAssistYSpeed = 10f;
+    public List<Collider> aimAssistExceptions = new List<Collider>();
 
     [Header("Save Camera")]
     public bool isSaveCamera;
@@ -133,6 +135,11 @@ public class FollowCameraControls : FollowCamera
 
         if (enableAimAssist && Application.isPlaying)
         {
+            if (aimAssistExceptions != null && aimAssistExceptions.Count > 0)
+            {
+                foreach (Collider comp in aimAssistExceptions)
+                    comp.enabled = false;
+            }
             if (Physics.SphereCast(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, out aimAssistanceCastHit, aimAssistDistance, aimAssistLayerMask))
             {
                 // Set `xRotation`, `yRotation` by hit object's position
@@ -143,6 +150,11 @@ public class FollowCameraControls : FollowCamera
                     xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
                 if (enableAimAssistY)
                     yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
+            }
+            if (aimAssistExceptions != null && aimAssistExceptions.Count > 0)
+            {
+                foreach (Collider comp in aimAssistExceptions)
+                    comp.enabled = true;
             }
         }
     }
