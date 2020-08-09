@@ -1973,14 +1973,16 @@ MonoBehaviour:
   zoomSmoothing: 10
   startZoomDistance: 0
   zoomSpeed: 5
-  enableAimAssistance: 1
-  aimAssistanceRadius: 0.5
-  aimAssistanceDistance: 10
-  aimAssistanceLayerMask:
+  enableAimAssist: 1
+  enableAimAssistX: 1
+  enableAimAssistY: 1
+  aimAssistRadius: 0.5
+  aimAssistDistance: 10
+  aimAssistLayerMask:
     serializedVersion: 2
     m_Bits: 2
-  aimAssistanceXSpeed: 10
-  aimAssistanceYSpeed: 10
+  aimAssistXSpeed: 20
+  aimAssistYSpeed: 20
   isSaveCamera: 0
   savePrefsPrefix: GAMEPLAY
 --- !u!81 &1459269234
