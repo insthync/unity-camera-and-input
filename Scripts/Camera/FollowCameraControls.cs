@@ -43,15 +43,15 @@ public class FollowCameraControls : FollowCamera
     public float startZoomDistance;
     public float zoomSpeed = 5;
 
-    [Header("Aim Assistance")]
-    public bool enableAimAssistance = false;
-    public bool enableAimAssistanceX = true;
-    public bool enableAimAssistanceY = true;
-    public float aimAssistanceRadius = 0.5f;
-    public float aimAssistanceDistance = 10f;
-    public LayerMask aimAssistanceLayerMask;
-    public float aimAssistanceXSpeed = 10f;
-    public float aimAssistanceYSpeed = 10f;
+    [Header("Aim Assist")]
+    public bool enableAimAssist = false;
+    public bool enableAimAssistX = true;
+    public bool enableAimAssistY = true;
+    public float aimAssistRadius = 0.5f;
+    public float aimAssistDistance = 10f;
+    public LayerMask aimAssistLayerMask;
+    public float aimAssistXSpeed = 10f;
+    public float aimAssistYSpeed = 10f;
 
     [Header("Save Camera")]
     public bool isSaveCamera;
@@ -131,18 +131,18 @@ public class FollowCameraControls : FollowCamera
         else
             zoomVelocity = 0f;
 
-        if (enableAimAssistance && Application.isPlaying)
+        if (enableAimAssist && Application.isPlaying)
         {
-            if (Physics.SphereCast(CacheCameraTransform.position, aimAssistanceRadius, CacheCameraTransform.forward, out aimAssistanceCastHit, aimAssistanceDistance, aimAssistanceLayerMask))
+            if (Physics.SphereCast(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, out aimAssistanceCastHit, aimAssistDistance, aimAssistLayerMask))
             {
                 // Set `xRotation`, `yRotation` by hit object's position
                 Vector3 targetCenter = aimAssistanceCastHit.collider.bounds.center;
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
-                if (enableAimAssistanceX)
-                    xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistanceXSpeed * deltaTime);
-                if (enableAimAssistanceY)
-                    yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistanceYSpeed * deltaTime);
+                if (enableAimAssistX)
+                    xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
+                if (enableAimAssistY)
+                    yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
             }
         }
     }
@@ -150,9 +150,11 @@ public class FollowCameraControls : FollowCamera
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
+#if UNITY_EDITOR
         Gizmos.color = Color.green;
         Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance);
-        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance, aimAssistanceRadius);
+        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance, aimAssistRadius);
+#endif
     }
 
     private float ClampAngleBetweenMinAndMax(float angle, float min, float max)
