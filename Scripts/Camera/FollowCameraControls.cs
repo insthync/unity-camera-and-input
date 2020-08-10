@@ -59,6 +59,7 @@ public class FollowCameraControls : FollowCamera
     public bool isSaveCamera;
     public string savePrefsPrefix = "GAMEPLAY";
 
+    private float deltaTime;
     private float xVelocity;
     private float yVelocity;
     private float zoomVelocity;
@@ -80,6 +81,9 @@ public class FollowCameraControls : FollowCamera
 
     private void Update()
     {
+        // Update delta time, this also being used in LateUpdate too.
+        deltaTime = Time.deltaTime;
+
         if (isSaveCamera)
         {
             PlayerPrefs.SetFloat(savePrefsPrefix + "_XRotation", xRotation);
@@ -87,8 +91,6 @@ public class FollowCameraControls : FollowCamera
             PlayerPrefs.SetFloat(savePrefsPrefix + "_ZoomDistance", zoomDistance);
             PlayerPrefs.Save();
         }
-
-        float deltaTime = Time.deltaTime;
 
         // X rotation
         if (updateRotation || updateRotationX)
@@ -132,7 +134,10 @@ public class FollowCameraControls : FollowCamera
             zoomVelocity = Mathf.Lerp(zoomVelocity, 0, deltaTime * zoomSmoothing);
         else
             zoomVelocity = 0f;
+    }
 
+    protected override void LateUpdate()
+    {
         if (enableAimAssist && Application.isPlaying)
         {
             if (aimAssistExceptions != null && aimAssistExceptions.Count > 0)
@@ -157,6 +162,7 @@ public class FollowCameraControls : FollowCamera
                     comp.enabled = true;
             }
         }
+        base.LateUpdate();
     }
 
     protected override void OnDrawGizmos()

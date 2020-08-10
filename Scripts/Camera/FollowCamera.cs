@@ -74,7 +74,7 @@ public class FollowCamera : MonoBehaviour
         CacheCameraTransform = CacheCamera.transform;
     }
 
-    private void LateUpdate()
+    protected virtual void LateUpdate()
     {
 #if UNITY_EDITOR
         if (!Application.isPlaying)
