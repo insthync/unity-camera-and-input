@@ -32,6 +32,8 @@ public class FollowCameraControls : FollowCamera
     public float startXRotation;
     public float startYRotation;
     public float rotationSpeed = 5;
+    [Range(0.1f, 1f)]
+    public float rotationSpeedScale = 1;
 
     [Header("Zoom")]
     public bool limitZoomDistance;
@@ -43,6 +45,8 @@ public class FollowCameraControls : FollowCamera
     [Header("General Zoom Settings")]
     public float startZoomDistance;
     public float zoomSpeed = 5;
+    [Range(0.1f, 1f)]
+    public float zoomSpeedScale = 1;
 
     [Header("Aim Assist")]
     public bool enableAimAssist = false;
@@ -94,7 +98,7 @@ public class FollowCameraControls : FollowCamera
 
         // X rotation
         if (updateRotation || updateRotationX)
-            xVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed;
+            xVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed * rotationSpeedScale;
         xRotation -= xVelocity;
         if (limitXRotation)
             xRotation = ClampAngleBetweenMinAndMax(xRotation, minXRotation, maxXRotation);
@@ -103,7 +107,7 @@ public class FollowCameraControls : FollowCamera
 
         // Y rotation
         if (updateRotation || updateRotationY)
-            yVelocity += InputManager.GetAxis("Mouse X", false) * rotationSpeed;
+            yVelocity += InputManager.GetAxis("Mouse X", false) * rotationSpeed * rotationSpeedScale;
         yRotation += yVelocity;
         if (limitYRotation)
             yRotation = ClampAngleBetweenMinAndMax(yRotation, minYRotation, maxYRotation);
@@ -112,7 +116,7 @@ public class FollowCameraControls : FollowCamera
 
         // Zoom
         if (updateZoom)
-            zoomVelocity += InputManager.GetAxis("Mouse ScrollWheel", false) * zoomSpeed;
+            zoomVelocity += InputManager.GetAxis("Mouse ScrollWheel", false) * zoomSpeed * zoomSpeedScale;
         zoomDistance += zoomVelocity;
         if (limitZoomDistance)
             zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
