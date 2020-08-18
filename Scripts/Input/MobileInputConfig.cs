@@ -26,8 +26,10 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
     [Tooltip("Default alpha will be used when there is no saved alpha")]
     public float defaultAlpha = 1f;
     [Tooltip("Min value for alpha settings")]
+    [Range(0f, 1f)]
     public float minAlpha = 0.1f;
     [Tooltip("Max value for alpha settings")]
+    [Range(0f, 1f)]
     public float maxAlpha = 1f;
     [Tooltip("If this is `TRUE` it will be able to move and save position")]
     public bool isEditMode;
