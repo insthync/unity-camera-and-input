@@ -52,8 +52,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     [FormerlySerializedAs("movementBackground")]
     private RectTransform controllerBackground;
     [SerializeField]
+    [Range(0f, 1f)]
     private float backgroundAlphaWhileIdling = 1f;
     [SerializeField]
+    [Range(0f, 1f)]
     private float backgroundAlphaWhileMoving = 1f;
 
     [Header("Controller Handler")]
@@ -62,8 +64,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     [FormerlySerializedAs("movementController")]
     private RectTransform controllerHandler;
     [SerializeField]
+    [Range(0f, 1f)]
     private float handlerAlphaWhileIdling = 1f;
     [SerializeField]
+    [Range(0f, 1f)]
     private float handlerAlphaWhileMoving = 1f;
 
     [Header("Events")]
