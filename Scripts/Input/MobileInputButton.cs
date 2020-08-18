@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
 {
@@ -14,6 +13,7 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
     private float alphaWhilePressing = 0.75f;
 
     private CanvasGroup canvasGroup;
+    private MobileInputConfig config;
     private float alphaMultiplier = 1f;
 
     private void Start()
@@ -24,6 +24,18 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
             canvasGroup.alpha = alphaWhileIdling * alphaMultiplier;
         }
+        config = GetComponent<MobileInputConfig>();
+        if (config != null)
+        {
+            // Updating default canvas group alpha when loading new config
+            config.onLoadAlpha += OnLoadAlpha;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (config != null)
+            config.onLoadAlpha -= OnLoadAlpha;
     }
 
     public void OnPointerDown(PointerEventData eventData)
