@@ -75,18 +75,18 @@ public class MobileInputConfigManager : MonoBehaviour
         }
         if (scaleSlider)
         {
+            scaleSlider.onValueChanged.RemoveAllListeners();
             scaleSlider.minValue = input.minScale;
             scaleSlider.maxValue = input.maxScale;
             scaleSlider.value = input.CurrentScale;
-            scaleSlider.onValueChanged.RemoveAllListeners();
             scaleSlider.onValueChanged.AddListener(input.SetScale);
         }
         if (alphaSlider)
         {
+            alphaSlider.onValueChanged.RemoveAllListeners();
             alphaSlider.minValue = input.minAlpha;
             alphaSlider.maxValue = input.maxAlpha;
             alphaSlider.value = input.CurrentAlpha;
-            alphaSlider.onValueChanged.RemoveAllListeners();
             alphaSlider.onValueChanged.AddListener(input.SetAlpha);
         }
     }
