@@ -43,16 +43,16 @@ public class FollowCamera : MonoBehaviour
     private Vector3 targetUp;
     private Quaternion targetRotation;
     private float targetYRotation;
-    private Vector3 prevTargetPosition;
-    private Vector3 prevTargetUp;
-    private float prevTargetYRotation;
     private Vector3 wantedPosition;
     private float wantedYRotation;
-    private float windowaspect;
+    private float windowAspect;
     private Quaternion wantedRotation;
     private Ray tempRay;
     private RaycastHit[] tempHits;
     private float tempDistance;
+    protected Vector3 prevTargetPosition;
+    protected Vector3 prevTargetUp;
+    protected float prevTargetYRotation;
 
     protected virtual void OnDrawGizmos()
     {
@@ -88,12 +88,12 @@ public class FollowCamera : MonoBehaviour
 
         if (zoomByAspectRatio)
         {
-            windowaspect = CacheCamera.aspect;
+            windowAspect = CacheCamera.aspect;
             zoomByAspectRatioSettings.Sort();
             foreach (ZoomByAspectRatioSetting data in zoomByAspectRatioSettings)
             {
-                if (windowaspect + windowaspect * 0.025f > data.Aspect() &&
-                    windowaspect - windowaspect * 0.025f < data.Aspect())
+                if (windowAspect + windowAspect * 0.025f > data.Aspect() &&
+                    windowAspect - windowAspect * 0.025f < data.Aspect())
                 {
                     zoomDistance = data.zoomDistance;
                     break;

@@ -57,6 +57,8 @@ public class FollowCameraControls : FollowCamera
     public LayerMask aimAssistLayerMask;
     public float aimAssistXSpeed = 10f;
     public float aimAssistYSpeed = 10f;
+    [Range(0f, 360f)]
+    public float aimAssistAngleLessThan = 360f;
     public List<Collider> aimAssistExceptions = new List<Collider>();
 
     [Header("Save Camera")]
@@ -149,9 +151,18 @@ public class FollowCameraControls : FollowCamera
                 foreach (Collider comp in aimAssistExceptions)
                     comp.enabled = false;
             }
-            if (Physics.SphereCast(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, out aimAssistanceCastHit, aimAssistDistance, aimAssistLayerMask))
+            RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
+            RaycastHit tempHit;
+            Vector3 cameraDir = CacheCameraTransform.forward;
+            Vector3 targetDir;
+            for (int i = 0; i < hits.Length; ++i)
             {
+                tempHit = hits[i];
+                targetDir = (tempHit.point - target.position).normalized;
+                if (Vector3.Angle(cameraDir, targetDir) > aimAssistAngleLessThan)
+                    continue;
                 // Set `xRotation`, `yRotation` by hit object's position
+                aimAssistanceCastHit = tempHit;
                 Vector3 targetCenter = aimAssistanceCastHit.collider.bounds.center;
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
@@ -159,6 +170,7 @@ public class FollowCameraControls : FollowCamera
                     xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
                 if (enableAimAssistY)
                     yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
+                break;
             }
             if (aimAssistExceptions != null && aimAssistExceptions.Count > 0)
             {
