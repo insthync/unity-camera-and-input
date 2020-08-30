@@ -59,17 +59,18 @@ public class FollowCameraControls : FollowCamera
     public float aimAssistYSpeed = 10f;
     [Range(0f, 360f)]
     public float aimAssistAngleLessThan = 360f;
-    public List<Collider> aimAssistExceptions = new List<Collider>();
 
     [Header("Save Camera")]
     public bool isSaveCamera;
     public string savePrefsPrefix = "GAMEPLAY";
 
+    public IAimAssistAvoidanceListener AimAssistAvoidanceListener { get; set; }
+
     private float deltaTime;
     private float xVelocity;
     private float yVelocity;
     private float zoomVelocity;
-    private RaycastHit aimAssistanceCastHit;
+    private RaycastHit aimAssistCastHit;
 
     private void Start()
     {
@@ -146,11 +147,6 @@ public class FollowCameraControls : FollowCamera
     {
         if (enableAimAssist && Application.isPlaying)
         {
-            if (aimAssistExceptions != null && aimAssistExceptions.Count > 0)
-            {
-                foreach (Collider comp in aimAssistExceptions)
-                    comp.enabled = false;
-            }
             RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
             RaycastHit tempHit;
             Vector3 cameraDir = CacheCameraTransform.forward;
@@ -158,12 +154,14 @@ public class FollowCameraControls : FollowCamera
             for (int i = 0; i < hits.Length; ++i)
             {
                 tempHit = hits[i];
+                if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
+                    continue;
                 targetDir = (tempHit.point - target.position).normalized;
                 if (Vector3.Angle(cameraDir, targetDir) > aimAssistAngleLessThan)
                     continue;
                 // Set `xRotation`, `yRotation` by hit object's position
-                aimAssistanceCastHit = tempHit;
-                Vector3 targetCenter = aimAssistanceCastHit.collider.bounds.center;
+                aimAssistCastHit = tempHit;
+                Vector3 targetCenter = aimAssistCastHit.collider.bounds.center;
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
                 if (enableAimAssistX)
@@ -171,11 +169,6 @@ public class FollowCameraControls : FollowCamera
                 if (enableAimAssistY)
                     yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
                 break;
-            }
-            if (aimAssistExceptions != null && aimAssistExceptions.Count > 0)
-            {
-                foreach (Collider comp in aimAssistExceptions)
-                    comp.enabled = true;
             }
         }
         base.LateUpdate();
@@ -186,8 +179,8 @@ public class FollowCameraControls : FollowCamera
         base.OnDrawGizmos();
 #if UNITY_EDITOR
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance);
-        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistanceCastHit.distance, aimAssistRadius);
+        Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistCastHit.distance);
+        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistCastHit.distance, aimAssistRadius);
 #endif
     }
 
