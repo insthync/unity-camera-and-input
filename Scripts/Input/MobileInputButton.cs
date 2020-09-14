@@ -15,6 +15,7 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
     private CanvasGroup canvasGroup;
     private MobileInputConfig config;
     private float alphaMultiplier = 1f;
+    private bool buttonAlreadyDown;
 
     private void Start()
     {
@@ -38,18 +39,35 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
             config.onLoadAlpha -= OnLoadAlpha;
     }
 
+    private void OnDisable()
+    {
+        if (buttonAlreadyDown)
+            InputManager.SetButtonUp(keyName);
+        SetIdleState();
+    }
+
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (canvasGroup != null)
-            canvasGroup.alpha = alphaWhilePressing * alphaMultiplier;
+        SetPressedState();
         InputManager.SetButtonDown(keyName);
+        buttonAlreadyDown = true;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (canvasGroup != null)
-            canvasGroup.alpha = alphaWhileIdling * alphaMultiplier;
+        SetIdleState();
         InputManager.SetButtonUp(keyName);
+        buttonAlreadyDown = false;
+    }
+
+    private void SetIdleState()
+    {
+        canvasGroup.alpha = alphaWhileIdling * alphaMultiplier;
+    }
+
+    private void SetPressedState()
+    {
+        canvasGroup.alpha = alphaWhilePressing * alphaMultiplier;
     }
 
     public void OnLoadAlpha(float alpha)

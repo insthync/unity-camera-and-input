@@ -161,6 +161,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private void OnDisable()
     {
         UpdateVirtualAxes(Vector2.zero);
+        SetIdleState();
     }
 
     private void LateUpdate()
