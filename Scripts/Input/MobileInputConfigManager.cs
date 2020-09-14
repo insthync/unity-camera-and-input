@@ -9,6 +9,19 @@ public class MobileInputConfigManager : MonoBehaviour
     public GameObject uiRoot;
     public Slider scaleSlider;
     public Slider alphaSlider;
+    public bool turnOnEditModeOnEnable;
+
+    private void OnEnable()
+    {
+        if (uiRoot)
+        {
+            uiRoot.SetActive(false);
+        }
+        if (turnOnEditModeOnEnable)
+            TurnOnEditMode();
+        else
+            TurnOffEditMode();
+    }
 
     public void TurnOnEditMode()
     {
