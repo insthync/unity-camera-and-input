@@ -174,6 +174,11 @@ public class FollowCameraControls : FollowCamera
         base.LateUpdate();
     }
 
+    public void Recoil(float strength)
+    {
+        xVelocity += strength;
+    }
+
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
