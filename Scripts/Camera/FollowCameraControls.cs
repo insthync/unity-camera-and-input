@@ -65,11 +65,11 @@ public class FollowCameraControls : FollowCamera
     public string savePrefsPrefix = "GAMEPLAY";
 
     public IAimAssistAvoidanceListener AimAssistAvoidanceListener { get; set; }
+    public float XRotationVelocity { get; set; }
+    public float YRotationVelocity { get; set; }
+    public float ZoomVelocity { get; set; }
 
     private float deltaTime;
-    private float xVelocity;
-    private float yVelocity;
-    private float zoomVelocity;
     private RaycastHit aimAssistCastHit;
 
     private void Start()
@@ -101,8 +101,8 @@ public class FollowCameraControls : FollowCamera
 
         // X rotation
         if (updateRotation || updateRotationX)
-            xVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed * rotationSpeedScale;
-        xRotation -= xVelocity;
+            XRotationVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed * rotationSpeedScale;
+        xRotation -= XRotationVelocity;
         if (limitXRotation)
             xRotation = ClampAngleBetweenMinAndMax(xRotation, minXRotation, maxXRotation);
         else
@@ -110,8 +110,8 @@ public class FollowCameraControls : FollowCamera
 
         // Y rotation
         if (updateRotation || updateRotationY)
-            yVelocity += InputManager.GetAxis("Mouse X", false) * rotationSpeed * rotationSpeedScale;
-        yRotation += yVelocity;
+            YRotationVelocity += InputManager.GetAxis("Mouse X", false) * rotationSpeed * rotationSpeedScale;
+        yRotation += YRotationVelocity;
         if (limitYRotation)
             yRotation = ClampAngleBetweenMinAndMax(yRotation, minYRotation, maxYRotation);
         else
@@ -119,28 +119,28 @@ public class FollowCameraControls : FollowCamera
 
         // Zoom
         if (updateZoom)
-            zoomVelocity += InputManager.GetAxis("Mouse ScrollWheel", false) * zoomSpeed * zoomSpeedScale;
-        zoomDistance += zoomVelocity;
+            ZoomVelocity += InputManager.GetAxis("Mouse ScrollWheel", false) * zoomSpeed * zoomSpeedScale;
+        zoomDistance += ZoomVelocity;
         if (limitZoomDistance)
             zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
 
         // X rotation smooth
         if (smoothRotateX)
-            xVelocity = Mathf.LerpAngle(xVelocity, 0, deltaTime * rotateXSmoothing);
+            XRotationVelocity = Mathf.LerpAngle(XRotationVelocity, 0, deltaTime * rotateXSmoothing);
         else
-            xVelocity = 0f;
+            XRotationVelocity = 0f;
 
         // Y rotation smooth
         if (smoothRotateY)
-            yVelocity = Mathf.LerpAngle(yVelocity, 0, deltaTime * rotateYSmoothing);
+            YRotationVelocity = Mathf.LerpAngle(YRotationVelocity, 0, deltaTime * rotateYSmoothing);
         else
-            yVelocity = 0f;
+            YRotationVelocity = 0f;
 
         // Zoom smooth
         if (smoothZoom)
-            zoomVelocity = Mathf.Lerp(zoomVelocity, 0, deltaTime * zoomSmoothing);
+            ZoomVelocity = Mathf.Lerp(ZoomVelocity, 0, deltaTime * zoomSmoothing);
         else
-            zoomVelocity = 0f;
+            ZoomVelocity = 0f;
     }
 
     protected override void LateUpdate()
@@ -172,11 +172,6 @@ public class FollowCameraControls : FollowCamera
             }
         }
         base.LateUpdate();
-    }
-
-    public void Recoil(float strength)
-    {
-        xVelocity += strength;
     }
 
     protected override void OnDrawGizmos()
