@@ -7,6 +7,9 @@ public class FollowCamera : MonoBehaviour
     public Camera targetCamera;
     public Transform target;
     public Vector3 targetOffset;
+    [Header("Follow smoothness")]
+    public bool smoothFollow;
+    public float followSmoothing = 10.0f;
     [Header("Rotation")]
     public float xRotation;
     public float yRotation;
@@ -38,7 +41,7 @@ public class FollowCamera : MonoBehaviour
     }
 
     // Improve Garbage collector
-    private bool targetIsNull;
+    private GameObject targetFollower;
     private Vector3 targetPosition;
     private Vector3 targetUp;
     private Quaternion targetRotation;
@@ -50,9 +53,6 @@ public class FollowCamera : MonoBehaviour
     private Ray tempRay;
     private RaycastHit[] tempHits;
     private float tempDistance;
-    protected Vector3 prevTargetPosition;
-    protected Vector3 prevTargetUp;
-    protected float prevTargetYRotation;
 
     protected virtual void OnDrawGizmos()
     {
@@ -72,6 +72,13 @@ public class FollowCamera : MonoBehaviour
         if (targetCamera == null)
             targetCamera = GetComponent<Camera>();
         CacheCameraTransform = CacheCamera.transform;
+        targetFollower = new GameObject("_CameraTargetFollower");
+    }
+
+    private void OnDestroy()
+    {
+        if (targetFollower)
+            Destroy(targetFollower);
     }
 
     protected virtual void LateUpdate()
@@ -80,11 +87,25 @@ public class FollowCamera : MonoBehaviour
         if (!Application.isPlaying)
             PrepareComponents();
 #endif
-        targetIsNull = target == null;
-        prevTargetPosition = targetPosition = targetIsNull ? prevTargetPosition : target.position;
-        prevTargetUp = targetUp = targetIsNull ? prevTargetUp : target.up;
+
+        if (target != null)
+        {
+            if (!smoothFollow)
+            {
+                targetFollower.transform.position = target.transform.position;
+                targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+            }
+            else
+            {
+                targetFollower.transform.position = Vector3.Lerp(targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
+                targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+            }
+        }
+
+        targetPosition = targetFollower.transform.position;
+        targetUp = targetFollower.transform.up;
         targetPosition += (targetOffset.x * CacheCameraTransform.right) + (targetOffset.y * targetUp) + (targetOffset.z * CacheCameraTransform.forward);
-        prevTargetYRotation = targetYRotation = targetIsNull ? prevTargetYRotation : target.eulerAngles.y;
+        targetYRotation = targetFollower.transform.eulerAngles.y;
 
         if (zoomByAspectRatio)
         {
