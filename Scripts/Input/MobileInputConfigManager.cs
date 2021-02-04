@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class MobileInputConfigManager : MonoBehaviour
 {
+    public static MobileInputConfigManager Instance { get; private set; }
+
     [Header("Editing UI Element")]
     public GameObject uiRoot;
     public Slider scaleSlider;
@@ -21,6 +21,13 @@ public class MobileInputConfigManager : MonoBehaviour
             TurnOnEditMode();
         else
             TurnOffEditMode();
+        Instance = this;
+    }
+
+    private void OnDisable()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     public void TurnOnEditMode()
