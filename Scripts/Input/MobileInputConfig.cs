@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -274,7 +272,6 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (!isEditMode)
             return;
         // Tell manager to edit this
-        MobileInputConfigManager manager = FindObjectOfType<MobileInputConfigManager>();
-        manager.SelectMobileInput(this);
+        MobileInputConfigManager.Instance.SelectMobileInput(this);
     }
 }
