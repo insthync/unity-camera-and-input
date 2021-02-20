@@ -293,12 +293,14 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     private void SetIdleState()
     {
-        canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
+        if (canvasGroup)
+            canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
     }
 
     private void SetDraggingState()
     {
-        canvasGroup.alpha = defaultCanvasGroupAlpha;
+        if (canvasGroup)
+            canvasGroup.alpha = defaultCanvasGroupAlpha;
     }
 
     public void OnLoadAlpha(float alpha)

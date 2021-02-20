@@ -62,12 +62,14 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
 
     private void SetIdleState()
     {
-        canvasGroup.alpha = alphaWhileIdling * alphaMultiplier;
+        if (canvasGroup)
+            canvasGroup.alpha = alphaWhileIdling * alphaMultiplier;
     }
 
     private void SetPressedState()
     {
-        canvasGroup.alpha = alphaWhilePressing * alphaMultiplier;
+        if (canvasGroup)
+            canvasGroup.alpha = alphaWhilePressing * alphaMultiplier;
     }
 
     public void OnLoadAlpha(float alpha)
