@@ -72,12 +72,18 @@ public class FollowCamera : MonoBehaviour
         if (targetCamera == null)
             targetCamera = GetComponent<Camera>();
         CacheCameraTransform = CacheCamera.transform;
-        targetFollower = new GameObject("_CameraTargetFollower");
+        if (targetFollower == null)
+        {
+            if (Application.isPlaying)
+                targetFollower = new GameObject("_CameraTargetFollower");
+            else
+                targetFollower = target.gameObject;
+        }
     }
 
     private void OnDestroy()
     {
-        if (targetFollower)
+        if (targetFollower != null)
             Destroy(targetFollower);
     }
 
