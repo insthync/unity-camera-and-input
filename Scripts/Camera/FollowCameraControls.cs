@@ -60,6 +60,9 @@ public class FollowCameraControls : FollowCamera
     [Range(0f, 360f)]
     public float aimAssistAngleLessThan = 360f;
 
+    [Header("Recoil")]
+    public float recoilSmoothing = 15.0f;
+
     [Header("Save Camera")]
     public bool isSaveCamera;
     public string savePrefsPrefix = "GAMEPLAY";
@@ -71,6 +74,10 @@ public class FollowCameraControls : FollowCamera
 
     private float deltaTime;
     private RaycastHit aimAssistCastHit;
+    private float recoilX;
+    private float recoilY;
+    private float recoilRetainX;
+    private float recoilRetainY;
 
     private void Start()
     {
@@ -103,6 +110,15 @@ public class FollowCameraControls : FollowCamera
         if (updateRotation || updateRotationX)
             XRotationVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed * rotationSpeedScale;
         xRotation -= XRotationVelocity;
+
+        // Recoil X
+        float absRecoilX = Mathf.Abs(recoilX);
+        float absRecoilRetainX = Mathf.Abs(recoilRetainX);
+        if (absRecoilX > 0.01f)
+            xRotation -= recoilX;
+        else if (absRecoilRetainX > 0.01f)
+            xRotation += recoilRetainX;
+
         if (limitXRotation)
             xRotation = ClampAngleBetweenMinAndMax(xRotation, minXRotation, maxXRotation);
         else
@@ -112,6 +128,15 @@ public class FollowCameraControls : FollowCamera
         if (updateRotation || updateRotationY)
             YRotationVelocity += InputManager.GetAxis("Mouse X", false) * rotationSpeed * rotationSpeedScale;
         yRotation += YRotationVelocity;
+
+        // Recoil Y
+        float absRecoilY = Mathf.Abs(recoilY);
+        float absRecoilRetainY = Mathf.Abs(recoilRetainY);
+        if (absRecoilY > 0.01f)
+            yRotation += recoilY;
+        else if (absRecoilRetainY > 0.01f)
+            yRotation -= recoilRetainY;
+
         if (limitYRotation)
             yRotation = ClampAngleBetweenMinAndMax(yRotation, minYRotation, maxYRotation);
         else
@@ -141,6 +166,26 @@ public class FollowCameraControls : FollowCamera
             ZoomVelocity = Mathf.Lerp(ZoomVelocity, 0, deltaTime * zoomSmoothing);
         else
             ZoomVelocity = 0f;
+
+        // Update recoil speed
+        // X
+        if (absRecoilX > 0.01f)
+            recoilX = Mathf.Lerp(recoilX, 0, deltaTime * recoilSmoothing);
+        else if (absRecoilRetainX > 0.01f)
+            recoilRetainX = Mathf.Lerp(recoilRetainX, 0, deltaTime * recoilSmoothing);
+        // Y
+        if (absRecoilY > 0.01f)
+            recoilY = Mathf.Lerp(recoilY, 0, deltaTime * recoilSmoothing);
+        else if (absRecoilRetainY > 0.01f)
+            recoilRetainY = Mathf.Lerp(recoilRetainY, 0, deltaTime * recoilSmoothing);
+    }
+
+    public void Recoil(float x, float y)
+    {
+        recoilX = x;
+        recoilY = y;
+        recoilRetainX = x;
+        recoilRetainY = y;
     }
 
     protected override void LateUpdate()
