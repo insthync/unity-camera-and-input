@@ -53,6 +53,7 @@ public class FollowCameraControls : FollowCamera
     public bool enableAimAssistX = true;
     public bool enableAimAssistY = true;
     public float aimAssistRadius = 0.5f;
+    public float aimAssistOriginOffsets = 3f;
     public float aimAssistDistance = 10f;
     public LayerMask aimAssistLayerMask;
     public float aimAssistXSpeed = 10f;
@@ -192,18 +193,16 @@ public class FollowCameraControls : FollowCamera
     {
         if (enableAimAssist && Application.isPlaying)
         {
-            RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
             RaycastHit tempHit;
-            Vector3 cameraDir = CacheCameraTransform.forward;
-            Vector3 targetDir;
-            for (int i = 0; i < hits.Length; ++i)
+            if (Physics.SphereCast(CacheCameraTransform.position + (CacheCameraTransform.forward * aimAssistOriginOffsets), aimAssistRadius, CacheCameraTransform.forward, out tempHit, aimAssistDistance, aimAssistLayerMask))
             {
-                tempHit = hits[i];
+                Vector3 cameraDir = CacheCameraTransform.forward;
+                Vector3 targetDir;
                 if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
-                    continue;
+                    return;
                 targetDir = (tempHit.point - target.position).normalized;
                 if (Vector3.Angle(cameraDir, targetDir) > aimAssistAngleLessThan)
-                    continue;
+                    return;
                 // Set `xRotation`, `yRotation` by hit object's position
                 aimAssistCastHit = tempHit;
                 Vector3 targetCenter = aimAssistCastHit.collider.bounds.center;
@@ -213,7 +212,6 @@ public class FollowCameraControls : FollowCamera
                     xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
                 if (enableAimAssistY)
                     yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
-                break;
             }
         }
         base.LateUpdate();
