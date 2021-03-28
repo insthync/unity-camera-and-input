@@ -40,7 +40,6 @@ public class FollowCamera : MonoBehaviour
         get { return targetCamera; }
     }
 
-    // Improve Garbage collector
     private GameObject targetFollower;
     private Vector3 targetPosition;
     private Vector3 targetUp;
@@ -72,13 +71,8 @@ public class FollowCamera : MonoBehaviour
         if (targetCamera == null)
             targetCamera = GetComponent<Camera>();
         CacheCameraTransform = CacheCamera.transform;
-        if (targetFollower == null)
-        {
-            if (Application.isPlaying)
-                targetFollower = new GameObject("_CameraTargetFollower");
-            else
-                targetFollower = target.gameObject;
-        }
+        if (targetFollower == null && Application.isPlaying)
+            targetFollower = new GameObject("_CameraTargetFollower");
     }
 
     private void OnDestroy()
@@ -89,12 +83,7 @@ public class FollowCamera : MonoBehaviour
 
     protected virtual void LateUpdate()
     {
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            PrepareComponents();
-#endif
-
-        if (target != null)
+        if (Application.isPlaying)
         {
             if (!smoothFollow)
             {
@@ -106,12 +95,31 @@ public class FollowCamera : MonoBehaviour
                 targetFollower.transform.position = Vector3.Lerp(targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
                 targetFollower.transform.eulerAngles = target.transform.eulerAngles;
             }
+            targetPosition = targetFollower.transform.position;
+            targetUp = targetFollower.transform.up;
+            targetYRotation = targetFollower.transform.eulerAngles.y;
+        }
+        else
+        {
+#if UNITY_EDITOR
+            PrepareComponents();
+            if (target == null)
+            {
+                targetPosition = Vector3.zero;
+                targetUp = Vector3.up;
+                targetYRotation = 0f;
+            }
+            else
+            {
+                targetPosition = target.position;
+                targetUp = target.up;
+                targetYRotation = target.eulerAngles.y;
+            }
+#endif
         }
 
-        targetPosition = targetFollower.transform.position;
-        targetUp = targetFollower.transform.up;
+        // Update target position by offsets
         targetPosition += (targetOffset.x * CacheCameraTransform.right) + (targetOffset.y * targetUp) + (targetOffset.z * CacheCameraTransform.forward);
-        targetYRotation = targetFollower.transform.eulerAngles.y;
 
         if (zoomByAspectRatio)
         {
