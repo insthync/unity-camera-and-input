@@ -56,6 +56,7 @@ public class FollowCameraControls : FollowCamera
     public float aimAssistOriginOffsets = 3f;
     public float aimAssistDistance = 10f;
     public LayerMask aimAssistLayerMask;
+    public LayerMask aimAssistObstacleLayerMask = 0;
     public float aimAssistXSpeed = 10f;
     public float aimAssistYSpeed = 10f;
     [Range(0f, 360f)]
@@ -194,8 +195,12 @@ public class FollowCameraControls : FollowCamera
         if (enableAimAssist && Application.isPlaying)
         {
             RaycastHit tempHit;
-            if (Physics.SphereCast(CacheCameraTransform.position + (CacheCameraTransform.forward * aimAssistOriginOffsets), aimAssistRadius, CacheCameraTransform.forward, out tempHit, aimAssistDistance, aimAssistLayerMask))
+            if (Physics.SphereCast(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, out tempHit, aimAssistDistance, aimAssistLayerMask))
             {
+                if (Vector3.Distance(CacheCameraTransform.position, tempHit.point) > aimAssistOriginOffsets)
+                    return;
+                if ((tempHit.transform.gameObject.layer & aimAssistObstacleLayerMask.value) != 0)
+                    return;
                 Vector3 cameraDir = CacheCameraTransform.forward;
                 Vector3 targetDir;
                 if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
