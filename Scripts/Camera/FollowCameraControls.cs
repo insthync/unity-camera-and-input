@@ -201,11 +201,10 @@ public class FollowCameraControls : FollowCamera
                     return;
                 if ((tempHit.transform.gameObject.layer & aimAssistObstacleLayerMask.value) != 0)
                     return;
-                Vector3 cameraDir = CacheCameraTransform.forward;
-                Vector3 targetDir;
                 if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
                     return;
-                targetDir = (tempHit.point - target.position).normalized;
+                Vector3 cameraDir = CacheCameraTransform.forward;
+                Vector3 targetDir = (tempHit.point - target.position).normalized;
                 if (Vector3.Angle(cameraDir, targetDir) > aimAssistAngleLessThan)
                     return;
                 // Set `xRotation`, `yRotation` by hit object's position
