@@ -85,19 +85,28 @@ public class FollowCamera : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            if (!smoothFollow)
+            if (target == null)
             {
-                targetFollower.transform.position = target.transform.position;
-                targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+                targetPosition = Vector3.zero;
+                targetUp = Vector3.up;
+                targetYRotation = 0f;
             }
             else
             {
-                targetFollower.transform.position = Vector3.Lerp(targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
-                targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+                if (!smoothFollow)
+                {
+                    targetFollower.transform.position = target.transform.position;
+                    targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+                }
+                else
+                {
+                    targetFollower.transform.position = Vector3.Lerp(targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
+                    targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+                }
+                targetPosition = targetFollower.transform.position;
+                targetUp = targetFollower.transform.up;
+                targetYRotation = targetFollower.transform.eulerAngles.y;
             }
-            targetPosition = targetFollower.transform.position;
-            targetUp = targetFollower.transform.up;
-            targetYRotation = targetFollower.transform.eulerAngles.y;
         }
         else
         {
