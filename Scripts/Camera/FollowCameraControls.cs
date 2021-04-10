@@ -197,7 +197,7 @@ public class FollowCameraControls : FollowCamera
             RaycastHit tempHit;
             if (Physics.SphereCast(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, out tempHit, aimAssistDistance, aimAssistLayerMask))
             {
-                if (Vector3.Distance(CacheCameraTransform.position, tempHit.point) > aimAssistOriginOffsets)
+                if (Vector3.Distance(CacheCameraTransform.position, tempHit.point) <= aimAssistOriginOffsets)
                     return;
                 if ((tempHit.transform.gameObject.layer & aimAssistObstacleLayerMask.value) != 0)
                     return;
