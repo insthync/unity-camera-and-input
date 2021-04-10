@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 [ExecuteInEditMode]
 public class FollowCameraControls : FollowCamera
@@ -53,14 +53,15 @@ public class FollowCameraControls : FollowCamera
     public bool enableAimAssistX = true;
     public bool enableAimAssistY = true;
     public float aimAssistRadius = 0.5f;
-    public float aimAssistOriginOffsets = 3f;
+    public float aimAssistMinDistanceFromFollowingTarget = 3f;
     public float aimAssistDistance = 10f;
     public LayerMask aimAssistLayerMask;
     public LayerMask aimAssistObstacleLayerMask = 0;
     public float aimAssistXSpeed = 10f;
     public float aimAssistYSpeed = 10f;
     [Range(0f, 360f)]
-    public float aimAssistAngleLessThan = 360f;
+    [FormerlySerializedAs("aimAssistAngleLessThan")]
+    public float aimAssistMaxAngleFromFollowingTarget = 360f;
 
     [Header("Recoil")]
     public float recoilSmoothing = 15.0f;
@@ -200,21 +201,34 @@ public class FollowCameraControls : FollowCamera
     {
         if (enableAimAssist && Application.isPlaying)
         {
+            RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
             RaycastHit tempHit;
-            if (Physics.SphereCast(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, out tempHit, aimAssistDistance, aimAssistLayerMask))
+            RaycastHit? hitTarget = null;
+            float nearestHit = float.MaxValue;
+            Vector3 cameraDir = CacheCameraTransform.forward;
+            Vector3 targetDir;
+            for (int i = 0; i < hits.Length; ++i)
             {
-                if (Vector3.Distance(CacheCameraTransform.position, tempHit.point) <= aimAssistOriginOffsets)
-                    return;
+                tempHit = hits[i];
                 if ((tempHit.transform.gameObject.layer & aimAssistObstacleLayerMask.value) != 0)
-                    return;
+                    continue;
                 if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
-                    return;
-                Vector3 cameraDir = CacheCameraTransform.forward;
-                Vector3 targetDir = (tempHit.point - target.position).normalized;
-                if (Vector3.Angle(cameraDir, targetDir) > aimAssistAngleLessThan)
-                    return;
+                    continue;
+                if (Vector3.Distance(target.position, tempHit.point) <= aimAssistMinDistanceFromFollowingTarget)
+                    continue;
+                targetDir = (tempHit.point - target.position).normalized;
+                if (Vector3.Angle(cameraDir, targetDir) > aimAssistMaxAngleFromFollowingTarget)
+                    continue;
+                if (nearestHit > tempHit.distance)
+                {
+                    nearestHit = tempHit.distance;
+                    hitTarget = tempHit;
+                }
+            }
+            if (hitTarget.HasValue)
+            {
                 // Set `xRotation`, `yRotation` by hit object's position
-                aimAssistCastHit = tempHit;
+                aimAssistCastHit = hitTarget.Value;
                 Vector3 targetCenter = aimAssistCastHit.collider.bounds.center;
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
