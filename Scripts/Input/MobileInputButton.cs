@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
@@ -11,6 +12,12 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
     [SerializeField]
     [Range(0f, 1f)]
     private float alphaWhilePressing = 0.75f;
+
+    [Header("Events")]
+    [SerializeField]
+    private UnityEvent onPointerDown;
+    [SerializeField]
+    private UnityEvent onPointerUp;
 
     private CanvasGroup canvasGroup;
     private MobileInputConfig config;
@@ -48,6 +55,7 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        onPointerDown.Invoke();
         SetPressedState();
         InputManager.SetButtonDown(keyName);
         buttonAlreadyDown = true;
@@ -55,6 +63,7 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        onPointerUp.Invoke();
         SetIdleState();
         InputManager.SetButtonUp(keyName);
         buttonAlreadyDown = false;
