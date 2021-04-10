@@ -192,6 +192,12 @@ public class FollowCameraControls : FollowCamera
 
     protected override void LateUpdate()
     {
+        UpdateAimAssist();
+        base.LateUpdate();
+    }
+
+    protected void UpdateAimAssist()
+    {
         if (enableAimAssist && Application.isPlaying)
         {
             RaycastHit tempHit;
@@ -218,7 +224,6 @@ public class FollowCameraControls : FollowCamera
                     yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
             }
         }
-        base.LateUpdate();
     }
 
     protected override void OnDrawGizmos()
