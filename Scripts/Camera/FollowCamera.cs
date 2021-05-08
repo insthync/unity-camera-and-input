@@ -85,13 +85,7 @@ public class FollowCamera : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            if (target == null)
-            {
-                targetPosition = Vector3.zero;
-                targetUp = Vector3.up;
-                targetYRotation = 0f;
-            }
-            else
+            if (target != null)
             {
                 if (!smoothFollow)
                 {
