@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 [ExecuteInEditMode]
@@ -55,7 +56,9 @@ public class FollowCameraControls : FollowCamera
     public float aimAssistRadius = 0.5f;
     public float aimAssistMinDistanceFromFollowingTarget = 3f;
     public float aimAssistDistance = 10f;
+    [Tooltip("Set both target layers and obstacle layers, it will be used in `SphereCastAll` function")]
     public LayerMask aimAssistLayerMask;
+    [Tooltip("Set only obstacle layers, it will be used to check hitting object layer is an obstacle or not. If it is, it won't perform aim assisting")]
     public LayerMask aimAssistObstacleLayerMask = 0;
     public float aimAssistXSpeed = 10f;
     public float aimAssistYSpeed = 10f;
@@ -202,16 +205,16 @@ public class FollowCameraControls : FollowCamera
         if (enableAimAssist && Application.isPlaying)
         {
             RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
+            System.Array.Sort(hits, 0, hits.Length, new RaycastHitComparer());
             RaycastHit tempHit;
             RaycastHit? hitTarget = null;
-            float nearestHit = float.MaxValue;
             Vector3 cameraDir = CacheCameraTransform.forward;
             Vector3 targetDir;
             for (int i = 0; i < hits.Length; ++i)
             {
                 tempHit = hits[i];
-                if ((tempHit.transform.gameObject.layer & aimAssistObstacleLayerMask.value) != 0)
-                    continue;
+                if (aimAssistObstacleLayerMask.value == (aimAssistObstacleLayerMask.value | (1 << tempHit.transform.gameObject.layer)))
+                    return;
                 if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
                     continue;
                 if (Vector3.Distance(target.position, tempHit.point) <= aimAssistMinDistanceFromFollowingTarget)
@@ -219,11 +222,8 @@ public class FollowCameraControls : FollowCamera
                 targetDir = (tempHit.point - target.position).normalized;
                 if (Vector3.Angle(cameraDir, targetDir) > aimAssistMaxAngleFromFollowingTarget)
                     continue;
-                if (nearestHit > tempHit.distance)
-                {
-                    nearestHit = tempHit.distance;
-                    hitTarget = tempHit;
-                }
+                hitTarget = tempHit;
+                break;
             }
             if (hitTarget.HasValue)
             {
@@ -257,5 +257,16 @@ public class FollowCameraControls : FollowCamera
         if (angle > 360)
             angle -= 360;
         return Mathf.Clamp(angle, min, max);
+    }
+
+    /// <summary>
+    /// Sort ASC by distance from origin to impact point
+    /// </summary>
+    public struct RaycastHitComparer : IComparer<RaycastHit>
+    {
+        public int Compare(RaycastHit x, RaycastHit y)
+        {
+            return x.distance.CompareTo(y.distance);
+        }
     }
 }
