@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField]
-    private string keyName;
+    private string keyName = string.Empty;
     [SerializeField]
     [Range(0f, 1f)]
     private float alphaWhileIdling = 1f;
@@ -15,9 +15,9 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
 
     [Header("Events")]
     [SerializeField]
-    private UnityEvent onPointerDown;
+    private UnityEvent onPointerDown = new UnityEvent();
     [SerializeField]
-    private UnityEvent onPointerUp;
+    private UnityEvent onPointerUp = new UnityEvent();
 
     private CanvasGroup canvasGroup;
     private MobileInputConfig config;

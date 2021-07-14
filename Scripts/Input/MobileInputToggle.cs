@@ -3,7 +3,7 @@
 public class MobileInputToggle : BaseMobileInputToggle
 {
     [SerializeField]
-    private string keyName;
+    private string keyName = string.Empty;
 
     protected override void OnToggle(bool isOn)
     {

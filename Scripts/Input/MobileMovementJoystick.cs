@@ -44,13 +44,13 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     [SerializeField]
     private bool useButtons = false;
     [SerializeField]
-    private string[] buttonKeyNames;
+    private string[] buttonKeyNames = new string[0];
 
     [Header("Controller Background")]
     [Tooltip("Container which showing as area that able to control movement")]
     [SerializeField]
     [FormerlySerializedAs("movementBackground")]
-    private RectTransform controllerBackground;
+    private RectTransform controllerBackground = null;
     [SerializeField]
     [Range(0f, 1f)]
     private float backgroundAlphaWhileIdling = 1f;
@@ -62,7 +62,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     [Tooltip("This is the button to control movement")]
     [SerializeField]
     [FormerlySerializedAs("movementController")]
-    private RectTransform controllerHandler;
+    private RectTransform controllerHandler = null;
     [SerializeField]
     [Range(0f, 1f)]
     private float handlerAlphaWhileIdling = 1f;
@@ -72,9 +72,9 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     [Header("Events")]
     [SerializeField]
-    private UnityEvent onPointerDown;
+    private UnityEvent onPointerDown = new UnityEvent();
     [SerializeField]
-    private UnityEvent onPointerUp;
+    private UnityEvent onPointerUp = new UnityEvent();
 
     public bool Interactable
     {

@@ -14,9 +14,9 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
     [Range(0f, 1f)]
     private float alphaWhileOn = 1f;
     [SerializeField]
-    private bool isOn;
+    private bool isOn = false;
     [SerializeField]
-    private BoolEvent onToggle;
+    private BoolEvent onToggle = new BoolEvent();
 
     public bool IsOn
     {
