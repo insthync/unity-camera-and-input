@@ -241,7 +241,7 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         EditorUtility.SetDirty(this);
     }
 
-    [ContextMenu("Set Default Position By Current Position", false, 1000200)]
+    [ContextMenu("Set Current Position By Default Position", false, 1000200)]
     public void SetCurrentPositionByDefaultPosition()
     {
         CurrentPosition = defaultPosition;
@@ -249,7 +249,7 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         EditorUtility.SetDirty(this);
     }
 
-    [ContextMenu("Set Default Scale By Default Scale", false, 1000201)]
+    [ContextMenu("Set Current Scale By Default Scale", false, 1000201)]
     public void SetCurrentScaleByDefaultScale()
     {
         CurrentScale = defaultScale;
@@ -257,7 +257,7 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         EditorUtility.SetDirty(this);
     }
 
-    [ContextMenu("Set Default Alpha By Default Alpha", false, 1000202)]
+    [ContextMenu("Set Current Alpha By Default Alpha", false, 1000202)]
     public void SetCurrentAlphaByDefaultAlpha()
     {
         CurrentAlpha = defaultAlpha;
