@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -216,7 +217,7 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
     }
 
 #if UNITY_EDITOR
-    [ContextMenu("Set Default Position By Current Position")]
+    [ContextMenu("Set Default Position By Current Position", false, 1000100)]
     public void SetDefaultPositionByCurrentPosition()
     {
         defaultPosition = CurrentPosition;
@@ -224,7 +225,7 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         EditorUtility.SetDirty(this);
     }
 
-    [ContextMenu("Set Default Scale By Current Scale")]
+    [ContextMenu("Set Default Scale By Current Scale", false, 1000101)]
     public void SetDefaultScaleByCurrentScale()
     {
         defaultScale = CurrentScale;
@@ -232,11 +233,91 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
         EditorUtility.SetDirty(this);
     }
 
-    [ContextMenu("Set Default Alpha By Current Alpha")]
+    [ContextMenu("Set Default Alpha By Current Alpha", false, 1000102)]
     public void SetDefaultAlphaByCurrentAlpha()
     {
         defaultAlpha = CurrentAlpha;
         Debug.Log("[MobileInputAlphaSave] Set default alpha to: " + defaultAlpha);
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Set Default Position By Current Position", false, 1000200)]
+    public void SetCurrentPositionByDefaultPosition()
+    {
+        CurrentPosition = defaultPosition;
+        Debug.Log("[MobileInputPositionSave] Set current position to: " + CurrentPosition);
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Set Default Scale By Default Scale", false, 1000201)]
+    public void SetCurrentScaleByDefaultScale()
+    {
+        CurrentScale = defaultScale;
+        Debug.Log("[MobileInputScaleSave] Set current scale to: " + CurrentScale);
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Set Default Alpha By Default Alpha", false, 1000202)]
+    public void SetCurrentAlphaByDefaultAlpha()
+    {
+        CurrentAlpha = defaultAlpha;
+        Debug.Log("[MobileInputAlphaSave] Set current alpha to: " + CurrentAlpha);
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Find And Remove Child Buttons", false, 1000300)]
+    public void FindAndRemoveChildButtons()
+    {
+        Button[] components = GetComponentsInChildren<Button>(true);
+        for (int i = components.Length - 1; i >= 0; --i)
+        {
+            Destroy(components[i]);
+            Debug.Log(components[i] + " removed");
+        }
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Find And Remove Child Toggles", false, 1000301)]
+    public void FindAndRemoveChildToggles()
+    {
+        Toggle[] components = GetComponentsInChildren<Toggle>(true);
+        for (int i = components.Length - 1; i >= 0; --i)
+        {
+            Destroy(components[i]);
+            Debug.Log(components[i] + " removed");
+        }
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Find And Remove Child Dropdowns", false, 1000302)]
+    public void FindAndRemoveChildDropdowns()
+    {
+        Dropdown[] components = GetComponentsInChildren<Dropdown>(true);
+        for (int i = components.Length - 1; i >= 0; --i)
+        {
+            Destroy(components[i]);
+            Debug.Log(components[i] + " removed");
+        }
+        EditorUtility.SetDirty(this);
+    }
+
+    [ContextMenu("Find And Disable Graphic Raycasting", false, 1000303)]
+    public void FindAndDisableGraphicRaycasting()
+    {
+        Graphic[] components = GetComponentsInChildren<Graphic>(true);
+        for (int i = components.Length - 1; i >= 0; --i)
+        {
+            if (components[i].gameObject != gameObject)
+            {
+                components[i].raycastTarget = false;
+                Debug.Log(components[i] + " raycastTarget = false");
+            }
+            else
+            {
+                components[i].raycastTarget = true;
+                Debug.Log(components[i] + " raycastTarget = true");
+            }
+        }
         EditorUtility.SetDirty(this);
     }
 #endif
