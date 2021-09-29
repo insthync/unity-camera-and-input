@@ -18,15 +18,21 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
     [SerializeField]
     private BoolEvent onToggle = new BoolEvent();
 
+    private bool dirtyIsOn = false;
+
     public bool IsOn
     {
         get { return isOn; }
         set
         {
             isOn = value;
-            OnToggle(value);
-            if (onToggle != null)
-                onToggle.Invoke(value);
+            if (dirtyIsOn != value)
+            {
+                dirtyIsOn = value;
+                OnToggle(value);
+                if (onToggle != null)
+                    onToggle.Invoke(value);
+            }
         }
     }
 
@@ -36,6 +42,7 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
 
     protected virtual void Start()
     {
+        dirtyIsOn = IsOn;
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
