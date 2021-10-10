@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class InputSettingManager : MonoBehaviour
 {
+    // TODO: Implement joystick (https://docs.unity3d.com/Manual/class-InputManager.html)
+
     [System.Serializable]
     public struct InputSetting
     {
@@ -33,6 +35,7 @@ public class InputSettingManager : MonoBehaviour
     {
         if (settings != null && settings.Length > 0)
         {
+            Settings.Clear();
             foreach (InputSetting setting in settings)
             {
                 if (!Settings.ContainsKey(setting.keyName))
