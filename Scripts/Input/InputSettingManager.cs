@@ -58,14 +58,19 @@ public class InputSettingManager : MonoBehaviour
         }
     }
 
+    public string GetSaveKey(string keyName, int index)
+    {
+        return $"{settingsSaveKeyPrefix}_{keyName}_{index}";
+    }
+
     public KeyCode LoadKeyBinding(string keyName, int index, KeyCode defaultKey)
     {
-        return (KeyCode)PlayerPrefs.GetInt($"{settingsSaveKeyPrefix}_{keyName}_{index}", (int)defaultKey);
+        return (KeyCode)PlayerPrefs.GetInt(GetSaveKey(keyName, index), (int)defaultKey);
     }
 
     public KeyCode SaveKeyBinding(string keyName, int index, KeyCode key)
     {
-        PlayerPrefs.SetInt($"{settingsSaveKeyPrefix}_{keyName}_{index}", (int)key);
+        PlayerPrefs.SetInt(GetSaveKey(keyName, index), (int)key);
         PlayerPrefs.Save();
         return key;
     }
