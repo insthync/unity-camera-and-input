@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public static class InputManager
@@ -52,7 +51,7 @@ public static class InputManager
         }
         if (HasInputSetting(name))
         {
-            HashSet<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
             foreach (KeyCode keyCode in keyCodes)
             {
                 if (Input.GetKey(keyCode))
@@ -78,7 +77,7 @@ public static class InputManager
         }
         if (HasInputSetting(name))
         {
-            HashSet<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
             foreach (KeyCode keyCode in keyCodes)
             {
                 if (Input.GetKeyDown(keyCode))
@@ -104,7 +103,7 @@ public static class InputManager
         }
         if (HasInputSetting(name))
         {
-            HashSet<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
             foreach (KeyCode keyCode in keyCodes)
             {
                 if (Input.GetKeyUp(keyCode))

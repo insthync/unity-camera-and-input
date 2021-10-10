@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class InputSettingManager : MonoBehaviour
@@ -14,8 +13,9 @@ public class InputSettingManager : MonoBehaviour
     public static InputSettingManager Singleton { get; protected set; }
 
     public InputSetting[] settings;
+    public string settingsSaveKeyPrefix = "SETTING_KEY_BIND";
 
-    internal readonly Dictionary<string, HashSet<KeyCode>> Settings = new Dictionary<string, HashSet<KeyCode>>();
+    internal readonly Dictionary<string, List<KeyCode>> Settings = new Dictionary<string, List<KeyCode>>();
 
     private void Awake()
     {
@@ -26,16 +26,54 @@ public class InputSettingManager : MonoBehaviour
         }
         Singleton = GetComponent<InputSettingManager>();
         DontDestroyOnLoad(gameObject);
+        Setup();
+    }
 
+    public void Setup()
+    {
         if (settings != null && settings.Length > 0)
         {
             foreach (InputSetting setting in settings)
             {
                 if (!Settings.ContainsKey(setting.keyName))
-                    Settings[setting.keyName] = new HashSet<KeyCode>();
+                    Settings[setting.keyName] = new List<KeyCode>();
                 if (!Settings[setting.keyName].Contains(setting.keyCode))
-                    Settings[setting.keyName].Add(setting.keyCode);
+                    Settings[setting.keyName].Add(LoadKeyBinding(setting.keyName, Settings[setting.keyName].Count - 1, setting.keyCode));
             }
         }
+    }
+
+    public void ResetSettings()
+    {
+        if (settings != null && settings.Length > 0)
+        {
+            Settings.Clear();
+            foreach (InputSetting setting in settings)
+            {
+                if (!Settings.ContainsKey(setting.keyName))
+                    Settings[setting.keyName] = new List<KeyCode>();
+                if (!Settings[setting.keyName].Contains(setting.keyCode))
+                    Settings[setting.keyName].Add(SaveKeyBinding(setting.keyName, Settings[setting.keyName].Count - 1, setting.keyCode));
+            }
+        }
+    }
+
+    public KeyCode LoadKeyBinding(string keyName, int index, KeyCode defaultKey)
+    {
+        return (KeyCode)PlayerPrefs.GetInt($"{settingsSaveKeyPrefix}_{keyName}_{index}", (int)defaultKey);
+    }
+
+    public KeyCode SaveKeyBinding(string keyName, int index, KeyCode key)
+    {
+        PlayerPrefs.SetInt($"{settingsSaveKeyPrefix}_{keyName}_{index}", (int)key);
+        PlayerPrefs.Save();
+        return key;
+    }
+
+    public void SetKeySetting(string keyName, int index, KeyCode key)
+    {
+        if (!Settings.ContainsKey(keyName) || index >= Settings[keyName].Count)
+            return;
+        Settings[keyName][index] = SaveKeyBinding(keyName, index, key);
     }
 }
