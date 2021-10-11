@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class InputSettingManager : MonoBehaviour
 {
-    // TODO: Implement joystick (https://docs.unity3d.com/Manual/class-InputManager.html)
-
     [System.Serializable]
     public struct InputSetting
     {
