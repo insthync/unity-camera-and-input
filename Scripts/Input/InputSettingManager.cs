@@ -12,6 +12,7 @@ public class InputSettingManager : MonoBehaviour
 
     public static InputSettingManager Singleton { get; protected set; }
 
+    [Tooltip("These settings will override Unity's input manager axes settings")]
     public InputSetting[] settings;
     public string settingsSaveKeyPrefix = "SETTING_KEY_BIND";
 
