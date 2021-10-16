@@ -6,6 +6,9 @@ using UnityEngine.Serialization;
 public class FollowCameraControls : FollowCamera
 {
     [Header("Controls")]
+    public string xRotationAxisName = "Mouse Y";
+    public string yRotationAxisName = "Mouse X";
+    public string zoomAxisName = "Mouse ScrollWheel";
     public bool updateRotation = true;
     public bool updateRotationX = false;
     public bool updateRotationY = false;
@@ -114,7 +117,7 @@ public class FollowCameraControls : FollowCamera
 
         // X rotation
         if (updateRotation || updateRotationX)
-            XRotationVelocity += InputManager.GetAxis("Mouse Y", false) * rotationSpeed * rotationSpeedScale;
+            XRotationVelocity += InputManager.GetAxis(xRotationAxisName, false) * rotationSpeed * rotationSpeedScale;
         xRotation -= XRotationVelocity;
 
         // Recoil X
@@ -132,7 +135,7 @@ public class FollowCameraControls : FollowCamera
 
         // Y rotation
         if (updateRotation || updateRotationY)
-            YRotationVelocity += InputManager.GetAxis("Mouse X", false) * rotationSpeed * rotationSpeedScale;
+            YRotationVelocity += InputManager.GetAxis(yRotationAxisName, false) * rotationSpeed * rotationSpeedScale;
         yRotation += YRotationVelocity;
 
         // Recoil Y
@@ -150,7 +153,7 @@ public class FollowCameraControls : FollowCamera
 
         // Zoom
         if (updateZoom)
-            ZoomVelocity += InputManager.GetAxis("Mouse ScrollWheel", false) * zoomSpeed * zoomSpeedScale;
+            ZoomVelocity += InputManager.GetAxis(zoomAxisName, false) * zoomSpeed * zoomSpeedScale;
         zoomDistance += ZoomVelocity;
         if (limitZoomDistance)
             zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
