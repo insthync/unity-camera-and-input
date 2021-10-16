@@ -236,9 +236,9 @@ public class FollowCameraControls : FollowCamera
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
                 if (enableAimAssistX)
-                    xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
+                    xRotation = Mathf.LerpAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
                 if (enableAimAssistY)
-                    yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
+                    yRotation = Mathf.LerpAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
             }
         }
     }
