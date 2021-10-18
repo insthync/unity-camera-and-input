@@ -21,8 +21,9 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 
     private Graphic graphic;
     private Vector2 previousTouchPosition;
-    private List<Touch> touches = new List<Touch>();
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
+    private List<Touch> touches = new List<Touch>();
+    private int draggingFingerId;
 
     private void Awake()
     {
@@ -45,49 +46,49 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 
     private void UpdateStandalone()
     {
-        PointerEventData tempPointer;
-        bool hasPointer = false;
-        tempPointer = new PointerEventData(EventSystem.current);
-        tempPointer.position = Input.mousePosition;
-        EventSystem.current.RaycastAll(tempPointer, raycastResults);
-        if (raycastResults != null && raycastResults.Count > 0)
+        if (!IsDragging && Input.GetMouseButton(0))
         {
-            if (raycastResults[0].gameObject == gameObject)
+            // Is it touched inside the touch area or not?
+            PointerEventData tempPointer = new PointerEventData(EventSystem.current);
+            tempPointer.position = Input.mousePosition;
+            EventSystem.current.RaycastAll(tempPointer, raycastResults);
+            if (raycastResults != null && raycastResults.Count == 1 && raycastResults[0].gameObject == gameObject)
             {
-                if (!IsDragging && Input.GetMouseButton(0))
-                {
-                    OnPointerDown(Input.mousePosition);
-                    return;
-                }
-                hasPointer = true;
+                // Yes, it is
+                OnPointerDown(Input.mousePosition);
+                return;
             }
         }
 
-        if (!hasPointer || !Input.GetMouseButton(0))
+        if (IsDragging && !Input.GetMouseButton(0))
         {
-            if (IsDragging)
-                OnPointerUp();
+            OnPointerUp();
             return;
         }
 
-        if (hasPointer)
-            OnDrag(Input.mousePosition);
+        OnDrag(Input.mousePosition);
     }
 
     private void UpdateMobile()
     {
-        PointerEventData tempPointer;
         touches.Clear();
+        PointerEventData tempPointer;
         for (int i = 0; i < Input.touchCount; ++i)
         {
+            if (Input.touches[i].fingerId == draggingFingerId)
+            {
+                touches.Add(Input.touches[i]);
+                continue;
+            }
+            // Is it touched inside the touch area or not?
             tempPointer = new PointerEventData(EventSystem.current);
             tempPointer.position = Input.touches[i].position;
             EventSystem.current.RaycastAll(tempPointer, raycastResults);
-            if (raycastResults != null && raycastResults.Count == 1)
+            if (raycastResults != null && raycastResults.Count == 1 && raycastResults[0].gameObject == gameObject &&
+                !MobileMovementJoystick.JoystickTouches.Contains(Input.touches[i].fingerId))
             {
-                if (raycastResults[0].gameObject == gameObject &&
-                    !MobileMovementJoystick.JoystickTouches.Contains(Input.touches[i].fingerId))
-                    touches.Add(Input.touches[i]);
+                // Yes, it is
+                touches.Add(Input.touches[i]);
             }
         }
 
@@ -99,7 +100,10 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
         }
 
         if (touches[0].phase == TouchPhase.Began && !IsDragging)
+        {
+            draggingFingerId = touches[0].fingerId;
             OnPointerDown(touches[0].position);
+        }
 
         if (touches[0].phase == TouchPhase.Moved ||
             touches[0].phase == TouchPhase.Stationary)
