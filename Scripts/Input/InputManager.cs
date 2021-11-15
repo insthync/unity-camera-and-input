@@ -26,7 +26,7 @@ public static class InputManager
         try
         {
             Player player = ReInput.players.GetPlayer(playerId);
-            return raw ? player.GetAxisRaw(name) : Input.GetAxis(name);
+            return raw ? player.GetAxisRaw(name) : player.GetAxis(name);
         }
         catch { }
 #endif
