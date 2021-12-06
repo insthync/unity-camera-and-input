@@ -2,7 +2,7 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class MobileInputButtonByKeyCode : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
+public class MobileInputKey : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField]
     private KeyCode keyCode = KeyCode.None;
