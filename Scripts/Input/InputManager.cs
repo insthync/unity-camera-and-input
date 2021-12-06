@@ -61,14 +61,16 @@ public static class InputManager
     {
         try
         {
-            return !Application.isMobilePlatform && Input.GetKey(key);
+            if (!Application.isMobilePlatform && Input.GetKey(key))
+                return true;
         }
         catch { }
 
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.Pressed;
+            if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.Pressed)
+                return true;
         }
         return false;
     }
@@ -77,14 +79,16 @@ public static class InputManager
     {
         try
         {
-            return !Application.isMobilePlatform && Input.GetKeyDown(key);
+            if (!Application.isMobilePlatform && Input.GetKeyDown(key))
+                return true;
         }
         catch { }
 
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonDown;
+            if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonDown)
+                return true;
         }
         return false;
     }
@@ -93,14 +97,16 @@ public static class InputManager
     {
         try
         {
-            return !Application.isMobilePlatform && Input.GetKeyUp(key);
+            if (!Application.isMobilePlatform && Input.GetKeyUp(key))
+                return true;
         }
         catch { }
 
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonUp;
+            if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonUp)
+                return true;
         }
         return false;
     }
@@ -133,14 +139,16 @@ public static class InputManager
 
         try
         {
-            return !Application.isMobilePlatform && Input.GetButton(name);
+            if (!Application.isMobilePlatform && Input.GetButton(name))
+                return true;
         }
         catch { }
 
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.Pressed;
+            if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.Pressed)
+                return true;
         }
         return false;
     }
@@ -173,14 +181,16 @@ public static class InputManager
 
         try
         {
-            return !Application.isMobilePlatform && Input.GetButtonDown(name);
+            if (!Application.isMobilePlatform && Input.GetButtonDown(name))
+                return true;
         }
         catch { }
 
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonDown;
+            if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonDown)
+                return true;
         }
         return false;
     }
@@ -213,14 +223,16 @@ public static class InputManager
 
         try
         {
-            return !Application.isMobilePlatform && Input.GetButtonUp(name);
+            if (!Application.isMobilePlatform && Input.GetButtonUp(name))
+                return true;
         }
         catch { }
 
         if (useMobileInputOnNonMobile || Application.isMobilePlatform)
         {
             SimulateButton foundSimulateButton;
-            return simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonUp;
+            if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonUp)
+                return true;
         }
         return false;
     }
