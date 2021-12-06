@@ -7,6 +7,7 @@ using Rewired;
 public static class InputManager
 {
     private static Dictionary<string, SimulateButton> simulateInputs = new Dictionary<string, SimulateButton>();
+    private static Dictionary<KeyCode, SimulateButton> simulateKeys = new Dictionary<KeyCode, SimulateButton>();
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
     public static bool useMobileInputOnNonMobile = false;
 
@@ -53,6 +54,54 @@ public static class InputManager
             return axis;
         }
         return 0f;
+    }
+
+    public static bool GetKey(KeyCode key)
+    {
+        try
+        {
+            return Input.GetKey(key);
+        }
+        catch { }
+
+        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        {
+            SimulateButton foundSimulateButton;
+            return simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.Pressed;
+        }
+        return false;
+    }
+
+    public static bool GetKeyDown(KeyCode key)
+    {
+        try
+        {
+            return Input.GetKeyDown(key);
+        }
+        catch { }
+
+        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        {
+            SimulateButton foundSimulateButton;
+            return simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonDown;
+        }
+        return false;
+    }
+
+    public static bool GetKeyUp(KeyCode key)
+    {
+        try
+        {
+            return Input.GetKeyUp(key);
+        }
+        catch { }
+
+        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        {
+            SimulateButton foundSimulateButton;
+            return simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonUp;
+        }
+        return false;
     }
 
 #if USE_REWIRED
@@ -191,6 +240,24 @@ public static class InputManager
             simulateInputs.Add(name, new SimulateButton());
         }
         simulateInputs[name].Release();
+    }
+
+    public static void SetKeyDown(KeyCode key)
+    {
+        if (!simulateKeys.ContainsKey(key))
+        {
+            simulateKeys.Add(key, new SimulateButton());
+        }
+        simulateKeys[key].Press();
+    }
+
+    public static void SetKeyUp(KeyCode key)
+    {
+        if (!simulateKeys.ContainsKey(key))
+        {
+            simulateKeys.Add(key, new SimulateButton());
+        }
+        simulateKeys[key].Release();
     }
 
     public static void SetAxisPositive(string name)
