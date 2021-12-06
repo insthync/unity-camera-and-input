@@ -34,7 +34,8 @@ public static class InputManager
 
         try
         {
-            return raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
+            if (!Application.isMobilePlatform)
+                return raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
         }
         catch { }
 
@@ -60,7 +61,7 @@ public static class InputManager
     {
         try
         {
-            return Input.GetKey(key);
+            return !Application.isMobilePlatform && Input.GetKey(key);
         }
         catch { }
 
@@ -76,7 +77,7 @@ public static class InputManager
     {
         try
         {
-            return Input.GetKeyDown(key);
+            return !Application.isMobilePlatform && Input.GetKeyDown(key);
         }
         catch { }
 
@@ -92,7 +93,7 @@ public static class InputManager
     {
         try
         {
-            return Input.GetKeyUp(key);
+            return !Application.isMobilePlatform && Input.GetKeyUp(key);
         }
         catch { }
 
@@ -120,7 +121,7 @@ public static class InputManager
         catch { }
 #endif
 
-        if (HasInputSetting(name))
+        if (!Application.isMobilePlatform && HasInputSetting(name))
         {
             List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
             foreach (KeyCode keyCode in keyCodes)
@@ -132,7 +133,7 @@ public static class InputManager
 
         try
         {
-            return Input.GetButton(name);
+            return !Application.isMobilePlatform && Input.GetButton(name);
         }
         catch { }
 
@@ -160,7 +161,7 @@ public static class InputManager
         catch { }
 #endif
 
-        if (HasInputSetting(name))
+        if (!Application.isMobilePlatform && HasInputSetting(name))
         {
             List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
             foreach (KeyCode keyCode in keyCodes)
@@ -172,7 +173,7 @@ public static class InputManager
 
         try
         {
-            return Input.GetButtonDown(name);
+            return !Application.isMobilePlatform && Input.GetButtonDown(name);
         }
         catch { }
 
@@ -200,7 +201,7 @@ public static class InputManager
         catch { }
 #endif
 
-        if (HasInputSetting(name))
+        if (!Application.isMobilePlatform && HasInputSetting(name))
         {
             List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
             foreach (KeyCode keyCode in keyCodes)
@@ -212,7 +213,7 @@ public static class InputManager
 
         try
         {
-            return Input.GetButtonUp(name);
+            return !Application.isMobilePlatform && Input.GetButtonUp(name);
         }
         catch { }
 
