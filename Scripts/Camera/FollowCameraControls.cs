@@ -21,7 +21,8 @@ public class FollowCameraControls : FollowCamera
     [Range(-360, 360)]
     public float maxXRotation = 0;
     public bool smoothRotateX;
-    public float rotateXSmoothing = 10.0f;
+    [FormerlySerializedAs("rotateXSmoothing")]
+    public float rotateXDeacceleration = 10.0f;
 
     [Header("Y Rotation")]
     public bool limitYRotation;
@@ -30,7 +31,8 @@ public class FollowCameraControls : FollowCamera
     [Range(-360, 360)]
     public float maxYRotation = 0;
     public bool smoothRotateY;
-    public float rotateYSmoothing = 10.0f;
+    [FormerlySerializedAs("rotateYSmoothing")]
+    public float rotateYDeacceleration = 10.0f;
 
     [Header("General Rotation Settings")]
     public float startXRotation;
@@ -44,11 +46,12 @@ public class FollowCameraControls : FollowCamera
     public float minZoomDistance;
     public float maxZoomDistance;
     public bool smoothZoom;
-    public float zoomSmoothing = 10.0f;
+    [FormerlySerializedAs("zoomSmoothing")]
+    public float zoomDeacceleration = 10.0f;
 
     [Header("General Zoom Settings")]
     public float startZoomDistance;
-    public float zoomSpeed = 5;
+    public float zoomSpeed = 0.05f;
     [Range(0.1f, 1f)]
     public float zoomSpeedScale = 1;
 
@@ -156,23 +159,34 @@ public class FollowCameraControls : FollowCamera
             ZoomVelocity += InputManager.GetAxis(zoomAxisName, false) * zoomSpeed * zoomSpeedScale;
         zoomDistance += ZoomVelocity;
         if (limitZoomDistance)
-            zoomDistance = Mathf.Clamp(zoomDistance, minZoomDistance, maxZoomDistance);
+        {
+            if (zoomDistance < minZoomDistance)
+            {
+                ZoomVelocity = 0f;
+                zoomDistance = minZoomDistance;
+            }
+            if (zoomDistance > maxZoomDistance)
+            {
+                ZoomVelocity = 0f;
+                zoomDistance = maxZoomDistance;
+            }
+        }
 
         // X rotation smooth
         if (smoothRotateX)
-            XRotationVelocity = Mathf.LerpAngle(XRotationVelocity, 0, deltaTime * rotateXSmoothing);
+            XRotationVelocity = Mathf.LerpAngle(XRotationVelocity, 0, deltaTime * rotateXDeacceleration);
         else
             XRotationVelocity = 0f;
 
         // Y rotation smooth
         if (smoothRotateY)
-            YRotationVelocity = Mathf.LerpAngle(YRotationVelocity, 0, deltaTime * rotateYSmoothing);
+            YRotationVelocity = Mathf.LerpAngle(YRotationVelocity, 0, deltaTime * rotateYDeacceleration);
         else
             YRotationVelocity = 0f;
 
         // Zoom smooth
         if (smoothZoom)
-            ZoomVelocity = Mathf.Lerp(ZoomVelocity, 0, deltaTime * zoomSmoothing);
+            ZoomVelocity = Mathf.Lerp(ZoomVelocity, 0, deltaTime * zoomDeacceleration);
         else
             ZoomVelocity = 0f;
 
