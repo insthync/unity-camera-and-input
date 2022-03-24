@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
@@ -85,5 +86,17 @@ public class MobileInputKey : MonoBehaviour, IMobileInputArea, IPointerDownHandl
     public void OnLoadAlpha(float alpha)
     {
         alphaMultiplier = alpha;
+    }
+
+    public void SimulateClick()
+    {
+        StartCoroutine(SimulateClickRoutine());
+    }
+
+    IEnumerator SimulateClickRoutine()
+    {
+        OnPointerDown(default);
+        yield return null;
+        OnPointerUp(default);
     }
 }
