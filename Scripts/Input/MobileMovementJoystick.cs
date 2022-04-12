@@ -124,21 +124,32 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
             canvasGroup.alpha = 1f;
         }
+        if (controllerHandler != null)
+        {
+            controllerHandler.anchorMin = Vector2.one * 0.5f;
+            controllerHandler.anchorMax = Vector2.one * 0.5f;
+            controllerHandler.pivot = Vector2.one * 0.5f;
+            // Get canvas group, will use it to change alpha later
+            handlerCanvasGroup = controllerHandler.GetComponent<CanvasGroup>();
+            if (handlerCanvasGroup != null)
+                handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
+        }
+        if (controllerBackground != null && controllerBackground.transform == transform)
+        {
+            controllerBackground = null;
+            Debug.LogWarning($"{this} `controllerBackground` must not the same game object with this component");
+        }
         if (controllerBackground != null)
         {
+            controllerBackground.anchorMin = Vector2.one * 0.5f;
+            controllerBackground.anchorMax = Vector2.one * 0.5f;
+            controllerBackground.pivot = Vector2.one * 0.5f;
             // Prepare background offset, it will be used to calculate joystick movement
             backgroundOffset = controllerBackground.position - controllerHandler.position;
             // Get canvas group, will use it to change alpha later
             backgroundCanvasGroup = controllerBackground.GetComponent<CanvasGroup>();
             if (backgroundCanvasGroup != null)
                 backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
-        }
-        if (controllerHandler != null)
-        {
-            // Get canvas group, will use it to change alpha later
-            handlerCanvasGroup = controllerHandler.GetComponent<CanvasGroup>();
-            if (handlerCanvasGroup != null)
-                handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
         }
         config = GetComponent<MobileInputConfig>();
         if (config != null)
