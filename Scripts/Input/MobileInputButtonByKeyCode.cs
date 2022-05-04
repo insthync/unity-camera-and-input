@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class MobileInputKey : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
+public class MobileInputButtonByKeyCode : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField]
     private KeyCode keyCode = KeyCode.None;
@@ -27,7 +27,6 @@ public class MobileInputKey : MonoBehaviour, IMobileInputArea, IPointerDownHandl
 
     private void Start()
     {
-
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
