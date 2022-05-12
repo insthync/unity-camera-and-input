@@ -15,6 +15,7 @@ public class InputSettingManager : MonoBehaviour
     [Tooltip("These settings will override Unity's input manager axes settings")]
     public InputSetting[] settings;
     public string settingsSaveKeyPrefix = "SETTING_KEY_BIND";
+    public bool enableUseMobileInputOnNonMobile;
 
     internal readonly Dictionary<string, List<KeyCode>> Settings = new Dictionary<string, List<KeyCode>>();
 
@@ -28,6 +29,8 @@ public class InputSettingManager : MonoBehaviour
         Singleton = GetComponent<InputSettingManager>();
         DontDestroyOnLoad(gameObject);
         Setup();
+        if (enableUseMobileInputOnNonMobile)
+            InputManager.useMobileInputOnNonMobile = true;
     }
 
     public void Setup()
