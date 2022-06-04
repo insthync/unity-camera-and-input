@@ -10,10 +10,21 @@ public static class InputManager
     private static Dictionary<KeyCode, SimulateButton> simulateKeys = new Dictionary<KeyCode, SimulateButton>();
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
     public static bool useMobileInputOnNonMobile = false;
+    public static bool useNonMobileInput = false;
 
     public static bool HasInputSetting(string keyName)
     {
         return InputSettingManager.Singleton != null && InputSettingManager.Singleton.Settings.ContainsKey(keyName);
+    }
+
+    public static bool UseMobileInput()
+    {
+        return Application.isMobilePlatform || useMobileInputOnNonMobile;
+    }
+
+    public static bool UseNonMobileInput()
+    {
+        return !Application.isMobilePlatform && (!useMobileInputOnNonMobile || useNonMobileInput);
     }
 
 #if USE_REWIRED
@@ -32,18 +43,18 @@ public static class InputManager
         catch { }
 #endif
 
-        try
+        if (UseNonMobileInput())
         {
-            if (!Application.isMobilePlatform)
+            try
             {
                 float result = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
                 if (Mathf.Abs(result) > 0.00001f)
                     return result;
             }
+            catch { }
         }
-        catch { }
 
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateAxis foundSimulateAxis;
             float axis = 0f;
@@ -63,14 +74,17 @@ public static class InputManager
 
     public static bool GetKey(KeyCode key)
     {
-        try
+        if (UseNonMobileInput())
         {
-            if (!Application.isMobilePlatform && Input.GetKey(key))
-                return true;
+            try
+            {
+                if (Input.GetKey(key))
+                    return true;
+            }
+            catch { }
         }
-        catch { }
 
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.Pressed)
@@ -81,14 +95,17 @@ public static class InputManager
 
     public static bool GetKeyDown(KeyCode key)
     {
-        try
+        if (UseNonMobileInput())
         {
-            if (!Application.isMobilePlatform && Input.GetKeyDown(key))
-                return true;
+            try
+            {
+                if (Input.GetKeyDown(key))
+                    return true;
+            }
+            catch { }
         }
-        catch { }
 
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonDown)
@@ -99,14 +116,17 @@ public static class InputManager
 
     public static bool GetKeyUp(KeyCode key)
     {
-        try
+        if (UseNonMobileInput())
         {
-            if (!Application.isMobilePlatform && Input.GetKeyUp(key))
-                return true;
+            try
+            {
+                if (Input.GetKeyUp(key))
+                    return true;
+            }
+            catch { }
         }
-        catch { }
 
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonUp)
@@ -131,24 +151,27 @@ public static class InputManager
         catch { }
 #endif
 
-        if (!Application.isMobilePlatform && HasInputSetting(name))
+        if (UseNonMobileInput())
         {
-            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
-            foreach (KeyCode keyCode in keyCodes)
+            if (HasInputSetting(name))
             {
-                if (Input.GetKey(keyCode))
+                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+                foreach (KeyCode keyCode in keyCodes)
+                {
+                    if (Input.GetKey(keyCode))
+                        return true;
+                }
+            }
+
+            try
+            {
+                if (Input.GetButton(name))
                     return true;
             }
+            catch { }
         }
 
-        try
-        {
-            if (!Application.isMobilePlatform && Input.GetButton(name))
-                return true;
-        }
-        catch { }
-
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.Pressed)
@@ -173,24 +196,27 @@ public static class InputManager
         catch { }
 #endif
 
-        if (!Application.isMobilePlatform && HasInputSetting(name))
+        if (UseNonMobileInput())
         {
-            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
-            foreach (KeyCode keyCode in keyCodes)
+            if (HasInputSetting(name))
             {
-                if (Input.GetKeyDown(keyCode))
+                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+                foreach (KeyCode keyCode in keyCodes)
+                {
+                    if (Input.GetKeyDown(keyCode))
+                        return true;
+                }
+            }
+
+            try
+            {
+                if (Input.GetButtonDown(name))
                     return true;
             }
+            catch { }
         }
 
-        try
-        {
-            if (!Application.isMobilePlatform && Input.GetButtonDown(name))
-                return true;
-        }
-        catch { }
-
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonDown)
@@ -215,24 +241,27 @@ public static class InputManager
         catch { }
 #endif
 
-        if (!Application.isMobilePlatform && HasInputSetting(name))
+        if (UseNonMobileInput())
         {
-            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
-            foreach (KeyCode keyCode in keyCodes)
+            if (HasInputSetting(name))
             {
-                if (Input.GetKeyUp(keyCode))
+                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+                foreach (KeyCode keyCode in keyCodes)
+                {
+                    if (Input.GetKeyUp(keyCode))
+                        return true;
+                }
+            }
+
+            try
+            {
+                if (Input.GetButtonUp(name))
                     return true;
             }
+            catch { }
         }
 
-        try
-        {
-            if (!Application.isMobilePlatform && Input.GetButtonUp(name))
-                return true;
-        }
-        catch { }
-
-        if (useMobileInputOnNonMobile || Application.isMobilePlatform)
+        if (UseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonUp)
