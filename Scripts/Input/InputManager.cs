@@ -19,12 +19,20 @@ public static class InputManager
 
     public static bool UseMobileInput()
     {
+#if VR_BUILD
+        return false;
+#else
         return Application.isMobilePlatform || useMobileInputOnNonMobile;
+#endif
     }
 
     public static bool UseNonMobileInput()
     {
+#if VR_BUILD
+        return true;
+#else
         return !Application.isMobilePlatform && (!useMobileInputOnNonMobile || useNonMobileInput);
+#endif
     }
 
 #if USE_REWIRED
