@@ -83,4 +83,11 @@ public class InputSettingManager : MonoBehaviour
             return;
         Settings[keyName][index] = SaveKeyBinding(keyName, index, key);
     }
+
+    public KeyCode GetKeySetting(string keyName, int index)
+    {
+        if (!Settings.ContainsKey(keyName) || index >= Settings[keyName].Count)
+            return KeyCode.None;
+        return Settings[keyName][index];
+    }
 }
