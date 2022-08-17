@@ -143,6 +143,20 @@ public static class InputManager
         return false;
     }
 
+    private static bool IsKeyFromSettingActivated(string name, System.Func<KeyCode, bool> func)
+    {
+        if (HasInputSetting(name))
+        {
+            List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
+            foreach (KeyCode keyCode in keyCodes)
+            {
+                if (func.Invoke(keyCode))
+                    return true;
+            }
+        }
+        return false;
+    }
+
 #if USE_REWIRED
     public static bool GetButton(string name, int playerId = 0)
 #else
@@ -161,22 +175,14 @@ public static class InputManager
 
         if (UseNonMobileInput())
         {
-            if (HasInputSetting(name))
-            {
-                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
-                foreach (KeyCode keyCode in keyCodes)
-                {
-                    if (Input.GetKey(keyCode))
-                        return true;
-                }
-            }
-
             try
             {
                 if (Input.GetButton(name))
                     return true;
             }
             catch { }
+            if (IsKeyFromSettingActivated(name, GetKey))
+                return true;
         }
 
         if (UseMobileInput())
@@ -184,6 +190,11 @@ public static class InputManager
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.Pressed)
                 return true;
+            if (!UseNonMobileInput())
+            {
+                if (IsKeyFromSettingActivated(name, GetKey))
+                    return true;
+            }
         }
         return false;
     }
@@ -206,22 +217,14 @@ public static class InputManager
 
         if (UseNonMobileInput())
         {
-            if (HasInputSetting(name))
-            {
-                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
-                foreach (KeyCode keyCode in keyCodes)
-                {
-                    if (Input.GetKeyDown(keyCode))
-                        return true;
-                }
-            }
-
             try
             {
                 if (Input.GetButtonDown(name))
                     return true;
             }
             catch { }
+            if (IsKeyFromSettingActivated(name, GetKeyDown))
+                return true;
         }
 
         if (UseMobileInput())
@@ -229,6 +232,11 @@ public static class InputManager
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonDown)
                 return true;
+            if (!UseNonMobileInput())
+            {
+                if (IsKeyFromSettingActivated(name, GetKeyDown))
+                    return true;
+            }
         }
         return false;
     }
@@ -251,22 +259,14 @@ public static class InputManager
 
         if (UseNonMobileInput())
         {
-            if (HasInputSetting(name))
-            {
-                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
-                foreach (KeyCode keyCode in keyCodes)
-                {
-                    if (Input.GetKeyUp(keyCode))
-                        return true;
-                }
-            }
-
             try
             {
                 if (Input.GetButtonUp(name))
                     return true;
             }
             catch { }
+            if (IsKeyFromSettingActivated(name, GetKeyUp))
+                return true;
         }
 
         if (UseMobileInput())
@@ -274,6 +274,11 @@ public static class InputManager
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonUp)
                 return true;
+            if (!UseNonMobileInput())
+            {
+                if (IsKeyFromSettingActivated(name, GetKeyUp))
+                    return true;
+            }
         }
         return false;
     }
