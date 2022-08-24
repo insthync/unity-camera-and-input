@@ -55,9 +55,7 @@ public static class InputManager
         {
             try
             {
-                float result = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
-                if (Mathf.Abs(result) > 0.00001f)
-                    return result;
+                return raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
             }
             catch { }
         }
