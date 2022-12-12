@@ -43,6 +43,32 @@ public static class InputManager
 #endif
     }
 
+#if ENABLE_INPUT_SYSTEM
+    public static bool TryGetInputAction(string name, out InputAction inputAction)
+    {
+        if (!alreadyFindInputActionNames.Contains(name))
+        {
+            alreadyFindInputActionNames.Add(name);
+            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
+            {
+                inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
+                if (inputAction != null)
+                {
+                    inputAction.Enable();
+                    foundInputActions.Add(name, inputAction);
+                    return true;
+                }
+            }
+        }
+        else if (foundInputActions.TryGetValue(name, out inputAction))
+        {
+            return true;
+        }
+        inputAction = null;
+        return false;
+    }
+#endif
+
 #if USE_REWIRED
     public static float GetAxis(string name, bool raw, int playerId = 0)
 #else
@@ -59,32 +85,9 @@ public static class InputManager
         catch { }
 #endif
 #if ENABLE_INPUT_SYSTEM
-        if (!alreadyFindInputActionNames.Contains(name))
+        if (TryGetInputAction(name, out InputAction inputAction))
         {
-            alreadyFindInputActionNames.Add(name);
-            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
-            {
-                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
-                if (inputAction != null)
-                {
-                    inputAction.Enable();
-                    foundInputActions.Add(name, inputAction);
-                    float axis = inputAction.ReadValue<float>();
-                    if (raw)
-                    {
-                        if (axis > 0f)
-                            axis = 1f;
-                        if (axis < 0f)
-                            axis = -1f;
-                    }
-                    if (Mathf.Abs(axis) > 0.00001f)
-                        return axis;
-                }
-            }
-        }
-        else if (foundInputActions.ContainsKey(name))
-        {
-            float axis = foundInputActions[name].ReadValue<float>();
+            float axis = inputAction.ReadValue<float>();
             if (raw)
             {
                 if (axis > 0f)
@@ -220,24 +223,9 @@ public static class InputManager
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (!alreadyFindInputActionNames.Contains(name))
+        if (TryGetInputAction(name, out InputAction inputAction))
         {
-            alreadyFindInputActionNames.Add(name);
-            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
-            {
-                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
-                if (inputAction != null)
-                {
-                    inputAction.Enable();
-                    foundInputActions.Add(name, inputAction);
-                    if (inputAction.IsPressed())
-                        return true;
-                }
-            }
-        }
-        else if (foundInputActions.ContainsKey(name))
-        {
-            if (foundInputActions[name].IsPressed())
+            if (inputAction.IsPressed())
                 return true;
         }
 #endif
@@ -285,24 +273,9 @@ public static class InputManager
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (!alreadyFindInputActionNames.Contains(name))
+        if (TryGetInputAction(name, out InputAction inputAction))
         {
-            alreadyFindInputActionNames.Add(name);
-            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
-            {
-                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
-                if (inputAction != null)
-                {
-                    inputAction.Enable();
-                    foundInputActions.Add(name, inputAction);
-                    if (inputAction.WasPressedThisFrame())
-                        return true;
-                }
-            }
-        }
-        else if (foundInputActions.ContainsKey(name))
-        {
-            if (foundInputActions[name].WasPressedThisFrame())
+            if (inputAction.WasPressedThisFrame())
                 return true;
         }
 #endif
@@ -350,24 +323,9 @@ public static class InputManager
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (!alreadyFindInputActionNames.Contains(name))
+        if (TryGetInputAction(name, out InputAction inputAction))
         {
-            alreadyFindInputActionNames.Add(name);
-            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
-            {
-                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
-                if (inputAction != null)
-                {
-                    inputAction.Enable();
-                    foundInputActions.Add(name, inputAction);
-                    if (inputAction.WasReleasedThisFrame())
-                        return true;
-                }
-            }
-        }
-        else if (foundInputActions.ContainsKey(name))
-        {
-            if (foundInputActions[name].WasReleasedThisFrame())
+            if (inputAction.WasReleasedThisFrame())
                 return true;
         }
 #endif
