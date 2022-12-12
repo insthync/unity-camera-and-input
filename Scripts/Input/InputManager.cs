@@ -2,6 +2,7 @@
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 #endif
 #if USE_REWIRED
 using Rewired;
@@ -84,6 +85,7 @@ public static class InputManager
         }
         catch { }
 #endif
+
 #if ENABLE_INPUT_SYSTEM
         if (TryGetInputAction(name, out InputAction inputAction))
         {
@@ -133,6 +135,13 @@ public static class InputManager
 
     public static bool GetKey(KeyCode key)
     {
+#if ENABLE_INPUT_SYSTEM
+        if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.isPressed)
+            return true;
+        if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.isPressed)
+            return true;
+#endif
+
 #if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
@@ -156,6 +165,13 @@ public static class InputManager
 
     public static bool GetKeyDown(KeyCode key)
     {
+#if ENABLE_INPUT_SYSTEM
+        if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.wasPressedThisFrame)
+            return true;
+        if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.wasPressedThisFrame)
+            return true;
+#endif
+
 #if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
@@ -179,6 +195,13 @@ public static class InputManager
 
     public static bool GetKeyUp(KeyCode key)
     {
+#if ENABLE_INPUT_SYSTEM
+        if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.wasReleasedThisFrame)
+            return true;
+        if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.wasReleasedThisFrame)
+            return true;
+#endif
+
 #if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
