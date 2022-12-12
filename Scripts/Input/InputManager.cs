@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 #if USE_REWIRED
 using Rewired;
 #endif
@@ -11,6 +14,11 @@ public static class InputManager
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
     public static bool useMobileInputOnNonMobile = false;
     public static bool useNonMobileInput = false;
+
+#if ENABLE_INPUT_SYSTEM
+    private static HashSet<string> alreadyFindInputActionNames = new HashSet<string>();
+    private static Dictionary<string, InputAction> foundInputActions = new Dictionary<string, InputAction>();
+#endif
 
     public static bool HasInputSetting(string keyName)
     {
@@ -50,14 +58,52 @@ public static class InputManager
         }
         catch { }
 #endif
+#if ENABLE_INPUT_SYSTEM
+        if (!alreadyFindInputActionNames.Contains(name))
+        {
+            alreadyFindInputActionNames.Add(name);
+            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
+            {
+                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
+                if (inputAction != null)
+                {
+                    inputAction.Enable();
+                    foundInputActions.Add(name, inputAction);
+                    float axis = inputAction.ReadValue<float>();
+                    if (raw)
+                    {
+                        if (axis > 0f)
+                            axis = 1f;
+                        if (axis < 0f)
+                            axis = -1f;
+                    }
+                    if (Mathf.Abs(axis) > 0.00001f)
+                        return axis;
+                }
+            }
+        }
+        else if (foundInputActions.ContainsKey(name))
+        {
+            float axis = foundInputActions[name].ReadValue<float>();
+            if (raw)
+            {
+                if (axis > 0f)
+                    axis = 1f;
+                if (axis < 0f)
+                    axis = -1f;
+            }
+            if (Mathf.Abs(axis) > 0.00001f)
+                return axis;
+        }
+#endif
 
         if (UseNonMobileInput())
         {
             try
             {
-                float result = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
-                if (Mathf.Abs(result) > 0.00001f)
-                    return result;
+                float axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
+                if (Mathf.Abs(axis) > 0.00001f)
+                    return axis;
             }
             catch { }
         }
@@ -173,6 +219,29 @@ public static class InputManager
         catch { }
 #endif
 
+#if ENABLE_INPUT_SYSTEM
+        if (!alreadyFindInputActionNames.Contains(name))
+        {
+            alreadyFindInputActionNames.Add(name);
+            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
+            {
+                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
+                if (inputAction != null)
+                {
+                    inputAction.Enable();
+                    foundInputActions.Add(name, inputAction);
+                    if (inputAction.IsPressed())
+                        return true;
+                }
+            }
+        }
+        else if (foundInputActions.ContainsKey(name))
+        {
+            if (foundInputActions[name].IsPressed())
+                return true;
+        }
+#endif
+
         if (UseNonMobileInput())
         {
             try
@@ -215,6 +284,29 @@ public static class InputManager
         catch { }
 #endif
 
+#if ENABLE_INPUT_SYSTEM
+        if (!alreadyFindInputActionNames.Contains(name))
+        {
+            alreadyFindInputActionNames.Add(name);
+            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
+            {
+                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
+                if (inputAction != null)
+                {
+                    inputAction.Enable();
+                    foundInputActions.Add(name, inputAction);
+                    if (inputAction.WasPressedThisFrame())
+                        return true;
+                }
+            }
+        }
+        else if (foundInputActions.ContainsKey(name))
+        {
+            if (foundInputActions[name].WasPressedThisFrame())
+                return true;
+        }
+#endif
+
         if (UseNonMobileInput())
         {
             try
@@ -255,6 +347,29 @@ public static class InputManager
             return player.GetButtonUp(name);
         }
         catch { }
+#endif
+
+#if ENABLE_INPUT_SYSTEM
+        if (!alreadyFindInputActionNames.Contains(name))
+        {
+            alreadyFindInputActionNames.Add(name);
+            if (InputSettingManager.Singleton != null && InputSettingManager.Singleton.inputActionAsset != null)
+            {
+                InputAction inputAction = InputSettingManager.Singleton.inputActionAsset.FindAction(name);
+                if (inputAction != null)
+                {
+                    inputAction.Enable();
+                    foundInputActions.Add(name, inputAction);
+                    if (inputAction.WasReleasedThisFrame())
+                        return true;
+                }
+            }
+        }
+        else if (foundInputActions.ContainsKey(name))
+        {
+            if (foundInputActions[name].WasReleasedThisFrame())
+                return true;
+        }
 #endif
 
         if (UseNonMobileInput())

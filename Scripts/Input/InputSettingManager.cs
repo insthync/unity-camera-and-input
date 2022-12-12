@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class InputSettingManager : MonoBehaviour
 {
@@ -15,6 +18,11 @@ public class InputSettingManager : MonoBehaviour
     [Tooltip("These settings will override Unity's input manager axes settings")]
     public InputSetting[] settings;
     public string settingsSaveKeyPrefix = "SETTING_KEY_BIND";
+#if ENABLE_INPUT_SYSTEM
+    public InputActionAsset inputActionAsset;
+    public string inputActionName = "Player";
+    public InputActionMap InputActionMap { get; private set; }
+#endif
 
     internal readonly Dictionary<string, List<KeyCode>> Settings = new Dictionary<string, List<KeyCode>>();
 
@@ -43,6 +51,9 @@ public class InputSettingManager : MonoBehaviour
                     Settings[setting.keyName].Add(LoadKeyBinding(setting.keyName, Settings[setting.keyName].Count - 1, setting.keyCode));
             }
         }
+#if ENABLE_INPUT_SYSTEM
+        InputActionMap = inputActionAsset.FindActionMap(inputActionName);
+#endif
     }
 
     public void ResetSettings()
