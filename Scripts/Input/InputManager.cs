@@ -100,6 +100,7 @@ public static class InputManager
         }
 #endif
 
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -110,6 +111,7 @@ public static class InputManager
             }
             catch { }
         }
+#endif
 
         if (UseMobileInput())
         {
@@ -131,6 +133,7 @@ public static class InputManager
 
     public static bool GetKey(KeyCode key)
     {
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -140,6 +143,7 @@ public static class InputManager
             }
             catch { }
         }
+#endif
 
         if (UseMobileInput())
         {
@@ -152,6 +156,7 @@ public static class InputManager
 
     public static bool GetKeyDown(KeyCode key)
     {
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -161,6 +166,7 @@ public static class InputManager
             }
             catch { }
         }
+#endif
 
         if (UseMobileInput())
         {
@@ -173,6 +179,7 @@ public static class InputManager
 
     public static bool GetKeyUp(KeyCode key)
     {
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -182,6 +189,7 @@ public static class InputManager
             }
             catch { }
         }
+#endif
 
         if (UseMobileInput())
         {
@@ -230,6 +238,7 @@ public static class InputManager
         }
 #endif
 
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -241,6 +250,7 @@ public static class InputManager
             if (IsKeyFromSettingActivated(name, GetKey))
                 return true;
         }
+#endif
 
         if (UseMobileInput())
         {
@@ -280,6 +290,7 @@ public static class InputManager
         }
 #endif
 
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -291,6 +302,7 @@ public static class InputManager
             if (IsKeyFromSettingActivated(name, GetKeyDown))
                 return true;
         }
+#endif
 
         if (UseMobileInput())
         {
@@ -330,6 +342,7 @@ public static class InputManager
         }
 #endif
 
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (UseNonMobileInput())
         {
             try
@@ -341,6 +354,7 @@ public static class InputManager
             if (IsKeyFromSettingActivated(name, GetKeyUp))
                 return true;
         }
+#endif
 
         if (UseMobileInput())
         {
