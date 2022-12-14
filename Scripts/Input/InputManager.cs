@@ -4,9 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 #endif
-#if USE_REWIRED
-using Rewired;
-#endif
 
 public static class InputManager
 {
@@ -80,7 +77,7 @@ public static class InputManager
 #if USE_REWIRED
         try
         {
-            Player player = ReInput.players.GetPlayer(playerId);
+            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
             return raw ? player.GetAxisRaw(name) : player.GetAxis(name);
         }
         catch { }
@@ -247,7 +244,7 @@ public static class InputManager
 #if USE_REWIRED
         try
         {
-            Player player = ReInput.players.GetPlayer(playerId);
+            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
             return player.GetButton(name);
         }
         catch { }
@@ -299,7 +296,8 @@ public static class InputManager
 #if USE_REWIRED
         try
         {
-            Player player = ReInput.players.GetPlayer(playerId);
+            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+            Debug.LogError(player.GetButtonDown(name));
             return player.GetButtonDown(name);
         }
         catch { }
@@ -351,7 +349,7 @@ public static class InputManager
 #if USE_REWIRED
         try
         {
-            Player player = ReInput.players.GetPlayer(playerId);
+            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
             return player.GetButtonUp(name);
         }
         catch { }
