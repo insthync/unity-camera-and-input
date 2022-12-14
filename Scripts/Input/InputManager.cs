@@ -78,7 +78,9 @@ public static class InputManager
         try
         {
             Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            return raw ? player.GetAxisRaw(name) : player.GetAxis(name);
+            float axis = raw ? player.GetAxisRaw(name) : player.GetAxis(name);
+            if (Mathf.Abs(axis) > 0.00001f)
+                return axis;
         }
         catch { }
 #endif
@@ -245,7 +247,8 @@ public static class InputManager
         try
         {
             Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            return player.GetButton(name);
+            if (player.GetButton(name))
+                return true;
         }
         catch { }
 #endif
@@ -297,8 +300,8 @@ public static class InputManager
         try
         {
             Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            Debug.LogError(player.GetButtonDown(name));
-            return player.GetButtonDown(name);
+            if (player.GetButtonDown(name))
+                return true;
         }
         catch { }
 #endif
@@ -350,7 +353,8 @@ public static class InputManager
         try
         {
             Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            return player.GetButtonUp(name);
+            if (player.GetButtonUp(name))
+                return true;
         }
         catch { }
 #endif
