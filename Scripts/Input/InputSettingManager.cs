@@ -52,7 +52,8 @@ public class InputSettingManager : MonoBehaviour
             }
         }
 #if ENABLE_INPUT_SYSTEM
-        InputActionMap = inputActionAsset.FindActionMap(inputActionName);
+        if (inputActionAsset != null)
+            InputActionMap = inputActionAsset.FindActionMap(inputActionName);
 #endif
     }
 
