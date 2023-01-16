@@ -242,12 +242,6 @@ public static class InputManager
     public static bool GetButton(string name)
 #endif
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            Debug.LogError("Cannot get button with null or empty `name`");
-            return false;
-        }
-
         // Try get input by rewired system
 #if USE_REWIRED
         try
@@ -301,12 +295,6 @@ public static class InputManager
     public static bool GetButtonDown(string name)
 #endif
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            Debug.LogError("Cannot get button down with null or empty `name`");
-            return false;
-        }
-
         // Try get input by rewired system
 #if USE_REWIRED
         try
@@ -360,12 +348,6 @@ public static class InputManager
     public static bool GetButtonUp(string name)
 #endif
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            Debug.LogError("Cannot get button up with null or empty `name`");
-            return false;
-        }
-
         // Try get input by rewired system
 #if USE_REWIRED
         try
