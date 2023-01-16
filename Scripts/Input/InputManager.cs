@@ -20,7 +20,7 @@ public static class InputManager
 
     public static bool HasInputSetting(string keyName)
     {
-        return InputSettingManager.Singleton != null && InputSettingManager.Singleton.Settings.ContainsKey(keyName);
+        return !string.IsNullOrEmpty(keyName) && InputSettingManager.Singleton != null && InputSettingManager.Singleton.Settings.ContainsKey(keyName);
     }
 
     public static bool UseMobileInput()
