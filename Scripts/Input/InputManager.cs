@@ -469,7 +469,65 @@ public static class InputManager
 
     public static Vector3 MousePosition()
     {
+#if ENABLE_INPUT_SYSTEM
+        return Mouse.current.position.ReadValue();
+#else
         return Input.mousePosition;
+#endif
+    }
+
+    public static bool GetMouseButtonDown(int button)
+    {
+#if ENABLE_INPUT_SYSTEM
+        switch (button)
+        {
+            case 0:
+                return Mouse.current.leftButton.wasPressedThisFrame;
+            case 1:
+                return Mouse.current.rightButton.wasPressedThisFrame;
+            case 2:
+                return Mouse.current.middleButton.wasPressedThisFrame;
+        }
+        return false;
+#else
+        return Input.GetMouseButtonDown(button);
+#endif
+    }
+
+    public static bool GetMouseButtonUp(int button)
+    {
+#if ENABLE_INPUT_SYSTEM
+        switch (button)
+        {
+            case 0:
+                return Mouse.current.leftButton.wasReleasedThisFrame;
+            case 1:
+                return Mouse.current.rightButton.wasReleasedThisFrame;
+            case 2:
+                return Mouse.current.middleButton.wasReleasedThisFrame;
+        }
+        return false;
+#else
+        return Input.GetMouseButtonUp(button);
+#endif
+    }
+
+    public static bool GetMouseButton(int button)
+    {
+#if ENABLE_INPUT_SYSTEM
+        switch (button)
+        {
+            case 0:
+                return Mouse.current.leftButton.isPressed;
+            case 1:
+                return Mouse.current.rightButton.isPressed;
+            case 2:
+                return Mouse.current.middleButton.isPressed;
+        }
+        return false;
+#else
+        return Input.GetMouseButton(button);
+#endif
     }
 
     public class SimulateButton

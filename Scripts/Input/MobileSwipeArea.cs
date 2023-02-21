@@ -48,7 +48,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
         PointerEventData tempPointer;
         bool hasPointer = false;
         tempPointer = new PointerEventData(EventSystem.current);
-        tempPointer.position = Input.mousePosition;
+        tempPointer.position = InputManager.MousePosition();
         EventSystem.current.RaycastAll(tempPointer, raycastResults);
         if (raycastResults != null && raycastResults.Count > 0)
         {
@@ -56,7 +56,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
             {
                 if (!IsDragging && Input.GetMouseButton(0))
                 {
-                    OnPointerDown(Input.mousePosition);
+                    OnPointerDown(InputManager.MousePosition());
                     return;
                 }
                 hasPointer = true;
@@ -71,7 +71,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
         }
 
         if (hasPointer)
-            OnDrag(Input.mousePosition);
+            OnDrag(InputManager.MousePosition());
     }
 
     private void UpdateMobile()

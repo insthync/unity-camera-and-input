@@ -44,7 +44,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
         PointerEventData tempPointer;
         bool hasPointer = false;
         tempPointer = new PointerEventData(EventSystem.current);
-        tempPointer.position = Input.mousePosition;
+        tempPointer.position = InputManager.MousePosition();
         EventSystem.current.RaycastAll(tempPointer, raycastResults);
         if (raycastResults != null && raycastResults.Count > 0)
         {
@@ -52,7 +52,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
             {
                 if (!IsZooming && Input.GetMouseButton(1))
                 {
-                    OnPointerDown(Input.mousePosition, -Input.mousePosition);
+                    OnPointerDown(InputManager.MousePosition(), -InputManager.MousePosition());
                     return;
                 }
                 hasPointer = true;
@@ -68,7 +68,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
         if (hasPointer)
         {
-            OnZoom_Standalone(Input.mousePosition, -Input.mousePosition);
+            OnZoom_Standalone(InputManager.MousePosition(), -InputManager.MousePosition());
         }
     }
 
