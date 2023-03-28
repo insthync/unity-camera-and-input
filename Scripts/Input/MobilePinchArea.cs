@@ -33,6 +33,8 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
 
     public void Update()
     {
+        if (EventSystem.current == null)
+            return;
         if (Application.isMobilePlatform)
             UpdateMobile();
         else if (!Application.isConsolePlatform)
