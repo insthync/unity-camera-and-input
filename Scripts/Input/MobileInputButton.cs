@@ -59,6 +59,7 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
         onPointerDown.Invoke();
         InputManager.SetButtonDown(keyName);
         buttonAlreadyDown = true;
+        InputManager.touchedPointerIds[eventData.pointerId] = gameObject;
         SetPressedState();
     }
 
@@ -67,6 +68,7 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
         onPointerUp.Invoke();
         InputManager.SetButtonUp(keyName);
         buttonAlreadyDown = false;
+        InputManager.touchedPointerIds.Remove(eventData.pointerId);
         SetIdleState();
     }
 

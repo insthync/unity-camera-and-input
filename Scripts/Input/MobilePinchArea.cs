@@ -9,16 +9,17 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     [SerializeField]
     private float sensitivity = 1f;
 
+    public bool DisableInput { get; set; }
+
+    private bool isZooming;
     public bool IsZooming
     {
-        get; private set;
+        get => isZooming && !DisableInput; private set => isZooming = value;
     }
 
     private Graphic graphic;
     private Vector2? previousTouchPosition1;
     private Vector2? previousTouchPosition2;
-    private int pointerId1;
-    private int pointerId2;
     private PointerEventData previousPointer1;
     private PointerEventData previousPointer2;
     private int lastDragFrame;
@@ -42,22 +43,18 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     {
         if (!Application.isMobilePlatform)
             return;
+        if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
+            return;
         if (previousPointer1 == null)
-        {
-            pointerId1 = eventData.pointerId;
             previousPointer1 = eventData;
-        }
         else if (previousPointer2 == null)
-        {
-            pointerId2 = eventData.pointerId;
             previousPointer2 = eventData;
-        }
         if (previousPointer1 != null && previousPointer2 != null)
         {
             previousTouchPosition1 = null;
             previousTouchPosition2 = null;
             if (swipeArea != null)
-                swipeArea.enabled = false;
+                swipeArea.DisableInput = true;
             IsZooming = true;
         }
     }
@@ -68,7 +65,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
             return;
         Vector2 pointerDelta1 = Vector2.zero;
         Vector2 pointerDelta2 = Vector2.zero;
-        if (eventData.pointerId == pointerId1)
+        if (previousPointer1 != null && previousPointer1.pointerId == eventData.pointerId)
         {
             previousPointer1 = eventData;
             if (!previousTouchPosition1.HasValue)
@@ -76,7 +73,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
             pointerDelta1 = eventData.position - previousTouchPosition1.Value;
             previousTouchPosition1 = eventData.position;
         }
-        if (eventData.pointerId == pointerId2)
+        if (previousPointer2 != null && previousPointer2.pointerId == eventData.pointerId)
         {
             previousPointer2 = eventData;
             if (!previousTouchPosition2.HasValue)
@@ -87,7 +84,6 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
         // Use 2 pointers to pinch
         if (previousPointer1 == null || previousPointer2 == null)
             return;
-        InputManager.UpdateMobileInputDragging();
         Vector2 curPos1 = previousTouchPosition1.Value;
         Vector2 curPos2 = previousTouchPosition2.Value;
         // Find the position in the previous frame of each touch.
@@ -99,8 +95,9 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
         // Find the difference in the distances between each frame.
         float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
         // Update virtual axes
-        InputManager.SetAxis(axisName, deltaMagnitudeDiff * sensitivity * Time.deltaTime * 100f);
-
+        UpdateVirtualAxisByDeltaMagnitudeDiff(deltaMagnitudeDiff);
+        if (DisableInput)
+            InputManager.UpdateMobileInputDragging();
         lastDragFrame = Time.frameCount;
     }
 
@@ -123,34 +120,31 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     {
         if (!Application.isMobilePlatform)
             return;
-        if (eventData != null && eventData.pointerId == pointerId1)
-            previousPointer1 = null;
-        if (eventData != null && eventData.pointerId == pointerId2)
-            previousPointer2 = null;
         if (eventData == null)
         {
             previousPointer1 = null;
             previousPointer2 = null;
         }
+        else
+        {
+            if (previousPointer1 != null && previousPointer1.pointerId == eventData.pointerId)
+                previousPointer1 = null;
+            if (previousPointer2 != null && previousPointer2.pointerId == eventData.pointerId)
+                previousPointer2 = null;
+        }
         if (previousPointer1 == null || previousPointer2 == null)
         {
-            InputManager.SetAxis(axisName, 0f);
+            UpdateVirtualAxis(0f);
             IsZooming = false;
             if (swipeArea != null)
-            {
-                swipeArea.enabled = true;
-                if (previousPointer1 != null)
-                    swipeArea.OnPointerDown(previousPointer1);
-                else if (previousPointer2 != null)
-                    swipeArea.OnPointerDown(previousPointer2);
-            }
+                swipeArea.DisableInput = false;
         }
     }
 
     private void UpdateStandalone()
     {
         if (swipeArea != null)
-            swipeArea.enabled = !IsZooming;
+            swipeArea.DisableInput = IsZooming;
         PointerEventData tempPointer;
         bool hasPointer = false;
         tempPointer = new PointerEventData(EventSystem.current);
@@ -187,13 +181,13 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
         IsZooming = true;
         previousTouchPosition1 = pointerPosition1;
         previousTouchPosition2 = pointerPosition2;
-        InputManager.SetAxis(axisName, 0f);
+        UpdateVirtualAxis(0f);
     }
 
     private void OnPointerUp()
     {
         IsZooming = false;
-        InputManager.SetAxis(axisName, 0f);
+        UpdateVirtualAxis(0f);
     }
 
     private void OnZoom_Standalone(Vector2 pointerPosition1, Vector2 pointerPosition2)
@@ -209,6 +203,18 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
         previousTouchPosition1 = pointerPosition1;
         previousTouchPosition2 = pointerPosition2;
         // Update virtual axes
-        InputManager.SetAxis(axisName, deltaMagnitudeDiff * sensitivity * Time.deltaTime * 100f);
+        UpdateVirtualAxisByDeltaMagnitudeDiff(deltaMagnitudeDiff);
+    }
+
+    private void UpdateVirtualAxisByDeltaMagnitudeDiff(float deltaMagnitudeDiff)
+    {
+        UpdateVirtualAxis(deltaMagnitudeDiff * sensitivity * Time.deltaTime * 100f);
+    }
+
+    public void UpdateVirtualAxis(float value)
+    {
+        if (DisableInput)
+            value = 0f;
+        InputManager.SetAxis(axisName, value);
     }
 }

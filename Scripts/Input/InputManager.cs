@@ -12,6 +12,7 @@ public static class InputManager
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
     public static bool useMobileInputOnNonMobile = false;
     public static bool useNonMobileInput = false;
+    internal static readonly Dictionary<int, GameObject> touchedPointerIds = new Dictionary<int, GameObject>();
 
     private static int mobileInputLastDragFrame;
     public static bool IsDraggingMobileInput

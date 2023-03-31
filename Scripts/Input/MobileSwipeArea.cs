@@ -13,14 +13,16 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     [SerializeField]
     private float ySensitivity = 1f;
 
+    public bool DisableInput { get; set; }
+
+    private bool isDragging;
     public bool IsDragging
     {
-        get; private set;
+        get => isDragging && !DisableInput; private set => isDragging = value;
     }
 
     private Graphic graphic;
     private Vector2? previousTouchPosition;
-    private int pointerId;
     private PointerEventData previousPointer;
     private int lastDragFrame;
 
@@ -37,9 +39,10 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
+            return;
         if (previousPointer != null)
             return;
-        pointerId = eventData.pointerId;
         previousPointer = eventData;
         previousTouchPosition = null;
         IsDragging = true;
@@ -47,15 +50,16 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (previousPointer == null || pointerId != eventData.pointerId)
+        if (previousPointer == null || previousPointer.pointerId != eventData.pointerId)
             return;
-        InputManager.UpdateMobileInputDragging();
         previousPointer = eventData;
         if (!previousTouchPosition.HasValue)
             previousTouchPosition = eventData.position;
         Vector2 pointerDelta = eventData.position - previousTouchPosition.Value;
         previousTouchPosition = eventData.position;
         UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
+        if (DisableInput)
+            InputManager.UpdateMobileInputDragging();
         lastDragFrame = Time.frameCount;
     }
 
@@ -67,7 +71,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (eventData != null && eventData.pointerId != pointerId)
+        if (previousPointer != null && eventData != null && previousPointer.pointerId != eventData.pointerId)
             return;
         IsDragging = false;
         previousPointer = null;
@@ -76,6 +80,9 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
 
     public void UpdateVirtualAxes(Vector2 value)
     {
+        if (DisableInput)
+            value = Vector2.zero;
+
         if (useAxisX)
             InputManager.SetAxis(axisXName, value.x);
 

@@ -190,6 +190,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         if (!Interactable || IsDragging)
             return;
 
+        InputManager.touchedPointerIds[eventData.pointerId] = gameObject;
+
         if (useButtons && buttonKeyNames != null)
         {
             foreach (string buttonKeyName in buttonKeyNames)
@@ -226,13 +228,17 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        InputManager.touchedPointerIds.Remove(eventData.pointerId);
+
         if (SetAsLastSiblingOnDrag)
             transform.SetSiblingIndex(defaultSiblingIndex);
 
         if (useButtons && buttonKeyNames != null)
         {
             foreach (string buttonKeyName in buttonKeyNames)
+            {
                 InputManager.SetButtonUp(buttonKeyName);
+            }
         }
 
         onPointerUp.Invoke();
