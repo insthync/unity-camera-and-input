@@ -255,7 +255,6 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         SetIdleState();
     }
 
-
     public void OnDrag(PointerEventData eventData)
     {
         if (!IsDragging)

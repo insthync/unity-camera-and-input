@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MobilePinchArea : MonoBehaviour, IMobileInputArea
+public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     public string axisName = "Mouse ScrollWheel";
     [SerializeField]
@@ -15,34 +15,135 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
     }
 
     private Graphic graphic;
-    private Vector2 previousTouchPosition1;
-    private Vector2 previousTouchPosition2;
+    private Vector2? previousTouchPosition1;
+    private Vector2? previousTouchPosition2;
+    private int pointerId1;
+    private int pointerId2;
+    private PointerEventData previousPointer1;
+    private PointerEventData previousPointer2;
+    private int lastDragFrame;
+
     private List<Touch> touches = new List<Touch>();
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
+    private MobileSwipeArea swipeArea;
 
     private void Awake()
     {
         graphic = GetComponent<Graphic>();
         graphic.raycastTarget = true;
+        swipeArea = GetComponent<MobileSwipeArea>();
     }
 
     private void OnDisable()
     {
-        InputManager.SetAxis(axisName, 0f);
+        OnPointerUp(null);
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (!Application.isMobilePlatform)
+            return;
+        if (previousPointer1 == null)
+        {
+            pointerId1 = eventData.pointerId;
+            previousPointer1 = eventData;
+        }
+        if (previousPointer2 == null)
+        {
+            pointerId2 = eventData.pointerId;
+            previousPointer2 = eventData;
+        }
+        if (previousPointer1 != null && previousPointer2 != null)
+        {
+            previousTouchPosition1 = null;
+            previousTouchPosition2 = null;
+            if (swipeArea != null)
+                swipeArea.enabled = false;
+        }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (!Application.isMobilePlatform)
+            return;
+        Vector2 pointerDelta1 = Vector2.zero;
+        Vector2 pointerDelta2 = Vector2.zero;
+        if (eventData.pointerId == pointerId1)
+        {
+            previousPointer1 = eventData;
+            if (!previousTouchPosition1.HasValue)
+                previousTouchPosition1 = eventData.position;
+            pointerDelta1 = eventData.position - previousTouchPosition1.Value;
+            previousTouchPosition1 = eventData.position;
+        }
+        if (eventData.pointerId == pointerId2)
+        {
+            previousPointer2 = eventData;
+            if (!previousTouchPosition2.HasValue)
+                previousTouchPosition2 = eventData.position;
+            pointerDelta2 = eventData.position - previousTouchPosition2.Value;
+            previousTouchPosition2 = eventData.position;
+        }
+        // Use 2 pointers to pinch
+        if (previousPointer1 == null || previousPointer2 == null)
+            return;
+        Vector2 curPos1 = previousTouchPosition1.Value;
+        Vector2 curPos2 = previousTouchPosition2.Value;
+        // Find the position in the previous frame of each touch.
+        Vector2 prevPos1 = curPos1 - pointerDelta1;
+        Vector2 prevPos2 = curPos2 - pointerDelta2;
+        // Find the magnitude of the vector (the distance) between the touches in each frame.
+        float prevTouchDeltaMag = (prevPos1 - prevPos2).magnitude;
+        float touchDeltaMag = (curPos1 - curPos2).magnitude;
+        // Find the difference in the distances between each frame.
+        float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
+        // Update virtual axes
+        InputManager.SetAxis(axisName, deltaMagnitudeDiff * sensitivity * Time.deltaTime * 100f);
+
+        lastDragFrame = Time.frameCount;
     }
 
     public void Update()
     {
-        if (EventSystem.current == null)
-            return;
-        if (Application.isMobilePlatform)
-            UpdateMobile();
-        else if (!Application.isConsolePlatform)
+        if (!Application.isMobilePlatform && !Application.isConsolePlatform)
+        {
             UpdateStandalone();
+            return;
+        }
+
+        if (Time.frameCount > lastDragFrame && previousPointer1 != null && previousPointer2 != null)
+        {
+            OnDrag(previousPointer1);
+            OnDrag(previousPointer2);
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (!Application.isMobilePlatform)
+            return;
+        if (eventData != null && eventData.pointerId == pointerId1)
+            previousPointer1 = null;
+        if (eventData != null && eventData.pointerId == pointerId2)
+            previousPointer2 = null;
+        if (previousPointer1 == null || previousPointer2 == null)
+        {
+            InputManager.SetAxis(axisName, 0f);
+            if (swipeArea != null)
+            {
+                swipeArea.enabled = true;
+                if (previousPointer1 != null)
+                    swipeArea.OnPointerDown(previousPointer1);
+                else if (previousPointer2 != null)
+                    swipeArea.OnPointerDown(previousPointer2);
+            }
+        }
     }
 
     private void UpdateStandalone()
     {
+        if (swipeArea != null)
+            swipeArea.enabled = !IsZooming;
         PointerEventData tempPointer;
         bool hasPointer = false;
         tempPointer = new PointerEventData(EventSystem.current);
@@ -127,7 +228,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea
         if (!IsZooming)
             return;
         // Find the magnitude of the vector (the distance) between the touches in each frame.
-        float prevTouchDeltaMag = (previousTouchPosition1 - previousTouchPosition2).magnitude;
+        float prevTouchDeltaMag = (previousTouchPosition1.Value - previousTouchPosition2.Value).magnitude;
         float touchDeltaMag = (pointerPosition1 - pointerPosition2).magnitude;
         // Find the difference in the distances between each frame.
         float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;

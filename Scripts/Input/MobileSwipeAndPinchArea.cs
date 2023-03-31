@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(MobileSwipeArea))]
 [RequireComponent(typeof(MobilePinchArea))]

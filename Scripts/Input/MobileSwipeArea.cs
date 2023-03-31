@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
+public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     public bool useAxisX = true;
     public bool useAxisY = true;
@@ -20,9 +19,10 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
     }
 
     private Graphic graphic;
-    private Vector2 previousTouchPosition;
-    private List<Touch> touches = new List<Touch>();
-    private List<RaycastResult> raycastResults = new List<RaycastResult>();
+    private Vector2? previousTouchPosition;
+    private int pointerId;
+    private PointerEventData previousPointer;
+    private int lastDragFrame;
 
     private void Awake()
     {
@@ -32,104 +32,45 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea
 
     private void OnDisable()
     {
-        UpdateVirtualAxes(Vector2.zero);
+        OnPointerUp(null);
     }
 
-    public void Update()
+    public void OnPointerDown(PointerEventData eventData)
     {
-        if (EventSystem.current == null)
+        if (previousPointer != null)
             return;
-        if (Application.isMobilePlatform)
-            UpdateMobile();
-        else if (!Application.isConsolePlatform)
-            UpdateStandalone();
-    }
-
-    private void UpdateStandalone()
-    {
-        PointerEventData tempPointer;
-        bool hasPointer = false;
-        tempPointer = new PointerEventData(EventSystem.current);
-        tempPointer.position = InputManager.MousePosition();
-        EventSystem.current.RaycastAll(tempPointer, raycastResults);
-        if (raycastResults != null && raycastResults.Count > 0)
-        {
-            if (raycastResults[0].gameObject == gameObject)
-            {
-                if (!IsDragging && Input.GetMouseButton(0))
-                {
-                    OnPointerDown(InputManager.MousePosition());
-                    return;
-                }
-                hasPointer = true;
-            }
-        }
-
-        if (!hasPointer || !Input.GetMouseButton(0))
-        {
-            if (IsDragging)
-                OnPointerUp();
-            return;
-        }
-
-        if (hasPointer)
-            OnDrag(InputManager.MousePosition());
-    }
-
-    private void UpdateMobile()
-    {
-        PointerEventData tempPointer;
-        touches.Clear();
-        for (int i = 0; i < Input.touchCount; ++i)
-        {
-            tempPointer = new PointerEventData(EventSystem.current);
-            tempPointer.position = Input.touches[i].position;
-            EventSystem.current.RaycastAll(tempPointer, raycastResults);
-            if (raycastResults != null && raycastResults.Count == 1)
-            {
-                if (raycastResults[0].gameObject == gameObject &&
-                    !MobileMovementJoystick.JoystickTouches.Contains(Input.touches[i].fingerId))
-                    touches.Add(Input.touches[i]);
-            }
-        }
-
-        if (touches.Count != 1)
-        {
-            if (IsDragging)
-                OnPointerUp();
-            return;
-        }
-
-        if (touches[0].phase == TouchPhase.Began && !IsDragging)
-            OnPointerDown(touches[0].position);
-
-        if (touches[0].phase == TouchPhase.Moved ||
-            touches[0].phase == TouchPhase.Stationary)
-            OnDrag(touches[0].position);
-    }
-
-    private void OnPointerDown(Vector2 pointerPosition)
-    {
+        pointerId = eventData.pointerId;
+        previousPointer = eventData;
+        previousTouchPosition = null;
         IsDragging = true;
-        previousTouchPosition = pointerPosition;
-        UpdateVirtualAxes(Vector2.zero);
     }
 
-    private void OnPointerUp()
+    public void OnDrag(PointerEventData eventData)
     {
-        IsDragging = false;
-        UpdateVirtualAxes(Vector2.zero);
-    }
-
-    private void OnDrag(Vector2 pointerPosition)
-    {
-        if (!IsDragging)
+        if (previousPointer == null || pointerId != eventData.pointerId)
             return;
-        Vector2 pointerDelta = pointerPosition - previousTouchPosition;
-        // Set previous touch position to use next frame
-        previousTouchPosition = pointerPosition;
-        // Update virtual axes
+        previousPointer = eventData;
+        if (!previousTouchPosition.HasValue)
+            previousTouchPosition = eventData.position;
+        Vector2 pointerDelta = eventData.position - previousTouchPosition.Value;
+        previousTouchPosition = eventData.position;
         UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
+        lastDragFrame = Time.frameCount;
+    }
+
+    private void Update()
+    {
+        if (Time.frameCount > lastDragFrame && previousPointer != null)
+            OnDrag(previousPointer);
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData != null && eventData.pointerId != pointerId)
+            return;
+        IsDragging = false;
+        previousPointer = null;
+        UpdateVirtualAxes(Vector2.zero);
     }
 
     public void UpdateVirtualAxes(Vector2 value)
