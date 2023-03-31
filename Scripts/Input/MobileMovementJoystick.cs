@@ -6,7 +6,6 @@ using UnityEngine.Serialization;
 
 public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
-    internal static readonly HashSet<int> JoystickTouches = new HashSet<int>();
     public enum EMode
     {
         Default,
@@ -94,35 +93,36 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         set { hideWhileIdle = value; }
     }
 
+
+    private bool _isDragging;
     public bool IsDragging
     {
-        get; private set;
+        get => _isDragging && Interactable; private set => _isDragging = value;
     }
 
-    public Vector2 CurrentPosition
-    {
-        get; private set;
-    }
+    public Vector2 CurrentPosition { get; private set; }
 
-    private Vector3 backgroundOffset;
-    private Vector3 defaultControllerLocalPosition;
-    private Vector2 startDragPosition;
-    private Vector2 startDragLocalPosition;
-    private int defaultSiblingIndex;
-    private CanvasGroup canvasGroup;
-    private float defaultCanvasGroupAlpha;
-    private CanvasGroup backgroundCanvasGroup;
-    private CanvasGroup handlerCanvasGroup;
-    private MobileInputConfig config;
-    private bool swipping;
+    private Vector3 _backgroundOffset;
+    private Vector3 _defaultControllerLocalPosition;
+    private Vector2 _startDragPosition;
+    private Vector2 _startDragLocalPosition;
+    private int _defaultSiblingIndex;
+    private CanvasGroup _canvasGroup;
+    private float _defaultCanvasGroupAlpha;
+    private CanvasGroup _backgroundCanvasGroup;
+    private CanvasGroup _handlerCanvasGroup;
+    private MobileInputConfig _config;
+    private Vector2? _previousTouchPosition;
+    private PointerEventData _previousPointer;
+    private int _lastDragFrame;
 
     private void Start()
     {
-        canvasGroup = GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
+        _canvasGroup = GetComponent<CanvasGroup>();
+        if (_canvasGroup == null)
         {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            canvasGroup.alpha = 1f;
+            _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            _canvasGroup.alpha = 1f;
         }
         if (controllerHandler != null)
         {
@@ -130,9 +130,9 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             controllerHandler.anchorMax = Vector2.one * 0.5f;
             controllerHandler.pivot = Vector2.one * 0.5f;
             // Get canvas group, will use it to change alpha later
-            handlerCanvasGroup = controllerHandler.GetComponent<CanvasGroup>();
-            if (handlerCanvasGroup != null)
-                handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
+            _handlerCanvasGroup = controllerHandler.GetComponent<CanvasGroup>();
+            if (_handlerCanvasGroup != null)
+                _handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
         }
         if (controllerBackground != null && controllerBackground.transform == transform)
         {
@@ -145,94 +145,132 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             controllerBackground.anchorMax = Vector2.one * 0.5f;
             controllerBackground.pivot = Vector2.one * 0.5f;
             // Prepare background offset, it will be used to calculate joystick movement
-            backgroundOffset = controllerBackground.position - controllerHandler.position;
+            _backgroundOffset = controllerBackground.position - controllerHandler.position;
             // Get canvas group, will use it to change alpha later
-            backgroundCanvasGroup = controllerBackground.GetComponent<CanvasGroup>();
-            if (backgroundCanvasGroup != null)
-                backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
+            _backgroundCanvasGroup = controllerBackground.GetComponent<CanvasGroup>();
+            if (_backgroundCanvasGroup != null)
+                _backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
         }
-        config = GetComponent<MobileInputConfig>();
-        if (config != null)
+        _config = GetComponent<MobileInputConfig>();
+        if (_config != null)
         {
             // Updating default canvas group alpha when loading new config
-            config.onLoadAlpha += OnLoadAlpha;
+            _config.onLoadAlpha += OnLoadAlpha;
         }
-        defaultCanvasGroupAlpha = canvasGroup.alpha;
-        defaultControllerLocalPosition = controllerHandler.localPosition;
-        defaultSiblingIndex = transform.GetSiblingIndex();
+        _defaultCanvasGroupAlpha = _canvasGroup.alpha;
+        _defaultControllerLocalPosition = controllerHandler.localPosition;
+        _defaultSiblingIndex = transform.GetSiblingIndex();
         SetIdleState();
     }
 
     private void OnDestroy()
     {
-        if (config != null)
-            config.onLoadAlpha -= OnLoadAlpha;
+        if (_config != null)
+            _config.onLoadAlpha -= OnLoadAlpha;
     }
 
     private void OnDisable()
     {
-        UpdateVirtualAxes(Vector2.zero);
-        SetIdleState();
-    }
-
-    private void LateUpdate()
-    {
-        if (swipping)
-        {
-            // Clear axis movement after swipped
-            UpdateVirtualAxes(Vector2.zero);
-            swipping = false;
-        }
+        OnPointerUp(null);
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!Interactable || IsDragging)
+        if (!Interactable)
             return;
 
+        if (_previousPointer != null)
+            return;
+        _previousPointer = eventData;
+        _previousTouchPosition = null;
         InputManager.touchedPointerIds[eventData.pointerId] = gameObject;
 
+        // Simulate button pressing
         if (useButtons && buttonKeyNames != null)
         {
             foreach (string buttonKeyName in buttonKeyNames)
                 InputManager.SetButtonDown(buttonKeyName);
         }
-
         onPointerDown.Invoke();
 
-        if (fixControllerPosition)
-            controllerHandler.localPosition = defaultControllerLocalPosition;
-        else
-            controllerHandler.position = eventData.position;
-
+        // Move transform
         if (SetAsLastSiblingOnDrag)
             transform.SetAsLastSibling();
 
+        // Set handler position
+        if (fixControllerPosition)
+            controllerHandler.localPosition = _defaultControllerLocalPosition;
+        else
+            controllerHandler.position = eventData.position;
+
+        // Set background position
         if (controllerBackground != null)
-            controllerBackground.position = backgroundOffset + controllerHandler.position;
+            controllerBackground.position = _backgroundOffset + controllerHandler.position;
 
-        if (backgroundCanvasGroup != null)
-            backgroundCanvasGroup.alpha = backgroundAlphaWhileMoving;
+        // Set canvas alpha
+        if (_backgroundCanvasGroup != null)
+            _backgroundCanvasGroup.alpha = backgroundAlphaWhileMoving;
 
-        if (handlerCanvasGroup != null)
-            handlerCanvasGroup.alpha = handlerAlphaWhileMoving;
+        if (_handlerCanvasGroup != null)
+            _handlerCanvasGroup.alpha = handlerAlphaWhileMoving;
 
-        CurrentPosition = startDragPosition = controllerHandler.position;
-        startDragLocalPosition = controllerHandler.localPosition;
-        UpdateVirtualAxes(Vector3.zero);
-        if (!JoystickTouches.Contains(eventData.pointerId))
-            JoystickTouches.Add(eventData.pointerId);
-        IsDragging = true;
+        _startDragPosition = controllerHandler.position;
+        _startDragLocalPosition = controllerHandler.localPosition;
         SetDraggingState();
+        IsDragging = true;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (_previousPointer == null || _previousPointer.pointerId != eventData.pointerId)
+            return;
+        _previousPointer = eventData;
+        if (!_previousTouchPosition.HasValue)
+            _previousTouchPosition = eventData.position;
+        CurrentPosition = eventData.position;
+
+        // Use previous position to find delta from last frame
+        Vector2 pointerDelta = eventData.position - _previousTouchPosition.Value;
+        // Set position to use next frame
+        _previousTouchPosition = eventData.position;
+
+        // Find distance from start position, it will be used to find move direction
+        Vector2 distanceFromStartPosition = eventData.position - _startDragPosition;
+        distanceFromStartPosition = Vector2.ClampMagnitude(distanceFromStartPosition, movementRange);
+
+        // Move the handler
+        controllerHandler.localPosition = _startDragLocalPosition + distanceFromStartPosition;
+
+        // Update virtual axes
+        switch (mode)
+        {
+            case EMode.SwipeArea:
+                UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
+                break;
+            default:
+                UpdateVirtualAxes((_startDragPosition - (_startDragPosition + distanceFromStartPosition)) / movementRange * -1);
+                break;
+        }
+        // Update dragging state
+        InputManager.UpdateMobileInputDragging();
+        _lastDragFrame = Time.frameCount;
+    }
+
+    private void Update()
+    {
+        if (Time.frameCount > _lastDragFrame && _previousPointer != null)
+            OnDrag(_previousPointer);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        InputManager.touchedPointerIds.Remove(eventData.pointerId);
+        if (_previousPointer != null && eventData != null && _previousPointer.pointerId != eventData.pointerId)
+            return;
+        if (_previousPointer != null)
+            InputManager.touchedPointerIds.Remove(_previousPointer.pointerId);
+        _previousPointer = null;
 
-        if (SetAsLastSiblingOnDrag)
-            transform.SetSiblingIndex(defaultSiblingIndex);
-
+        // Simulate button pressing
         if (useButtons && buttonKeyNames != null)
         {
             foreach (string buttonKeyName in buttonKeyNames)
@@ -240,68 +278,36 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
                 InputManager.SetButtonUp(buttonKeyName);
             }
         }
-
         onPointerUp.Invoke();
 
-        controllerHandler.localPosition = defaultControllerLocalPosition;
+        // Reset transform sibling
+        if (eventData != null && SetAsLastSiblingOnDrag)
+            transform.SetSiblingIndex(_defaultSiblingIndex);
 
+        // Reset handler position
+        controllerHandler.localPosition = _defaultControllerLocalPosition;
+
+        // Reset background position
         if (controllerBackground != null)
-            controllerBackground.position = backgroundOffset + controllerHandler.position;
+            controllerBackground.position = _backgroundOffset + controllerHandler.position;
 
-        if (backgroundCanvasGroup != null)
-            backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
+        // Reset canvas alpha
+        if (_backgroundCanvasGroup != null)
+            _backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
 
-        if (handlerCanvasGroup != null)
-            handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
+        if (_handlerCanvasGroup != null)
+            _handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
 
         UpdateVirtualAxes(Vector3.zero);
-        if (JoystickTouches.Contains(eventData.pointerId))
-            JoystickTouches.Remove(eventData.pointerId);
-        IsDragging = false;
         SetIdleState();
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (!IsDragging)
-        {
-            // It will be true while it's Interactable 
-            return;
-        }
-
-        InputManager.UpdateMobileInputDragging();
-
-        Vector2 pointerDelta = eventData.position - CurrentPosition; // Current Position actually is previous pointer position
-        // Get cursor position (Also using it as previous touch position to use next frame)
-        CurrentPosition = eventData.position;
-
-        Vector2 allowedOffsets = CurrentPosition - startDragPosition;
-        allowedOffsets = Vector2.ClampMagnitude(allowedOffsets, movementRange);
-
-        // Prepare offsets
-        Vector2 newOffsets = Vector2.zero;
-        if (useAxisX)
-            newOffsets.x = allowedOffsets.x;
-        if (useAxisY)
-            newOffsets.y = allowedOffsets.y;
-
-        controllerHandler.localPosition = startDragLocalPosition + newOffsets;
-
-        // Update virtual axes
-        switch (mode)
-        {
-            case EMode.SwipeArea:
-                UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
-                swipping = true;
-                break;
-            default:
-                UpdateVirtualAxes((startDragPosition - (startDragPosition + newOffsets)) / movementRange * -1);
-                break;
-        }
+        IsDragging = false;
     }
 
     public void UpdateVirtualAxes(Vector2 value)
     {
+        if (!IsDragging)
+            return;
+
         if (useAxisX)
             InputManager.SetAxis(axisXName, value.x * (mode == EMode.SwipeArea ? 1f : axisXScale));
 
@@ -311,18 +317,18 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     private void SetIdleState()
     {
-        if (canvasGroup)
-            canvasGroup.alpha = hideWhileIdle ? 0f : defaultCanvasGroupAlpha;
+        if (_canvasGroup)
+            _canvasGroup.alpha = hideWhileIdle ? 0f : _defaultCanvasGroupAlpha;
     }
 
     private void SetDraggingState()
     {
-        if (canvasGroup)
-            canvasGroup.alpha = defaultCanvasGroupAlpha;
+        if (_canvasGroup)
+            _canvasGroup.alpha = _defaultCanvasGroupAlpha;
     }
 
     public void OnLoadAlpha(float alpha)
     {
-        defaultCanvasGroupAlpha = alpha;
+        _defaultCanvasGroupAlpha = alpha;
     }
 }

@@ -12,24 +12,30 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     private float xSensitivity = 1f;
     [SerializeField]
     private float ySensitivity = 1f;
+    [SerializeField]
+    private bool interactable = true;
 
-    public bool DisableInput { get; set; }
-
-    private bool isDragging;
-    public bool IsDragging
+    public bool Interactable
     {
-        get => isDragging && !DisableInput; private set => isDragging = value;
+        get { return interactable; }
+        set { interactable = value; }
     }
 
-    private Graphic graphic;
-    private Vector2? previousTouchPosition;
-    private PointerEventData previousPointer;
-    private int lastDragFrame;
+    private bool _isSwiping;
+    public bool IsSwiping
+    {
+        get => _isSwiping && Interactable; private set => _isSwiping = value;
+    }
+
+    private Graphic _graphic;
+    private Vector2? _previousTouchPosition;
+    private PointerEventData _previousPointer;
+    private int _lastDragFrame;
 
     private void Awake()
     {
-        graphic = GetComponent<Graphic>();
-        graphic.raycastTarget = true;
+        _graphic = GetComponent<Graphic>();
+        _graphic.raycastTarget = true;
     }
 
     private void OnDisable()
@@ -41,46 +47,48 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     {
         if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
             return;
-        if (previousPointer != null)
+        if (_previousPointer != null)
             return;
-        previousPointer = eventData;
-        previousTouchPosition = null;
-        IsDragging = true;
+        _previousPointer = eventData;
+        _previousTouchPosition = null;
+        IsSwiping = true;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (previousPointer == null || previousPointer.pointerId != eventData.pointerId)
+        if (_previousPointer == null || _previousPointer.pointerId != eventData.pointerId)
             return;
-        previousPointer = eventData;
-        if (!previousTouchPosition.HasValue)
-            previousTouchPosition = eventData.position;
-        Vector2 pointerDelta = eventData.position - previousTouchPosition.Value;
-        previousTouchPosition = eventData.position;
+        _previousPointer = eventData;
+        if (!_previousTouchPosition.HasValue)
+            _previousTouchPosition = eventData.position;
+        // Use previous position to find delta from last frame
+        Vector2 pointerDelta = eventData.position - _previousTouchPosition.Value;
+        // Set position to use next frame
+        _previousTouchPosition = eventData.position;
         UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
-        if (DisableInput)
-            InputManager.UpdateMobileInputDragging();
-        lastDragFrame = Time.frameCount;
+        // Update dragging state
+        InputManager.UpdateMobileInputDragging();
+        _lastDragFrame = Time.frameCount;
     }
 
     private void Update()
     {
-        if (Time.frameCount > lastDragFrame && previousPointer != null)
-            OnDrag(previousPointer);
+        if (Time.frameCount > _lastDragFrame && _previousPointer != null)
+            OnDrag(_previousPointer);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (previousPointer != null && eventData != null && previousPointer.pointerId != eventData.pointerId)
+        if (_previousPointer != null && eventData != null && _previousPointer.pointerId != eventData.pointerId)
             return;
-        IsDragging = false;
-        previousPointer = null;
+        IsSwiping = false;
+        _previousPointer = null;
         UpdateVirtualAxes(Vector2.zero);
     }
 
     public void UpdateVirtualAxes(Vector2 value)
     {
-        if (DisableInput)
+        if (!Interactable)
             value = Vector2.zero;
 
         if (useAxisX)
