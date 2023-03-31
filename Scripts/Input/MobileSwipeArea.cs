@@ -49,6 +49,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     {
         if (previousPointer == null || pointerId != eventData.pointerId)
             return;
+        InputManager.UpdateMobileInputDragging();
         previousPointer = eventData;
         if (!previousTouchPosition.HasValue)
             previousTouchPosition = eventData.position;

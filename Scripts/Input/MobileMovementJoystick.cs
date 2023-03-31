@@ -263,6 +263,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             return;
         }
 
+        InputManager.UpdateMobileInputDragging();
+
         Vector2 pointerDelta = eventData.position - CurrentPosition; // Current Position actually is previous pointer position
         // Get cursor position (Also using it as previous touch position to use next frame)
         CurrentPosition = eventData.position;

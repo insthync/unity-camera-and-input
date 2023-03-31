@@ -87,6 +87,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
         // Use 2 pointers to pinch
         if (previousPointer1 == null || previousPointer2 == null)
             return;
+        InputManager.UpdateMobileInputDragging();
         Vector2 curPos1 = previousTouchPosition1.Value;
         Vector2 curPos2 = previousTouchPosition2.Value;
         // Find the position in the previous frame of each touch.

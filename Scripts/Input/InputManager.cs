@@ -13,10 +13,24 @@ public static class InputManager
     public static bool useMobileInputOnNonMobile = false;
     public static bool useNonMobileInput = false;
 
+    private static int mobileInputLastDragFrame;
+    public static bool IsDraggingMobileInput
+    {
+        get
+        {
+            return Time.frameCount - mobileInputLastDragFrame <= 1;
+        }
+    }
+
 #if ENABLE_INPUT_SYSTEM
     private static HashSet<string> alreadyFindInputActionNames = new HashSet<string>();
     private static Dictionary<string, InputAction> foundInputActions = new Dictionary<string, InputAction>();
 #endif
+
+    public static void UpdateMobileInputDragging()
+    {
+        mobileInputLastDragFrame = Time.frameCount;
+    }
 
     public static bool HasInputSetting(string keyName)
     {
