@@ -57,17 +57,17 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
     public void OnPointerDown(PointerEventData eventData)
     {
         onPointerDown.Invoke();
-        SetPressedState();
         InputManager.SetButtonDown(keyName);
         buttonAlreadyDown = true;
+        SetPressedState();
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         onPointerUp.Invoke();
-        SetIdleState();
         InputManager.SetButtonUp(keyName);
         buttonAlreadyDown = false;
+        SetIdleState();
     }
 
     private void SetIdleState()
