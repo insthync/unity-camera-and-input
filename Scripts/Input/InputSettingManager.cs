@@ -20,8 +20,6 @@ public class InputSettingManager : MonoBehaviour
     public string settingsSaveKeyPrefix = "SETTING_KEY_BIND";
 #if ENABLE_INPUT_SYSTEM
     public InputActionAsset inputActionAsset;
-    public string inputActionName = "Player";
-    public InputActionMap InputActionMap { get; private set; }
 #endif
 
     internal readonly Dictionary<string, List<KeyCode>> Settings = new Dictionary<string, List<KeyCode>>();
@@ -51,10 +49,6 @@ public class InputSettingManager : MonoBehaviour
                     Settings[setting.keyName].Add(LoadKeyBinding(setting.keyName, Settings[setting.keyName].Count - 1, setting.keyCode));
             }
         }
-#if ENABLE_INPUT_SYSTEM
-        if (inputActionAsset != null)
-            InputActionMap = inputActionAsset.FindActionMap(inputActionName);
-#endif
     }
 
     public void ResetSettings()
