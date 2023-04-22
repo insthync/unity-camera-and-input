@@ -257,6 +257,9 @@ public static class InputManager
     public static bool GetButton(string name)
 #endif
     {
+        if (string.IsNullOrEmpty(name))
+            return false;
+
         // Try get input by rewired system
 #if USE_REWIRED
         try
@@ -310,6 +313,9 @@ public static class InputManager
     public static bool GetButtonDown(string name)
 #endif
     {
+        if (string.IsNullOrEmpty(name))
+            return false;
+
         // Try get input by rewired system
 #if USE_REWIRED
         try
@@ -363,6 +369,9 @@ public static class InputManager
     public static bool GetButtonUp(string name)
 #endif
     {
+        if (string.IsNullOrEmpty(name))
+            return false;
+
         // Try get input by rewired system
 #if USE_REWIRED
         try
