@@ -114,6 +114,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private Vector2? _previousTouchPosition;
     private PointerEventData _previousPointer;
     private int _lastDragFrame;
+    private bool _isResettingSiblingIndex;
 
     private void Start()
     {
@@ -166,6 +167,15 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     {
         if (_config != null)
             _config.onLoadAlpha -= OnLoadAlpha;
+    }
+
+    private void OnEnable()
+    {
+        if (_isResettingSiblingIndex)
+        {
+            _isResettingSiblingIndex = false;
+            transform.SetSiblingIndex(_defaultSiblingIndex);
+        }
     }
 
     private void OnDisable()
@@ -283,8 +293,13 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         }
 
         // Reset transform sibling
-        if (eventData != null && SetAsLastSiblingOnDrag)
-            transform.SetSiblingIndex(_defaultSiblingIndex);
+        if (SetAsLastSiblingOnDrag)
+        {
+            if (transform.parent.gameObject.activeInHierarchy)
+                transform.SetSiblingIndex(_defaultSiblingIndex);
+            else
+                _isResettingSiblingIndex = true;
+        }
 
         // Reset handler position
         controllerHandler.localPosition = _defaultControllerLocalPosition;
