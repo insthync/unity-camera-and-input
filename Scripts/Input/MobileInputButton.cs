@@ -80,8 +80,11 @@ public class MobileInputButton : MonoBehaviour, IMobileInputArea, IPointerDownHa
         if (_previousPointer != null)
             InputManager.touchedPointerIds.Remove(_previousPointer.pointerId);
         _previousPointer = null;
-        InputManager.SetButtonUp(keyName);
-        onPointerUp.Invoke();
+        if (eventData != null)
+        {
+            InputManager.SetButtonUp(keyName);
+            onPointerUp.Invoke();
+        }
         SetIdleState();
     }
 

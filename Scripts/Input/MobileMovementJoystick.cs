@@ -270,14 +270,17 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         _previousPointer = null;
 
         // Simulate button pressing
-        if (useButtons && buttonKeyNames != null)
+        if (eventData != null)
         {
-            foreach (string buttonKeyName in buttonKeyNames)
+            if (useButtons && buttonKeyNames != null)
             {
-                InputManager.SetButtonUp(buttonKeyName);
+                foreach (string buttonKeyName in buttonKeyNames)
+                {
+                    InputManager.SetButtonUp(buttonKeyName);
+                }
             }
+            onPointerUp.Invoke();
         }
-        onPointerUp.Invoke();
 
         // Reset transform sibling
         if (eventData != null && SetAsLastSiblingOnDrag)
