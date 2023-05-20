@@ -494,7 +494,9 @@ public static class InputManager
     public static Vector3 MousePosition()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Mouse.current.position.ReadValue();
+        if (Application.isMobilePlatform)
+            return Touchscreen.current.primaryTouch.position.value;
+        return Mouse.current.position.value;
 #else
         return Input.mousePosition;
 #endif
@@ -503,6 +505,8 @@ public static class InputManager
     public static bool GetMouseButtonDown(int button)
     {
 #if ENABLE_INPUT_SYSTEM
+        if (Application.isMobilePlatform)
+            return Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
         switch (button)
         {
             case 0:
@@ -521,6 +525,8 @@ public static class InputManager
     public static bool GetMouseButtonUp(int button)
     {
 #if ENABLE_INPUT_SYSTEM
+        if (Application.isMobilePlatform)
+            return Touchscreen.current.primaryTouch.press.wasReleasedThisFrame;
         switch (button)
         {
             case 0:
@@ -539,6 +545,8 @@ public static class InputManager
     public static bool GetMouseButton(int button)
     {
 #if ENABLE_INPUT_SYSTEM
+        if (Application.isMobilePlatform)
+            return Touchscreen.current.primaryTouch.press.isPressed;
         switch (button)
         {
             case 0:
