@@ -164,7 +164,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
         {
             if (_raycastResults[0].gameObject == gameObject)
             {
-                if (!IsPinching && Input.GetMouseButton(1))
+                if (!IsPinching && InputManager.GetMouseButton(1))
                 {
                     OnPointerDown(InputManager.MousePosition(), -InputManager.MousePosition());
                     return;
@@ -173,7 +173,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
             }
         }
 
-        if (!hasPointer || !Input.GetMouseButton(1))
+        if (!hasPointer || !InputManager.GetMouseButton(1))
         {
             if (IsPinching)
                 OnPointerUp();
