@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
+[DefaultExecutionOrder(int.MinValue)]
 public class FollowCamera : MonoBehaviour
 {
     public Camera targetCamera;

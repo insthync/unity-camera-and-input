@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [ExecuteInEditMode]
+[DefaultExecutionOrder(int.MinValue)]
 public class FollowCameraControls : FollowCamera
 {
     [Header("Controls")]
