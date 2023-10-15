@@ -2,7 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public partial class FollowCamera : MonoBehaviour
+[DefaultExecutionOrder(int.MinValue)]
+public class FollowCamera : MonoBehaviour
 {
     public Camera targetCamera;
     public Transform target;

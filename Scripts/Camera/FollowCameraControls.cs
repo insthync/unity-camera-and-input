@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [ExecuteInEditMode]
-public partial class FollowCameraControls : FollowCamera
+[DefaultExecutionOrder(int.MinValue)]
+public class FollowCameraControls : FollowCamera
 {
     [Header("Controls")]
     public string xRotationAxisName = "Mouse Y";
