@@ -74,7 +74,8 @@ public class FollowCameraControls : FollowCamera
     public float aimAssistMaxAngleFromFollowingTarget = 360f;
 
     [Header("Recoil")]
-    public float recoilSmoothing = 15.0f;
+    public float recoilReturnSpeed = 2f;
+    public float recoilSmoothing = 6f;
 
     [Header("Save Camera")]
     public bool isSaveCamera;
@@ -85,12 +86,10 @@ public class FollowCameraControls : FollowCamera
     public float YRotationVelocity { get; set; }
     public float ZoomVelocity { get; set; }
 
-    private float deltaTime;
-    private RaycastHit aimAssistCastHit;
-    private float recoilX;
-    private float recoilY;
-    private float recoilRetainX;
-    private float recoilRetainY;
+    private Vector3 _targetRecoilRotation;
+    private Vector3 _currentRecoilRotation;
+    // Being used in Update and DrawGizmos functions
+    private RaycastHit _aimAssistCastHit;
 
     private void Start()
     {
@@ -108,8 +107,7 @@ public class FollowCameraControls : FollowCamera
 
     private void Update()
     {
-        // Update delta time, this also being used in LateUpdate too.
-        deltaTime = Time.deltaTime;
+        float deltaTime = Time.deltaTime;
 
         if (isSaveCamera)
         {
@@ -124,14 +122,6 @@ public class FollowCameraControls : FollowCamera
             XRotationVelocity += InputManager.GetAxis(xRotationAxisName, false) * rotationSpeed * rotationSpeedScale;
         xRotation -= XRotationVelocity;
 
-        // Recoil X
-        float absRecoilX = Mathf.Abs(recoilX);
-        float absRecoilRetainX = Mathf.Abs(recoilRetainX);
-        if (absRecoilX > 0.01f)
-            xRotation -= recoilX;
-        else if (absRecoilRetainX > 0.01f)
-            xRotation += recoilRetainX;
-
         if (limitXRotation)
             xRotation = ClampAngleBetweenMinAndMax(xRotation, minXRotation, maxXRotation);
         else
@@ -141,14 +131,6 @@ public class FollowCameraControls : FollowCamera
         if (updateRotation || updateRotationY)
             YRotationVelocity += InputManager.GetAxis(yRotationAxisName, false) * rotationSpeed * rotationSpeedScale;
         yRotation += YRotationVelocity;
-
-        // Recoil Y
-        float absRecoilY = Mathf.Abs(recoilY);
-        float absRecoilRetainY = Mathf.Abs(recoilRetainY);
-        if (absRecoilY > 0.01f)
-            yRotation += recoilY;
-        else if (absRecoilRetainY > 0.01f)
-            yRotation -= recoilRetainY;
 
         if (limitYRotation)
             yRotation = ClampAngleBetweenMinAndMax(yRotation, minYRotation, maxYRotation);
@@ -190,35 +172,26 @@ public class FollowCameraControls : FollowCamera
             ZoomVelocity = Mathf.Lerp(ZoomVelocity, 0, deltaTime * zoomDeacceleration);
         else
             ZoomVelocity = 0f;
-
-        // Update recoil speed
-        // X
-        if (absRecoilX > 0.01f)
-            recoilX = Mathf.Lerp(recoilX, 0, deltaTime * recoilSmoothing);
-        else if (absRecoilRetainX > 0.01f)
-            recoilRetainX = Mathf.Lerp(recoilRetainX, 0, deltaTime * recoilSmoothing);
-        // Y
-        if (absRecoilY > 0.01f)
-            recoilY = Mathf.Lerp(recoilY, 0, deltaTime * recoilSmoothing);
-        else if (absRecoilRetainY > 0.01f)
-            recoilRetainY = Mathf.Lerp(recoilRetainY, 0, deltaTime * recoilSmoothing);
     }
 
-    public void Recoil(float x, float y)
+    public void Recoil(float x, float y, float z)
     {
-        recoilX = x;
-        recoilY = y;
-        recoilRetainX = x;
-        recoilRetainY = y;
+        _targetRecoilRotation += new Vector3(x, y, z);
     }
 
     protected override void LateUpdate()
     {
-        UpdateAimAssist();
+        float deltaTime = Time.deltaTime;
+        UpdateAimAssist(deltaTime);
         base.LateUpdate();
+
+        // Update recoiling
+        _targetRecoilRotation = Vector3.Lerp(_targetRecoilRotation, Vector3.zero, deltaTime * recoilReturnSpeed);
+        _currentRecoilRotation = Vector3.Lerp(_currentRecoilRotation, _targetRecoilRotation, deltaTime * recoilSmoothing);
+        CacheCameraTransform.eulerAngles += _currentRecoilRotation;
     }
 
-    protected void UpdateAimAssist()
+    protected void UpdateAimAssist(float deltaTime)
     {
         if (enableAimAssist && Application.isPlaying)
         {
@@ -246,8 +219,8 @@ public class FollowCameraControls : FollowCamera
             if (hitTarget.HasValue)
             {
                 // Set `xRotation`, `yRotation` by hit object's position
-                aimAssistCastHit = hitTarget.Value;
-                Vector3 targetCenter = aimAssistCastHit.collider.bounds.center;
+                _aimAssistCastHit = hitTarget.Value;
+                Vector3 targetCenter = _aimAssistCastHit.collider.bounds.center;
                 Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
                 if (enableAimAssistX)
@@ -263,8 +236,8 @@ public class FollowCameraControls : FollowCamera
         base.OnDrawGizmos();
 #if UNITY_EDITOR
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistCastHit.distance);
-        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * aimAssistCastHit.distance, aimAssistRadius);
+        Gizmos.DrawLine(CacheCameraTransform.position, CacheCameraTransform.position + CacheCameraTransform.forward * _aimAssistCastHit.distance);
+        Gizmos.DrawWireSphere(CacheCameraTransform.position + CacheCameraTransform.forward * _aimAssistCastHit.distance, aimAssistRadius);
 #endif
     }
 

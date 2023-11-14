@@ -41,24 +41,20 @@ public class FollowCamera : MonoBehaviour
         get { return targetCamera; }
     }
 
-    private GameObject targetFollower;
-    private Vector3 targetPosition;
-    private Vector3 targetUp;
-    private Quaternion targetRotation;
-    private float targetYRotation;
-    private Vector3 wantedPosition;
-    private float wantedYRotation;
-    private float windowAspect;
-    private Quaternion wantedRotation;
-    private Ray tempRay;
-    private RaycastHit[] tempHits;
-    private float tempDistance;
+    private GameObject _targetFollower;
+    public Vector3 _targetPosition;
+    public Vector3 _targetUp;
+    public float _targetYRotation = 0f;
+    // Being used in Update and DrawGizmos functions
+    private Ray _tempRay;
+    private RaycastHit[] _tempHits;
+    private float _tempDistance;
 
     protected virtual void OnDrawGizmos()
     {
 #if UNITY_EDITOR
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(tempRay.origin, tempRay.origin + tempRay.direction * tempDistance);
+        Gizmos.DrawLine(_tempRay.origin, _tempRay.origin + _tempRay.direction * _tempDistance);
 #endif
     }
 
@@ -72,14 +68,14 @@ public class FollowCamera : MonoBehaviour
         if (targetCamera == null)
             targetCamera = GetComponent<Camera>();
         CacheCameraTransform = CacheCamera.transform;
-        if (targetFollower == null && Application.isPlaying)
-            targetFollower = new GameObject("_CameraTargetFollower");
+        if (_targetFollower == null && Application.isPlaying)
+            _targetFollower = new GameObject("_CameraTargetFollower");
     }
 
     private void OnDestroy()
     {
-        if (targetFollower != null)
-            Destroy(targetFollower);
+        if (_targetFollower != null)
+            Destroy(_targetFollower);
     }
 
     protected virtual void LateUpdate()
@@ -90,17 +86,17 @@ public class FollowCamera : MonoBehaviour
             {
                 if (!smoothFollow)
                 {
-                    targetFollower.transform.position = target.transform.position;
-                    targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+                    _targetFollower.transform.position = target.transform.position;
+                    _targetFollower.transform.eulerAngles = target.transform.eulerAngles;
                 }
                 else
                 {
-                    targetFollower.transform.position = Vector3.Lerp(targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
-                    targetFollower.transform.eulerAngles = target.transform.eulerAngles;
+                    _targetFollower.transform.position = Vector3.Lerp(_targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
+                    _targetFollower.transform.eulerAngles = target.transform.eulerAngles;
                 }
-                targetPosition = targetFollower.transform.position;
-                targetUp = targetFollower.transform.up;
-                targetYRotation = targetFollower.transform.eulerAngles.y;
+                _targetPosition = _targetFollower.transform.position;
+                _targetUp = _targetFollower.transform.up;
+                _targetYRotation = _targetFollower.transform.eulerAngles.y;
             }
         }
         else
@@ -109,25 +105,25 @@ public class FollowCamera : MonoBehaviour
             PrepareComponents();
             if (target == null)
             {
-                targetPosition = Vector3.zero;
-                targetUp = Vector3.up;
-                targetYRotation = 0f;
+                _targetPosition = Vector3.zero;
+                _targetUp = Vector3.up;
+                _targetYRotation = 0f;
             }
             else
             {
-                targetPosition = target.position;
-                targetUp = target.up;
-                targetYRotation = target.eulerAngles.y;
+                _targetPosition = target.position;
+                _targetUp = target.up;
+                _targetYRotation = target.eulerAngles.y;
             }
 #endif
         }
 
         // Update target position by offsets
-        targetPosition += (targetOffset.x * CacheCameraTransform.right) + (targetOffset.y * targetUp) + (targetOffset.z * CacheCameraTransform.forward);
+        _targetPosition += (targetOffset.x * CacheCameraTransform.right) + (targetOffset.y * _targetUp) + (targetOffset.z * CacheCameraTransform.forward);
 
         if (zoomByAspectRatio)
         {
-            windowAspect = CacheCamera.aspect;
+            float windowAspect = CacheCamera.aspect;
             zoomByAspectRatioSettings.Sort();
             foreach (ZoomByAspectRatioSetting data in zoomByAspectRatioSettings)
             {
@@ -146,28 +142,27 @@ public class FollowCamera : MonoBehaviour
         if (CacheCamera.orthographic)
             CacheCamera.orthographicSize = zoomDistance;
 
-        wantedYRotation = useTargetYRotation ? targetYRotation : yRotation;
+        float wantedYRotation = useTargetYRotation ? _targetYRotation : yRotation;
 
         // Convert the angle into a rotation
-        targetRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
-        wantedRotation = targetRotation;
+        Quaternion wantedRotation = Quaternion.Euler(xRotation, wantedYRotation, 0);
 
         // Set the position of the camera on the x-z plane to:
         // distance meters behind the target
-        wantedPosition = targetPosition - (wantedRotation * Vector3.forward * zoomDistance);
+        Vector3 wantedPosition = _targetPosition - (wantedRotation * Vector3.forward * zoomDistance);
 
         if (enableWallHitSpring)
         {
             float nearest = float.MaxValue;
-            tempRay = new Ray(targetPosition, wantedRotation * -Vector3.forward);
-            tempDistance = Vector3.Distance(targetPosition, wantedPosition);
-            tempHits = Physics.RaycastAll(tempRay, tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
-            for (int i = 0; i < tempHits.Length; i++)
+            _tempRay = new Ray(_targetPosition, wantedRotation * -Vector3.forward);
+            _tempDistance = Vector3.Distance(_targetPosition, wantedPosition);
+            _tempHits = Physics.RaycastAll(_tempRay, _tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
+            for (int i = 0; i < _tempHits.Length; i++)
             {
-                if (tempHits[i].distance < nearest)
+                if (_tempHits[i].distance < nearest)
                 {
-                    nearest = tempHits[i].distance;
-                    wantedPosition = tempHits[i].point;
+                    nearest = _tempHits[i].distance;
+                    wantedPosition = _tempHits[i].point;
                 }
             }
         }
