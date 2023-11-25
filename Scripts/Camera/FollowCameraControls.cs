@@ -187,7 +187,7 @@ public class FollowCameraControls : FollowCamera
 
         // Update recoiling
         _targetRecoilRotation = Vector3.Lerp(_targetRecoilRotation, Vector3.zero, deltaTime * recoilReturnSpeed);
-        _currentRecoilRotation = Vector3.Lerp(_currentRecoilRotation, _targetRecoilRotation, deltaTime * recoilSmoothing);
+        _currentRecoilRotation = Vector3.Lerp(_currentRecoilRotation, _targetRecoilRotation, Time.fixedDeltaTime * recoilSmoothing);
         CacheCameraTransform.eulerAngles += _currentRecoilRotation;
     }
 
