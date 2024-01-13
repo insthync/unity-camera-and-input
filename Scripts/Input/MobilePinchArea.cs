@@ -6,8 +6,7 @@ using UnityEngine.UI;
 public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     public string axisName = "Mouse ScrollWheel";
-    [SerializeField]
-    private float sensitivity = 1f;
+    public float sensitivity = 1f;
     [SerializeField]
     private bool interactable = true;
 

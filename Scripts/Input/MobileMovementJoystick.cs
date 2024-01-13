@@ -17,81 +17,50 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     public bool useAxisY = true;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
-    [SerializeField]
-    private EMode mode = EMode.Default;
-    [SerializeField]
+    public EMode mode = EMode.Default;
+    public bool setAsLastSiblingOnDrag;
+    public bool hideWhileIdle;
     private bool interactable = true;
-    [SerializeField]
-    private bool setAsLastSiblingOnDrag;
-    [SerializeField]
-    private bool hideWhileIdle;
 
     [Header("Default Mode Settings")]
-    [SerializeField]
-    private float axisXScale = 1f;
-    [SerializeField]
-    private float axisYScale = 1f;
+    public float axisXScale = 1f;
+    public float axisYScale = 1f;
 
     [Header("Swipe Area Mode Settings")]
-    [SerializeField]
-    private float xSensitivity = 1f;
-    [SerializeField]
-    private float ySensitivity = 1f;
+    public float xSensitivity = 1f;
+    public float ySensitivity = 1f;
 
     [Header("Button Events Settings")]
-    [SerializeField]
-    private bool useButtons = false;
-    [SerializeField]
-    private string[] buttonKeyNames = new string[0];
+    public bool useButtons = false;
+    public string[] buttonKeyNames = new string[0];
 
     [Header("Controller Background")]
     [Tooltip("Container which showing as area that able to control movement")]
-    [SerializeField]
     [FormerlySerializedAs("movementBackground")]
-    private RectTransform controllerBackground = null;
-    [SerializeField]
+    public RectTransform controllerBackground = null;
     [Range(0f, 1f)]
-    private float backgroundAlphaWhileIdling = 1f;
-    [SerializeField]
+    public float backgroundAlphaWhileIdling = 1f;
     [Range(0f, 1f)]
-    private float backgroundAlphaWhileMoving = 1f;
+    public float backgroundAlphaWhileMoving = 1f;
 
     [Header("Controller Handler")]
     [Tooltip("This is the button to control movement")]
-    [SerializeField]
     [FormerlySerializedAs("movementController")]
-    private RectTransform controllerHandler = null;
-    [SerializeField]
+    public RectTransform controllerHandler = null;
     [Range(0f, 1f)]
-    private float handlerAlphaWhileIdling = 1f;
-    [SerializeField]
+    public float handlerAlphaWhileIdling = 1f;
     [Range(0f, 1f)]
-    private float handlerAlphaWhileMoving = 1f;
+    public float handlerAlphaWhileMoving = 1f;
 
     [Header("Events")]
-    [SerializeField]
-    private UnityEvent onPointerDown = new UnityEvent();
-    [SerializeField]
-    private UnityEvent onPointerUp = new UnityEvent();
+    public UnityEvent onPointerDown = new UnityEvent();
+    public UnityEvent onPointerUp = new UnityEvent();
 
     public bool Interactable
     {
         get { return interactable; }
         set { interactable = value; }
     }
-
-    public bool SetAsLastSiblingOnDrag
-    {
-        get { return setAsLastSiblingOnDrag; }
-        set { setAsLastSiblingOnDrag = value; }
-    }
-
-    public bool HideWhileIdle
-    {
-        get { return hideWhileIdle; }
-        set { hideWhileIdle = value; }
-    }
-
 
     private bool _isDragging;
     public bool IsDragging
@@ -203,7 +172,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         onPointerDown.Invoke();
 
         // Move transform
-        if (SetAsLastSiblingOnDrag)
+        if (setAsLastSiblingOnDrag)
             transform.SetAsLastSibling();
 
         // Set handler position
@@ -293,7 +262,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         }
 
         // Reset transform sibling
-        if (SetAsLastSiblingOnDrag)
+        if (setAsLastSiblingOnDrag)
         {
             if (transform.parent.gameObject.activeInHierarchy)
                 transform.SetSiblingIndex(_defaultSiblingIndex);

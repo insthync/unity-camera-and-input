@@ -1,9 +1,6 @@
-﻿using UnityEngine;
-
-public class MobileInputToggle : BaseMobileInputToggle
+﻿public class MobileInputToggle : BaseMobileInputToggle
 {
-    [SerializeField]
-    private string keyName = string.Empty;
+    public string keyName = string.Empty;
 
     protected override void OnToggle(bool isOn)
     {

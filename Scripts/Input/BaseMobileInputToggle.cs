@@ -7,28 +7,24 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
     [System.Serializable]
     public class BoolEvent : UnityEvent<bool> { }
 
-    [SerializeField]
     [Range(0f, 1f)]
-    private float alphaWhileOff = 0.75f;
-    [SerializeField]
+    public float alphaWhileOff = 0.75f;
     [Range(0f, 1f)]
-    private float alphaWhileOn = 1f;
+    public float alphaWhileOn = 1f;
+    public BoolEvent onToggle = new BoolEvent();
     [SerializeField]
     private bool isOn = false;
-    [SerializeField]
-    private BoolEvent onToggle = new BoolEvent();
 
-    private bool dirtyIsOn = false;
-
+    private bool _dirtyIsOn = false;
     public bool IsOn
     {
         get { return isOn; }
         set
         {
             isOn = value;
-            if (dirtyIsOn != value)
+            if (_dirtyIsOn != value)
             {
-                dirtyIsOn = value;
+                _dirtyIsOn = value;
                 OnToggle(value);
                 if (onToggle != null)
                     onToggle.Invoke(value);
@@ -36,31 +32,31 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
         }
     }
 
-    private CanvasGroup canvasGroup;
-    private MobileInputConfig config;
-    private float alphaMultiplier = 1f;
+    private CanvasGroup _canvasGroup;
+    private MobileInputConfig _config;
+    private float _alphaMultiplier = 1f;
 
     protected virtual void Start()
     {
-        dirtyIsOn = IsOn;
-        canvasGroup = GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
+        _dirtyIsOn = IsOn;
+        _canvasGroup = GetComponent<CanvasGroup>();
+        if (_canvasGroup == null)
         {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            canvasGroup.alpha = GetAlphaByCurrentState() * alphaMultiplier;
+            _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            _canvasGroup.alpha = GetAlphaByCurrentState() * _alphaMultiplier;
         }
-        config = GetComponent<MobileInputConfig>();
-        if (config != null)
+        _config = GetComponent<MobileInputConfig>();
+        if (_config != null)
         {
             // Updating default canvas group alpha when loading new config
-            config.onLoadAlpha += OnLoadAlpha;
+            _config.onLoadAlpha += OnLoadAlpha;
         }
     }
 
     protected virtual void OnDestroy()
     {
-        if (config != null)
-            config.onLoadAlpha -= OnLoadAlpha;
+        if (_config != null)
+            _config.onLoadAlpha -= OnLoadAlpha;
     }
 
     private float GetAlphaByCurrentState()
@@ -71,8 +67,8 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
     public void OnPointerDown(PointerEventData eventData)
     {
         IsOn = !IsOn;
-        if (canvasGroup != null)
-            canvasGroup.alpha = GetAlphaByCurrentState() * alphaMultiplier;
+        if (_canvasGroup != null)
+            _canvasGroup.alpha = GetAlphaByCurrentState() * _alphaMultiplier;
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -82,7 +78,7 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
 
     public void OnLoadAlpha(float alpha)
     {
-        alphaMultiplier = alpha;
+        _alphaMultiplier = alpha;
     }
 
     protected abstract void OnToggle(bool isOn);

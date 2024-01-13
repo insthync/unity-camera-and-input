@@ -8,10 +8,8 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
     public bool useAxisY = true;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
-    [SerializeField]
-    private float xSensitivity = 1f;
-    [SerializeField]
-    private float ySensitivity = 1f;
+    public float xSensitivity = 1f;
+    public float ySensitivity = 1f;
     [SerializeField]
     private bool interactable = true;
 

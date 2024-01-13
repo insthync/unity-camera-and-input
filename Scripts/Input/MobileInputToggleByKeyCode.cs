@@ -2,8 +2,7 @@
 
 public class MobileInputToggleByKeyCode : BaseMobileInputToggle
 {
-    [SerializeField]
-    private KeyCode keyCode = KeyCode.None;
+    public KeyCode keyCode = KeyCode.None;
 
     protected override void OnToggle(bool isOn)
     {
