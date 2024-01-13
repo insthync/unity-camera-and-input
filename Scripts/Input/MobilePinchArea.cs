@@ -118,7 +118,7 @@ public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
             return;
         }
 
-        if (Time.frameCount > _lastDragFrame && _previousPointer1 != null && _previousPointer2 != null)
+        if (IsPinching && Time.frameCount > _lastDragFrame && _previousPointer1 != null && _previousPointer2 != null)
         {
             OnDrag(_previousPointer1);
             OnDrag(_previousPointer2);

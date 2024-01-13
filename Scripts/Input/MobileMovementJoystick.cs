@@ -273,7 +273,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             OnDrag(_toggledPointer);
             return;
         }
-        if (Time.frameCount > _lastDragFrame && _previousPointer != null)
+        if (IsDragging && Time.frameCount > _lastDragFrame && _previousPointer != null)
             OnDrag(_previousPointer);
     }
 

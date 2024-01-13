@@ -71,7 +71,7 @@ public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHand
 
     private void Update()
     {
-        if (Time.frameCount > _lastDragFrame && _previousPointer != null)
+        if (IsSwiping && Time.frameCount > _lastDragFrame && _previousPointer != null)
             OnDrag(_previousPointer);
     }
 
