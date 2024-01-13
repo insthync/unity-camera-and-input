@@ -12,14 +12,15 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     }
     [Header("Joystick Settings")]
     public int movementRange = 150;
-    public bool fixControllerPosition;
+    public bool fixControllerPosition = false;
     public bool useAxisX = true;
     public bool useAxisY = true;
     public string axisXName = "Horizontal";
     public string axisYName = "Vertical";
     public EMode mode = EMode.Default;
-    public bool setAsLastSiblingOnDrag;
-    public bool hideWhileIdle;
+    public bool setAsLastSiblingOnDrag = true;
+    public bool hideWhileIdle = false;
+    [SerializeField]
     private bool interactable = true;
 
     [Header("Default Mode Settings")]
@@ -52,9 +53,18 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     [Range(0f, 1f)]
     public float handlerAlphaWhileMoving = 1f;
 
+    [Header("Toggling")]
+    public RectTransform controllerToggler = null;
+    public float toggleRangeMin = 75f;
+    public float toggleRangeMax = 105f;
+    public GameObject[] toggleSigns = new GameObject[0];
+    public GameObject[] unToggleSigns = new GameObject[0];
+
     [Header("Events")]
     public UnityEvent onPointerDown = new UnityEvent();
     public UnityEvent onPointerUp = new UnityEvent();
+    public UnityEvent onToggleOn = new UnityEvent();
+    public UnityEvent onToggleOff = new UnityEvent();
 
     public bool Interactable
     {
@@ -82,6 +92,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private MobileInputConfig _config;
     private Vector2? _previousTouchPosition;
     private PointerEventData _previousPointer;
+    private PointerEventData _toggledPointer;
     private int _lastDragFrame;
     private bool _isResettingSiblingIndex;
 
@@ -120,6 +131,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
             if (_backgroundCanvasGroup != null)
                 _backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
         }
+        if (controllerToggler != null)
+            controllerToggler.gameObject.SetActive(false);
         _config = GetComponent<MobileInputConfig>();
         if (_config != null)
         {
@@ -171,6 +184,13 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         }
         onPointerDown.Invoke();
 
+        // Update toggling
+        if (controllerToggler != null)
+        {
+            UpdateToggle(false);
+            controllerToggler.gameObject.SetActive(false);
+        }
+
         // Move transform
         if (setAsLastSiblingOnDrag)
             transform.SetAsLastSibling();
@@ -220,15 +240,26 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         controllerHandler.localPosition = _startDragLocalPosition + distanceFromStartPosition;
 
         // Update virtual axes
+        Vector2 movement;
         switch (mode)
         {
             case EMode.SwipeArea:
-                UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
+                movement = new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f;
                 break;
             default:
-                UpdateVirtualAxes((_startDragPosition - (_startDragPosition + distanceFromStartPosition)) / movementRange * -1);
+                movement = (_startDragPosition - (_startDragPosition + distanceFromStartPosition)) / movementRange * -1;
                 break;
         }
+        UpdateVirtualAxes(movement);
+
+        // Update toggling
+        if (controllerToggler != null)
+        {
+            Vector2 direction = movement.normalized;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            controllerToggler.gameObject.SetActive(angle > toggleRangeMin && angle < toggleRangeMax);
+        }
+
         // Update dragging state
         InputManager.UpdateMobileInputDragging();
         _lastDragFrame = Time.frameCount;
@@ -236,6 +267,12 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     private void Update()
     {
+        if (_toggledPointer != null)
+        {
+            _toggledPointer.position = controllerToggler.position;
+            OnDrag(_toggledPointer);
+            return;
+        }
         if (Time.frameCount > _lastDragFrame && _previousPointer != null)
             OnDrag(_previousPointer);
     }
@@ -287,6 +324,19 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         UpdateVirtualAxes(Vector3.zero);
         SetIdleState();
         IsDragging = false;
+
+        // Update toggling
+        if (controllerToggler != null)
+        {
+            controllerToggler.gameObject.SetActive(false);
+            if (RectTransformUtility.RectangleContainsScreenPoint(controllerToggler, eventData.position))
+            {
+                _toggledPointer = eventData;
+                UpdateToggle(true);
+                return;
+            }
+            UpdateToggle(false);
+        }
     }
 
     public void UpdateVirtualAxes(Vector2 value)
@@ -299,6 +349,23 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
         if (useAxisY)
             InputManager.SetAxis(axisYName, value.y * (mode == EMode.SwipeArea ? 1f : axisYScale));
+    }
+
+    public void UpdateToggle(bool isOn)
+    {
+        if (isOn)
+            onToggleOn.Invoke();
+        else
+            onToggleOff.Invoke();
+        int i;
+        for (i = 0; i < toggleSigns.Length; ++i)
+        {
+            toggleSigns[i].SetActive(isOn);
+        }
+        for (i = 0; i < unToggleSigns.Length; ++i)
+        {
+            unToggleSigns[i].SetActive(!isOn);
+        }
     }
 
     private void SetIdleState()
