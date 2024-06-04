@@ -217,6 +217,36 @@ public class MobileInputConfig : MonoBehaviour, IBeginDragHandler, IDragHandler,
     }
 
 #if UNITY_EDITOR
+    [ContextMenu("Set Default Position By Current Position To All Objects", false, 1000000)]
+    public void SetDefaultPositionByCurrentPositionToAllObjects()
+    {
+        var objs = FindObjectsOfType<MobileInputConfig>();
+        foreach (var obj in objs)
+        {
+            obj.SetDefaultPositionByCurrentPosition();
+        }
+    }
+
+    [ContextMenu("Set Default Scale By Current Scale To All Objects", false, 1000001)]
+    public void SetDefaultScaleByCurrentScaleToAllObjects()
+    {
+        var objs = FindObjectsOfType<MobileInputConfig>();
+        foreach (var obj in objs)
+        {
+            obj.SetDefaultScaleByCurrentScale();
+        }
+    }
+
+    [ContextMenu("Set Default Alpha By Current Alpha To All Objects", false, 1000002)]
+    public void SetDefaultAlphaByCurrentAlphaToAllObjects()
+    {
+        var objs = FindObjectsOfType<MobileInputConfig>();
+        foreach (var obj in objs)
+        {
+            obj.SetDefaultAlphaByCurrentAlpha();
+        }
+    }
+
     [ContextMenu("Set Default Position By Current Position", false, 1000100)]
     public void SetDefaultPositionByCurrentPosition()
     {
