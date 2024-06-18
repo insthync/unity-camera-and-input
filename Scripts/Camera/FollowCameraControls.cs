@@ -66,7 +66,7 @@ public class FollowCameraControls : FollowCamera
     [Tooltip("Set both target layers and obstacle layers, it will be used in `SphereCastAll` function")]
     public LayerMask aimAssistLayerMask;
     [Tooltip("Set only obstacle layers, it will be used to check hitting object layer is an obstacle or not. If it is, it won't perform aim assisting")]
-    public LayerMask aimAssistObstacleLayerMask = 0;
+    public LayerMask aimAssistObstacleLayerMask = Physics.DefaultRaycastLayers;
     public float aimAssistXSpeed = 10f;
     public float aimAssistYSpeed = 10f;
     [Range(0f, 360f)]
@@ -193,42 +193,40 @@ public class FollowCameraControls : FollowCamera
 
     protected void UpdateAimAssist(float deltaTime)
     {
-        if (enableAimAssist && Application.isPlaying)
+        if (!enableAimAssist || !Application.isPlaying)
+            return;
+        RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
+        System.Array.Sort(hits, 0, hits.Length, new RaycastHitComparer());
+        RaycastHit tempHit;
+        RaycastHit? hitTarget = null;
+        Vector3 cameraDir = CacheCameraTransform.forward;
+        Vector3 targetDir;
+        for (int i = 0; i < hits.Length; ++i)
         {
-            RaycastHit[] hits = Physics.SphereCastAll(CacheCameraTransform.position, aimAssistRadius, CacheCameraTransform.forward, aimAssistDistance, aimAssistLayerMask);
-            System.Array.Sort(hits, 0, hits.Length, new RaycastHitComparer());
-            RaycastHit tempHit;
-            RaycastHit? hitTarget = null;
-            Vector3 cameraDir = CacheCameraTransform.forward;
-            Vector3 targetDir;
-            for (int i = 0; i < hits.Length; ++i)
-            {
-                tempHit = hits[i];
-                if (aimAssistObstacleLayerMask.value == (aimAssistObstacleLayerMask.value | (1 << tempHit.transform.gameObject.layer)))
-                    return;
-                if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
-                    continue;
-                if (Vector3.Distance(target.position, tempHit.point) <= aimAssistMinDistanceFromFollowingTarget)
-                    continue;
-                targetDir = (tempHit.point - target.position).normalized;
-                if (Vector3.Angle(cameraDir, targetDir) > aimAssistMaxAngleFromFollowingTarget)
-                    continue;
-                hitTarget = tempHit;
-                break;
-            }
-            if (hitTarget.HasValue)
-            {
-                // Set `xRotation`, `yRotation` by hit object's position
-                _aimAssistCastHit = hitTarget.Value;
-                Vector3 targetCenter = _aimAssistCastHit.collider.bounds.center;
-                Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
-                Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
-                if (enableAimAssistX)
-                    xRotation = Mathf.LerpAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
-                if (enableAimAssistY)
-                    yRotation = Mathf.LerpAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
-            }
+            tempHit = hits[i];
+            if (aimAssistObstacleLayerMask.value == (aimAssistObstacleLayerMask.value | (1 << tempHit.transform.gameObject.layer)))
+                return;
+            if (AimAssistAvoidanceListener != null && AimAssistAvoidanceListener.AvoidAimAssist(tempHit))
+                continue;
+            if (Vector3.Distance(target.position, tempHit.point) <= aimAssistMinDistanceFromFollowingTarget)
+                continue;
+            targetDir = (tempHit.point - target.position).normalized;
+            if (Vector3.Angle(cameraDir, targetDir) > aimAssistMaxAngleFromFollowingTarget)
+                continue;
+            hitTarget = tempHit;
+            break;
         }
+        if (!hitTarget.HasValue)
+            return;
+        // Set `xRotation`, `yRotation` by hit object's position
+        _aimAssistCastHit = hitTarget.Value;
+        Vector3 targetCenter = _aimAssistCastHit.collider.bounds.center;
+        Vector3 directionToTarget = (targetCenter - CacheCameraTransform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
+        if (enableAimAssistX)
+            xRotation = Mathf.MoveTowardsAngle(xRotation, lookRotation.eulerAngles.x, aimAssistXSpeed * deltaTime);
+        if (enableAimAssistY)
+            yRotation = Mathf.MoveTowardsAngle(yRotation, lookRotation.eulerAngles.y, aimAssistYSpeed * deltaTime);
     }
 
     protected override void OnDrawGizmos()
