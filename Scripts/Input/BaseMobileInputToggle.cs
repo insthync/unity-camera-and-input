@@ -35,6 +35,7 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
             if (_dirtyIsOn != value)
             {
                 _dirtyIsOn = value;
+                UpdateGraphics();
                 OnToggle(value);
                 if (onToggle != null)
                     onToggle.Invoke(value);
@@ -85,7 +86,6 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
     public void OnPointerDown(PointerEventData eventData)
     {
         IsOn = !IsOn;
-        UpdateGraphics();
     }
 
     public void OnPointerUp(PointerEventData eventData)
