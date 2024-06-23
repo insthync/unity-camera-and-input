@@ -10,8 +10,30 @@ public static class InputManager
     private static Dictionary<string, SimulateButton> simulateInputs = new Dictionary<string, SimulateButton>();
     private static Dictionary<KeyCode, SimulateButton> simulateKeys = new Dictionary<KeyCode, SimulateButton>();
     private static Dictionary<string, SimulateAxis> simulateAxis = new Dictionary<string, SimulateAxis>();
-    public static bool useMobileInputOnNonMobile = false;
-    public static bool useNonMobileInput = false;
+    private static bool s_useMobileInputOnNonMobile = false;
+    public static bool UseMobileInputOnNonMobile
+    {
+        get
+        {
+            return s_useMobileInputOnNonMobile;
+        }
+        set
+        {
+            s_useMobileInputOnNonMobile = value;
+        }
+    }
+    private static bool s_useNonMobileInput = false;
+    public static bool UseNonMobileInput
+    {
+        get
+        {
+            return s_useNonMobileInput;
+        }
+        set
+        {
+            s_useNonMobileInput = value;
+        }
+    }
     internal static readonly Dictionary<int, GameObject> touchedPointerIds = new Dictionary<int, GameObject>();
 
     private static int mobileInputLastDragFrame;
@@ -38,21 +60,21 @@ public static class InputManager
         return !string.IsNullOrEmpty(keyName) && InputSettingManager.Singleton != null && InputSettingManager.Singleton.Settings.ContainsKey(keyName);
     }
 
-    public static bool UseMobileInput()
+    public static bool IsUseMobileInput()
     {
 #if VR_BUILD
         return false;
 #else
-        return Application.isMobilePlatform || useMobileInputOnNonMobile;
+        return Application.isMobilePlatform || UseMobileInputOnNonMobile;
 #endif
     }
 
-    public static bool UseNonMobileInput()
+    public static bool IsUseNonMobileInput()
     {
 #if VR_BUILD
         return true;
 #else
-        return !Application.isMobilePlatform && (!useMobileInputOnNonMobile || useNonMobileInput);
+        return !Application.isMobilePlatform && (!UseMobileInputOnNonMobile || UseNonMobileInput);
 #endif
     }
 
@@ -89,36 +111,36 @@ public static class InputManager
 #endif
     {
         // Try get input by rewired system
-#if USE_REWIRED
-        try
+        if (IsUseNonMobileInput())
         {
-            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            float axis = raw ? player.GetAxisRaw(name) : player.GetAxis(name);
-            if (Mathf.Abs(axis) > 0.00001f)
-                return axis;
-        }
-        catch { }
+#if USE_REWIRED
+            try
+            {
+                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                float axis = raw ? player.GetAxisRaw(name) : player.GetAxis(name);
+                if (Mathf.Abs(axis) > 0.00001f)
+                    return axis;
+            }
+            catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (TryGetInputAction(name, out InputAction inputAction))
-        {
-            float axis = inputAction.ReadValue<float>();
-            if (raw)
+            if (TryGetInputAction(name, out InputAction inputAction))
             {
-                if (axis > 0f)
-                    axis = 1f;
-                if (axis < 0f)
-                    axis = -1f;
+                float axis = inputAction.ReadValue<float>();
+                if (raw)
+                {
+                    if (axis > 0f)
+                        axis = 1f;
+                    if (axis < 0f)
+                        axis = -1f;
+                }
+                if (Mathf.Abs(axis) > 0.00001f)
+                    return axis;
             }
-            if (Mathf.Abs(axis) > 0.00001f)
-                return axis;
-        }
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 float axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
@@ -126,10 +148,10 @@ public static class InputManager
                     return axis;
             }
             catch { }
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateAxis foundSimulateAxis;
             float axis = 0f;
@@ -149,26 +171,26 @@ public static class InputManager
 
     public static bool GetKey(KeyCode key)
     {
+        if (IsUseNonMobileInput())
+        {
 #if ENABLE_INPUT_SYSTEM
-        if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.isPressed)
-            return true;
-        if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.isPressed)
-            return true;
+            if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.isPressed)
+                return true;
+            if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.isPressed)
+                return true;
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 if (Input.GetKey(key))
                     return true;
             }
             catch { }
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.Pressed)
@@ -179,26 +201,26 @@ public static class InputManager
 
     public static bool GetKeyDown(KeyCode key)
     {
+        if (IsUseNonMobileInput())
+        {
 #if ENABLE_INPUT_SYSTEM
-        if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.wasPressedThisFrame)
-            return true;
-        if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.wasPressedThisFrame)
-            return true;
+            if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.wasPressedThisFrame)
+                return true;
+            if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.wasPressedThisFrame)
+                return true;
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 if (Input.GetKeyDown(key))
                     return true;
             }
             catch { }
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonDown)
@@ -209,26 +231,26 @@ public static class InputManager
 
     public static bool GetKeyUp(KeyCode key)
     {
+        if (IsUseNonMobileInput())
+        {
 #if ENABLE_INPUT_SYSTEM
-        if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.wasReleasedThisFrame)
-            return true;
-        if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.wasReleasedThisFrame)
-            return true;
+            if (key.TryGetMouseButtonControl(out ButtonControl buttonControl) && buttonControl.wasReleasedThisFrame)
+                return true;
+            if (key.TryGetKeyboardKeyControl(out KeyControl keyControl) && keyControl.wasReleasedThisFrame)
+                return true;
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 if (Input.GetKeyUp(key))
                     return true;
             }
             catch { }
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateKeys.TryGetValue(key, out foundSimulateButton) && foundSimulateButton.ButtonUp)
@@ -260,28 +282,28 @@ public static class InputManager
         if (string.IsNullOrEmpty(name))
             return false;
 
-        // Try get input by rewired system
-#if USE_REWIRED
-        try
+        if (IsUseNonMobileInput())
         {
-            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            if (player.GetButton(name))
-                return true;
-        }
-        catch { }
+            // Try get input by rewired system
+#if USE_REWIRED
+            try
+            {
+                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                if (player.GetButton(name))
+                    return true;
+            }
+            catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (TryGetInputAction(name, out InputAction inputAction))
-        {
-            if (inputAction.IsPressed())
-                return true;
-        }
+            if (TryGetInputAction(name, out InputAction inputAction))
+            {
+                if (inputAction.IsPressed())
+                    return true;
+            }
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 if (Input.GetButton(name))
@@ -290,15 +312,15 @@ public static class InputManager
             catch { }
             if (IsKeyFromSettingActivated(name, GetKey))
                 return true;
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.Pressed)
                 return true;
-            if (!UseNonMobileInput())
+            if (!IsUseNonMobileInput())
             {
                 if (IsKeyFromSettingActivated(name, GetKey))
                     return true;
@@ -316,28 +338,28 @@ public static class InputManager
         if (string.IsNullOrEmpty(name))
             return false;
 
-        // Try get input by rewired system
-#if USE_REWIRED
-        try
+        if (IsUseNonMobileInput())
         {
-            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            if (player.GetButtonDown(name))
-                return true;
-        }
-        catch { }
+            // Try get input by rewired system
+#if USE_REWIRED
+            try
+            {
+                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                if (player.GetButtonDown(name))
+                    return true;
+            }
+            catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (TryGetInputAction(name, out InputAction inputAction))
-        {
-            if (inputAction.WasPressedThisFrame())
-                return true;
-        }
+            if (TryGetInputAction(name, out InputAction inputAction))
+            {
+                if (inputAction.WasPressedThisFrame())
+                    return true;
+            }
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 if (Input.GetButtonDown(name))
@@ -346,15 +368,15 @@ public static class InputManager
             catch { }
             if (IsKeyFromSettingActivated(name, GetKeyDown))
                 return true;
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonDown)
                 return true;
-            if (!UseNonMobileInput())
+            if (!IsUseNonMobileInput())
             {
                 if (IsKeyFromSettingActivated(name, GetKeyDown))
                     return true;
@@ -372,28 +394,29 @@ public static class InputManager
         if (string.IsNullOrEmpty(name))
             return false;
 
-        // Try get input by rewired system
-#if USE_REWIRED
-        try
+
+        if (IsUseNonMobileInput())
         {
-            Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-            if (player.GetButtonUp(name))
-                return true;
-        }
-        catch { }
+            // Try get input by rewired system
+#if USE_REWIRED
+            try
+            {
+                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                if (player.GetButtonUp(name))
+                    return true;
+            }
+            catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
-        if (TryGetInputAction(name, out InputAction inputAction))
-        {
-            if (inputAction.WasReleasedThisFrame())
-                return true;
-        }
+            if (TryGetInputAction(name, out InputAction inputAction))
+            {
+                if (inputAction.WasReleasedThisFrame())
+                    return true;
+            }
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-        if (UseNonMobileInput())
-        {
             try
             {
                 if (Input.GetButtonUp(name))
@@ -402,15 +425,15 @@ public static class InputManager
             catch { }
             if (IsKeyFromSettingActivated(name, GetKeyUp))
                 return true;
-        }
 #endif
+        }
 
-        if (UseMobileInput())
+        if (IsUseMobileInput())
         {
             SimulateButton foundSimulateButton;
             if (simulateInputs.TryGetValue(name, out foundSimulateButton) && foundSimulateButton.ButtonUp)
                 return true;
-            if (!UseNonMobileInput())
+            if (!IsUseNonMobileInput())
             {
                 if (IsKeyFromSettingActivated(name, GetKeyUp))
                     return true;

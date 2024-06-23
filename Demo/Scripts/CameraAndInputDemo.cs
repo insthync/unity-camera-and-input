@@ -10,7 +10,7 @@ public class CameraAndInputDemo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InputManager.useMobileInputOnNonMobile = true;
+        InputManager.UseMobileInputOnNonMobile = true;
     }
 
     // Update is called once per frame
