@@ -154,15 +154,25 @@ public class FollowCamera : MonoBehaviour
         if (enableWallHitSpring)
         {
             float nearest = float.MaxValue;
-            _tempRay = new Ray(_targetPosition, wantedRotation * -Vector3.forward);
+            // Direction from the target to the camera
+            Vector3 directionToCamera = wantedRotation * -Vector3.forward;
+            _tempRay = new Ray(_targetPosition, directionToCamera);
             _tempDistance = Vector3.Distance(_targetPosition, wantedPosition);
-            _tempHits = Physics.RaycastAll(_tempRay, _tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
-            for (int i = 0; i < _tempHits.Length; i++)
+
+            float sphereRadius = 0.5f;
+            RaycastHit[] hits = Physics.SphereCastAll(_tempRay, sphereRadius, _tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
+
+            foreach (var hit in hits)
             {
-                if (_tempHits[i].distance < nearest)
+                if (hit.distance < nearest)
                 {
-                    nearest = _tempHits[i].distance;
-                    wantedPosition = _tempHits[i].point;
+                    nearest = hit.distance;
+                    float offset = 0.5f;
+                    Vector3 collisionPointWithOffset = _tempRay.origin + directionToCamera.normalized * (hit.distance - offset);
+                    if (Vector3.Distance(_targetPosition, collisionPointWithOffset) < _tempDistance)
+                    {
+                        wantedPosition = collisionPointWithOffset;
+                    }
                 }
             }
         }
