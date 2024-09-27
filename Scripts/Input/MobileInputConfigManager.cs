@@ -118,4 +118,19 @@ public class MobileInputConfigManager : MonoBehaviour
             uiRoot.SetActive(false);
         }
     }
+
+    [ContextMenu("Delete all child's buttons")]
+    public void DeleteAllChildsButtons()
+    {
+        var buttons = GetComponentsInChildren<Button>(true);
+        for (int i = buttons.Length - 1; i >= 0; --i)
+        {
+            DestroyImmediate(buttons[i]);
+        }
+        var inputAreas = GetComponentsInChildren<IMobileInputArea>(true);
+        for (int i = inputAreas.Length - 1; i >= 0; --i)
+        {
+            DestroyImmediate(inputAreas[i] as MonoBehaviour);
+        }
+    }
 }
