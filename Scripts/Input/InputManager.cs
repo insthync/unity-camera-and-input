@@ -36,7 +36,7 @@ public static class InputManager
     }
     internal static readonly Dictionary<int, GameObject> touchedPointerIds = new Dictionary<int, GameObject>();
 
-    private static int mobileInputLastDragFrame;
+    private static int mobileInputLastDragFrame = 0;
     public static bool IsDraggingMobileInput
     {
         get
@@ -49,6 +49,23 @@ public static class InputManager
     private static HashSet<string> alreadyFindInputActionNames = new HashSet<string>();
     private static Dictionary<string, InputAction> foundInputActions = new Dictionary<string, InputAction>();
 #endif
+
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    public static void Initialize()
+    {
+        simulateInputs.Clear();
+        simulateKeys.Clear();
+        simulateAxis.Clear();
+        s_useMobileInputOnNonMobile = false;
+        s_useNonMobileInput = false;
+        touchedPointerIds.Clear();
+        mobileInputLastDragFrame = 0;
+#if ENABLE_INPUT_SYSTEM
+        alreadyFindInputActionNames.Clear();
+        foundInputActions.Clear();
+#endif
+    }
 
     public static void UpdateMobileInputDragging()
     {
