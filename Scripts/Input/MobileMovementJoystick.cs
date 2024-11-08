@@ -57,6 +57,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     public RectTransform controllerToggler = null;
     public float toggleRangeMin = 75f;
     public float toggleRangeMax = 105f;
+    public string[] toggleKeyNames = new string[0];
     public GameObject[] toggleSigns = new GameObject[0];
     public GameObject[] unToggleSigns = new GameObject[0];
 
@@ -79,6 +80,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     }
 
     public Vector2 CurrentPosition { get; private set; }
+    public bool IsToggled { get; private set; }
 
     private Vector3 _backgroundOffset;
     private Vector3 _defaultControllerLocalPosition;
@@ -92,9 +94,9 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     private MobileInputConfig _config;
     private Vector2? _previousTouchPosition;
     private PointerEventData _previousPointer;
-    private PointerEventData _toggledPointer;
     private int _lastDragFrame;
     private bool _isResettingSiblingIndex;
+    private bool _prevToggled;
 
     private void Start()
     {
@@ -180,7 +182,9 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         if (useButtons && buttonKeyNames != null)
         {
             foreach (string buttonKeyName in buttonKeyNames)
+            {
                 InputManager.SetButtonDown(buttonKeyName);
+            }
         }
         onPointerDown.Invoke();
 
@@ -223,17 +227,22 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         if (_previousPointer == null || _previousPointer.pointerId != eventData.pointerId)
             return;
         _previousPointer = eventData;
+        OnDrag(eventData.position);
+    }
+
+    public void OnDrag(Vector2 pointerPosition)
+    {
         if (!_previousTouchPosition.HasValue)
-            _previousTouchPosition = eventData.position;
-        CurrentPosition = eventData.position;
+            _previousTouchPosition = pointerPosition;
+        CurrentPosition = pointerPosition;
 
         // Use previous position to find delta from last frame
-        Vector2 pointerDelta = eventData.position - _previousTouchPosition.Value;
+        Vector2 pointerDelta = pointerPosition - _previousTouchPosition.Value;
         // Set position to use next frame
-        _previousTouchPosition = eventData.position;
+        _previousTouchPosition = pointerPosition;
 
         // Find distance from start position, it will be used to find move direction
-        Vector2 distanceFromStartPosition = eventData.position - _startDragPosition;
+        Vector2 distanceFromStartPosition = pointerPosition - _startDragPosition;
         distanceFromStartPosition = Vector2.ClampMagnitude(distanceFromStartPosition, movementRange);
 
         // Move the handler
@@ -267,12 +276,38 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     private void Update()
     {
-        if (_toggledPointer != null)
+        if (IsToggled)
         {
-            _toggledPointer.position = controllerToggler.position;
-            OnDrag(_toggledPointer);
-            return;
+            _startDragLocalPosition = controllerHandler.localPosition = _defaultControllerLocalPosition;
+            _startDragPosition = controllerHandler.position;
+            _previousTouchPosition = controllerHandler.position;
+            Vector2 dir = ((Vector2)controllerToggler.position - _startDragPosition).normalized;
+            Vector2 newPosition = _startDragPosition + dir * movementRange;
+            controllerHandler.position = newPosition;
+            OnDrag(controllerToggler.position);
+            // Toggled
+            if (toggleKeyNames != null && toggleKeyNames.Length > 0)
+            {
+                foreach (string toggleKeyName in toggleKeyNames)
+                {
+                    InputManager.SetButtonDown(toggleKeyName);
+                }
+            }
         }
+        else if (_prevToggled)
+        {
+            // Untoggled
+            if (toggleKeyNames != null && toggleKeyNames.Length > 0)
+            {
+                foreach (string toggleKeyName in toggleKeyNames)
+                {
+                    InputManager.SetButtonUp(toggleKeyName);
+                }
+            }
+        }
+        _prevToggled = IsToggled;
+        if (_prevToggled)
+            return;
         if (IsDragging && Time.frameCount > _lastDragFrame && _previousPointer != null)
             OnDrag(_previousPointer);
     }
@@ -288,7 +323,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         // Simulate button pressing
         if (eventData != null)
         {
-            if (useButtons && buttonKeyNames != null)
+            if (useButtons && toggleKeyNames != null)
             {
                 foreach (string buttonKeyName in buttonKeyNames)
                 {
@@ -327,21 +362,12 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
         // Update toggling
         if (controllerToggler != null)
-        {
-            controllerToggler.gameObject.SetActive(false);
-            if (RectTransformUtility.RectangleContainsScreenPoint(controllerToggler, eventData.position))
-            {
-                _toggledPointer = eventData;
-                UpdateToggle(true);
-                return;
-            }
-            UpdateToggle(false);
-        }
+            UpdateToggle(controllerToggler.gameObject.activeSelf);
     }
 
     public void UpdateVirtualAxes(Vector2 value)
     {
-        if (!IsDragging)
+        if (!IsDragging && !IsToggled)
             return;
 
         if (useAxisX)
@@ -353,6 +379,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     public void UpdateToggle(bool isOn)
     {
+        IsToggled = isOn;
         if (isOn)
             onToggleOn.Invoke();
         else
