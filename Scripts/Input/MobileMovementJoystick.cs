@@ -55,8 +55,9 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     [Header("Toggling")]
     public RectTransform controllerToggler = null;
-    public float toggleRangeMin = 75f;
-    public float toggleRangeMax = 105f;
+    public float toggleAngleRangeMin = 75f;
+    public float toggleAngleRangeMax = 105f;
+    public float toggleDistanceRangeMin = 90f;
     public string[] toggleKeyNames = new string[0];
     public GameObject[] toggleSigns = new GameObject[0];
     public GameObject[] unToggleSigns = new GameObject[0];
@@ -80,6 +81,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
     }
 
     public Vector2 CurrentPosition { get; private set; }
+    public bool PreToggled { get; private set; }
     public bool IsToggled { get; private set; }
 
     private Vector3 _backgroundOffset;
@@ -266,7 +268,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         {
             Vector2 direction = movement.normalized;
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            controllerToggler.gameObject.SetActive(angle > toggleRangeMin && angle < toggleRangeMax);
+            PreToggled = angle > toggleAngleRangeMin && angle < toggleAngleRangeMax && Vector3.Distance(pointerPosition, _startDragPosition) > toggleDistanceRangeMin;
+            controllerToggler.gameObject.SetActive(PreToggled);
         }
 
         // Update dragging state
@@ -276,15 +279,18 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
 
     private void Update()
     {
-        if (IsToggled)
+        if (IsToggled || PreToggled)
         {
-            _startDragLocalPosition = controllerHandler.localPosition = _defaultControllerLocalPosition;
-            _startDragPosition = controllerHandler.position;
-            _previousTouchPosition = controllerHandler.position;
-            Vector2 dir = ((Vector2)controllerToggler.position - _startDragPosition).normalized;
-            Vector2 newPosition = _startDragPosition + dir * movementRange;
-            controllerHandler.position = newPosition;
-            OnDrag(controllerToggler.position);
+            if (IsToggled)
+            {
+                _startDragLocalPosition = controllerHandler.localPosition = _defaultControllerLocalPosition;
+                _startDragPosition = controllerHandler.position;
+                _previousTouchPosition = controllerHandler.position;
+                Vector2 dir = ((Vector2)controllerToggler.position - _startDragPosition).normalized;
+                Vector2 newPosition = _startDragPosition + dir * movementRange;
+                controllerHandler.position = newPosition;
+                OnDrag(controllerToggler.position);
+            }
             // Toggled
             if (toggleKeyNames != null && toggleKeyNames.Length > 0)
             {
@@ -305,7 +311,7 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
                 }
             }
         }
-        _prevToggled = IsToggled;
+        _prevToggled = IsToggled || PreToggled;
         if (_prevToggled)
             return;
         if (IsDragging && Time.frameCount > _lastDragFrame && _previousPointer != null)
