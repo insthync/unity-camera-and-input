@@ -348,6 +348,10 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
                 _isResettingSiblingIndex = true;
         }
 
+        // Update toggling
+        if (controllerToggler != null)
+            UpdateToggle(controllerToggler.gameObject.activeSelf && RectTransformUtility.RectangleContainsScreenPoint(controllerToggler, eventData.position));
+
         // Reset handler position
         controllerHandler.localPosition = _defaultControllerLocalPosition;
 
@@ -365,10 +369,6 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         UpdateVirtualAxes(Vector3.zero);
         SetIdleState();
         IsDragging = false;
-
-        // Update toggling
-        if (controllerToggler != null)
-            UpdateToggle(controllerToggler.gameObject.activeSelf);
     }
 
     public void UpdateVirtualAxes(Vector2 value)
@@ -399,6 +399,8 @@ public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerD
         {
             unToggleSigns[i].SetActive(!isOn);
         }
+        if (controllerToggler != null)
+            controllerToggler.gameObject.SetActive(isOn);
     }
 
     private void SetIdleState()
