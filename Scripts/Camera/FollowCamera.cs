@@ -30,6 +30,9 @@ public class FollowCamera : MonoBehaviour
     };
     [Header("Wall hit spring")]
     public bool enableWallHitSpring;
+    public float minDistanceToPerformWallHitSpring = 1f;
+    public float wallHitSpringPushForwardDistance = 0.5f;
+    public float wallHitSpringRadius = 0.5f;
     public LayerMask wallHitLayerMask = -1;
     public QueryTriggerInteraction wallHitQueryTriggerInteraction = QueryTriggerInteraction.Ignore;
 
@@ -47,14 +50,15 @@ public class FollowCamera : MonoBehaviour
     public float _targetYRotation = 0f;
     // Being used in Update and DrawGizmos functions
     private Ray _tempRay;
-    private RaycastHit[] _tempHits;
     private float _tempDistance;
+    private Vector3 _debugFrom;
+    private Vector3 _debugTo;
 
     protected virtual void OnDrawGizmos()
     {
 #if UNITY_EDITOR
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(_tempRay.origin, _tempRay.origin + _tempRay.direction * _tempDistance);
+        Gizmos.DrawLine(_debugFrom, _debugTo);
 #endif
     }
 
@@ -158,21 +162,16 @@ public class FollowCamera : MonoBehaviour
             Vector3 directionToCamera = wantedRotation * -Vector3.forward;
             _tempRay = new Ray(_targetPosition, directionToCamera);
             _tempDistance = Vector3.Distance(_targetPosition, wantedPosition);
-
-            float sphereRadius = 0.5f;
-            RaycastHit[] hits = Physics.SphereCastAll(_tempRay, sphereRadius, _tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
-
+            RaycastHit[] hits = Physics.SphereCastAll(_tempRay, wallHitSpringRadius, _tempDistance, wallHitLayerMask, wallHitQueryTriggerInteraction);
             foreach (var hit in hits)
             {
-                if (hit.distance < nearest)
+                if (hit.distance < minDistanceToPerformWallHitSpring || hit.distance >= nearest)
+                    continue;
+                nearest = hit.distance;
+                Vector3 collisionPointWithOffset = _tempRay.origin + (directionToCamera.normalized * (hit.distance - wallHitSpringPushForwardDistance));
+                if (Vector3.Distance(_targetPosition, collisionPointWithOffset) < _tempDistance)
                 {
-                    nearest = hit.distance;
-                    float offset = 0.5f;
-                    Vector3 collisionPointWithOffset = _tempRay.origin + directionToCamera.normalized * (hit.distance - offset);
-                    if (Vector3.Distance(_targetPosition, collisionPointWithOffset) < _tempDistance)
-                    {
-                        wantedPosition = collisionPointWithOffset;
-                    }
+                    wantedPosition = collisionPointWithOffset;
                 }
             }
         }
@@ -180,6 +179,9 @@ public class FollowCamera : MonoBehaviour
         // Update position & rotation
         CacheCameraTransform.position = wantedPosition;
         CacheCameraTransform.rotation = wantedRotation;
+
+        _debugFrom = _targetPosition;
+        _debugTo = wantedPosition;
     }
 
     [System.Serializable]
