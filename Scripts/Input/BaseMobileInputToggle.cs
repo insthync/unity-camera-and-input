@@ -68,6 +68,16 @@ public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, I
             _config.onLoadAlpha -= OnLoadAlpha;
     }
 
+    public void SetIsOnWithoutNotify(bool value)
+    {
+        isOn = value;
+        if (_dirtyIsOn != value)
+        {
+            _dirtyIsOn = value;
+            UpdateGraphics();
+        }
+    }
+
     private float GetAlphaByCurrentState()
     {
         return IsOn ? alphaWhileOn : alphaWhileOff;
