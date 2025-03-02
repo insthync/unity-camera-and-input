@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 
-public class MobileInputToggleByKeyCode : BaseMobileInputToggle
+namespace Insthync.CameraAndInput
 {
-    public KeyCode keyCode = KeyCode.None;
-
-    protected override void OnToggle(bool isOn)
+    public class MobileInputToggleByKeyCode : BaseMobileInputToggle
     {
-        if (isOn)
-            InputManager.SetKeyDown(keyCode);
-        else
-            InputManager.SetKeyUp(keyCode);
+        public KeyCode keyCode = KeyCode.None;
+
+        protected override void OnToggle(bool isOn)
+        {
+            if (isOn)
+                InputManager.SetKeyDown(keyCode);
+            else
+                InputManager.SetKeyUp(keyCode);
+        }
     }
 }

@@ -1,17 +1,20 @@
 ﻿using UnityEngine;
 
-public class MobileInputButtonByKeyCode : BaseMobileInputButton
+namespace Insthync.CameraAndInput
 {
-    [Header("Key")]
-    public KeyCode keyCode = KeyCode.None;
-
-    protected override void OnButtonDown()
+    public class MobileInputButtonByKeyCode : BaseMobileInputButton
     {
-        InputManager.SetKeyDown(keyCode);
-    }
+        [Header("Key")]
+        public KeyCode keyCode = KeyCode.None;
 
-    protected override void OnButtonUp()
-    {
-        InputManager.SetKeyUp(keyCode);
+        protected override void OnButtonDown()
+        {
+            InputManager.SetKeyDown(keyCode);
+        }
+
+        protected override void OnButtonUp()
+        {
+            InputManager.SetKeyUp(keyCode);
+        }
     }
 }

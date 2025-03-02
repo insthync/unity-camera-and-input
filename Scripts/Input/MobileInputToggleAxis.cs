@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 
-public class MobileInputToggleAxis : BaseMobileInputToggle
+namespace Insthync.CameraAndInput
 {
-    [SerializeField]
-    private string axisName = string.Empty;
-    [SerializeField]
-    private float axisValueWhenOff = 0f;
-    [SerializeField]
-    private float axisValueWhileOn = 0f;
-
-    private void Update()
+    public class MobileInputToggleAxis : BaseMobileInputToggle
     {
-        if (IsOn)
-            InputManager.SetAxis(axisName, axisValueWhileOn);
-    }
+        [SerializeField]
+        private string axisName = string.Empty;
+        [SerializeField]
+        private float axisValueWhenOff = 0f;
+        [SerializeField]
+        private float axisValueWhileOn = 0f;
 
-    protected override void OnToggle(bool isOn)
-    {
-        InputManager.SetAxis(axisName, isOn ? axisValueWhileOn : axisValueWhenOff);
+        private void Update()
+        {
+            if (IsOn)
+                InputManager.SetAxis(axisName, axisValueWhileOn);
+        }
+
+        protected override void OnToggle(bool isOn)
+        {
+            InputManager.SetAxis(axisName, isOn ? axisValueWhileOn : axisValueWhenOff);
+        }
     }
 }

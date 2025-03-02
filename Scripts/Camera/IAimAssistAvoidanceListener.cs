@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
-public interface IAimAssistAvoidanceListener
+namespace Insthync.CameraAndInput
 {
-    bool AvoidAimAssist(RaycastHit hitInfo);
+    public interface IAimAssistAvoidanceListener
+    {
+        bool AvoidAimAssist(RaycastHit hitInfo);
+    }
 }

@@ -1,136 +1,139 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class MobileInputConfigManager : MonoBehaviour
+namespace Insthync.CameraAndInput
 {
-    public static MobileInputConfigManager Instance { get; private set; }
-
-    [Header("Editing UI Element")]
-    public GameObject uiRoot;
-    public Slider scaleSlider;
-    public Slider alphaSlider;
-    public bool turnOnEditModeOnEnable;
-
-    private void OnEnable()
+    public class MobileInputConfigManager : MonoBehaviour
     {
-        if (uiRoot)
-        {
-            uiRoot.SetActive(false);
-        }
-        if (turnOnEditModeOnEnable)
-            TurnOnEditMode();
-        else
-            TurnOffEditMode();
-        Instance = this;
-    }
+        public static MobileInputConfigManager Instance { get; private set; }
 
-    private void OnDisable()
-    {
-        if (Instance == this)
-            Instance = null;
-    }
+        [Header("Editing UI Element")]
+        public GameObject uiRoot;
+        public Slider scaleSlider;
+        public Slider alphaSlider;
+        public bool turnOnEditModeOnEnable;
 
-    public void TurnOnEditMode()
-    {
-        var comps = GetComponentsInChildren<MobileInputConfig>();
-        foreach (var comp in comps)
+        private void OnEnable()
         {
-            comp.isEditMode = true;
+            if (uiRoot)
+            {
+                uiRoot.SetActive(false);
+            }
+            if (turnOnEditModeOnEnable)
+                TurnOnEditMode();
+            else
+                TurnOffEditMode();
+            Instance = this;
         }
-    }
 
-    public void TurnOffEditMode()
-    {
-        var comps = GetComponentsInChildren<MobileInputConfig>();
-        foreach (var comp in comps)
+        private void OnDisable()
         {
-            comp.isEditMode = false;
+            if (Instance == this)
+                Instance = null;
         }
-    }
 
-    public void LoadConfig()
-    {
-        var comps = FindObjectsOfType<MobileInputConfig>();
-        foreach (var comp in comps)
+        public void TurnOnEditMode()
         {
-            comp.LoadPosition();
-            comp.LoadScale();
-            comp.LoadAlpha();
+            var comps = GetComponentsInChildren<MobileInputConfig>();
+            foreach (var comp in comps)
+            {
+                comp.isEditMode = true;
+            }
         }
-    }
 
-    public void SaveConfig()
-    {
-        var comps = GetComponentsInChildren<MobileInputConfig>();
-        foreach (var comp in comps)
+        public void TurnOffEditMode()
         {
-            comp.SavePosition();
-            comp.SaveScale();
-            comp.SaveAlpha();
+            var comps = GetComponentsInChildren<MobileInputConfig>();
+            foreach (var comp in comps)
+            {
+                comp.isEditMode = false;
+            }
         }
-        LoadConfig();
-    }
 
-    public void ResetConfig()
-    {
-        var comps = GetComponentsInChildren<MobileInputConfig>();
-        foreach (var comp in comps)
+        public void LoadConfig()
         {
-            comp.ResetPosition();
-            comp.ResetScale();
-            comp.ResetAlpha();
+            var comps = FindObjectsOfType<MobileInputConfig>();
+            foreach (var comp in comps)
+            {
+                comp.LoadPosition();
+                comp.LoadScale();
+                comp.LoadAlpha();
+            }
         }
-    }
 
-    public void SelectMobileInput(MobileInputConfig input)
-    {
-        if (!input)
+        public void SaveConfig()
         {
-            DeselectMobileInput();
-            return;
+            var comps = GetComponentsInChildren<MobileInputConfig>();
+            foreach (var comp in comps)
+            {
+                comp.SavePosition();
+                comp.SaveScale();
+                comp.SaveAlpha();
+            }
+            LoadConfig();
         }
-        if (uiRoot)
-        {
-            uiRoot.SetActive(true);
-        }
-        if (scaleSlider)
-        {
-            scaleSlider.onValueChanged.RemoveAllListeners();
-            scaleSlider.minValue = input.minScale;
-            scaleSlider.maxValue = input.maxScale;
-            scaleSlider.value = input.CurrentScale;
-            scaleSlider.onValueChanged.AddListener(input.SetScale);
-        }
-        if (alphaSlider)
-        {
-            alphaSlider.onValueChanged.RemoveAllListeners();
-            alphaSlider.minValue = input.minAlpha;
-            alphaSlider.maxValue = input.maxAlpha;
-            alphaSlider.value = input.CurrentAlpha;
-            alphaSlider.onValueChanged.AddListener(input.SetAlpha);
-        }
-    }
 
-    public void DeselectMobileInput()
-    {
-        if (uiRoot)
+        public void ResetConfig()
         {
-            uiRoot.SetActive(false);
+            var comps = GetComponentsInChildren<MobileInputConfig>();
+            foreach (var comp in comps)
+            {
+                comp.ResetPosition();
+                comp.ResetScale();
+                comp.ResetAlpha();
+            }
         }
-    }
 
-    [ContextMenu("Delete all child's buttons")]
-    public void DeleteAllChildsButtons()
-    {
-        var buttons = GetComponentsInChildren<Button>(true);
-        for (int i = buttons.Length - 1; i >= 0; --i)
+        public void SelectMobileInput(MobileInputConfig input)
         {
-            DestroyImmediate(buttons[i]);
+            if (!input)
+            {
+                DeselectMobileInput();
+                return;
+            }
+            if (uiRoot)
+            {
+                uiRoot.SetActive(true);
+            }
+            if (scaleSlider)
+            {
+                scaleSlider.onValueChanged.RemoveAllListeners();
+                scaleSlider.minValue = input.minScale;
+                scaleSlider.maxValue = input.maxScale;
+                scaleSlider.value = input.CurrentScale;
+                scaleSlider.onValueChanged.AddListener(input.SetScale);
+            }
+            if (alphaSlider)
+            {
+                alphaSlider.onValueChanged.RemoveAllListeners();
+                alphaSlider.minValue = input.minAlpha;
+                alphaSlider.maxValue = input.maxAlpha;
+                alphaSlider.value = input.CurrentAlpha;
+                alphaSlider.onValueChanged.AddListener(input.SetAlpha);
+            }
         }
-        var inputAreas = GetComponentsInChildren<IMobileInputArea>(true);
-        for (int i = inputAreas.Length - 1; i >= 0; --i)
+
+        public void DeselectMobileInput()
         {
-            DestroyImmediate(inputAreas[i] as MonoBehaviour);
+            if (uiRoot)
+            {
+                uiRoot.SetActive(false);
+            }
+        }
+
+        [ContextMenu("Delete all child's buttons")]
+        public void DeleteAllChildsButtons()
+        {
+            var buttons = GetComponentsInChildren<Button>(true);
+            for (int i = buttons.Length - 1; i >= 0; --i)
+            {
+                DestroyImmediate(buttons[i]);
+            }
+            var inputAreas = GetComponentsInChildren<IMobileInputArea>(true);
+            for (int i = inputAreas.Length - 1; i >= 0; --i)
+            {
+                DestroyImmediate(inputAreas[i] as MonoBehaviour);
+            }
         }
     }
 }

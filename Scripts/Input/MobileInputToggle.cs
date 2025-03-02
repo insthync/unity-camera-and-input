@@ -1,12 +1,15 @@
-﻿public class MobileInputToggle : BaseMobileInputToggle
+﻿namespace Insthync.CameraAndInput
 {
-    public string keyName = string.Empty;
-
-    protected override void OnToggle(bool isOn)
+    public class MobileInputToggle : BaseMobileInputToggle
     {
-        if (isOn)
-            InputManager.SetButtonDown(keyName);
-        else
-            InputManager.SetButtonUp(keyName);
+        public string keyName = string.Empty;
+
+        protected override void OnToggle(bool isOn)
+        {
+            if (isOn)
+                InputManager.SetButtonDown(keyName);
+            else
+                InputManager.SetButtonUp(keyName);
+        }
     }
 }

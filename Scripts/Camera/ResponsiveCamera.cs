@@ -1,64 +1,65 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[ExecuteInEditMode]
-[RequireComponent(typeof(Camera))]
-public class ResponsiveCamera : MonoBehaviour
+namespace Insthync.CameraAndInput
 {
-    private Camera tempCamera;
-    public Camera TempCamera
+    [ExecuteInEditMode]
+    [RequireComponent(typeof(Camera))]
+    public class ResponsiveCamera : MonoBehaviour
     {
-        get
+        private Camera tempCamera;
+        public Camera TempCamera
         {
-            if (tempCamera == null)
-                tempCamera = GetComponent<Camera>();
-            return tempCamera;
+            get
+            {
+                if (tempCamera == null)
+                    tempCamera = GetComponent<Camera>();
+                return tempCamera;
+            }
         }
-    }
 
-    public float targetWidth;
-    public float targetHeight;
-    
-    private void LateUpdate()
-    {
-        // set the desired aspect ratio (the values in this example are
-        // hard-coded for 16:9, but you could make them into public
-        // variables instead so you can set them at design time)
-        float targetaspect = targetWidth / targetHeight;
+        public float targetWidth;
+        public float targetHeight;
 
-        // determine the game window's current aspect ratio
-        float windowaspect = (float)Screen.width / (float)Screen.height;
-
-        // current viewport height should be scaled by this amount
-        float scaleheight = windowaspect / targetaspect;
-
-        // if scaled height is less than current height, add letterbox
-        if (scaleheight < 1.0f)
+        private void LateUpdate()
         {
-            Rect rect = TempCamera.rect;
+            // set the desired aspect ratio (the values in this example are
+            // hard-coded for 16:9, but you could make them into public
+            // variables instead so you can set them at design time)
+            float targetaspect = targetWidth / targetHeight;
 
-            rect.width = 1.0f;
-            rect.height = scaleheight;
+            // determine the game window's current aspect ratio
+            float windowaspect = (float)Screen.width / (float)Screen.height;
 
-            rect.x = 0;
-            rect.y = (1.0f - scaleheight) / 2.0f;
+            // current viewport height should be scaled by this amount
+            float scaleheight = windowaspect / targetaspect;
 
-            TempCamera.rect = rect;
-        }
-        else // add pillarbox
-        {
-            float scalewidth = 1.0f / scaleheight;
+            // if scaled height is less than current height, add letterbox
+            if (scaleheight < 1.0f)
+            {
+                Rect rect = TempCamera.rect;
 
-            Rect rect = TempCamera.rect;
+                rect.width = 1.0f;
+                rect.height = scaleheight;
 
-            rect.width = scalewidth;
-            rect.height = 1.0f;
+                rect.x = 0;
+                rect.y = (1.0f - scaleheight) / 2.0f;
 
-            rect.x = (1.0f - scalewidth) / 2.0f;
-            rect.y = 0;
+                TempCamera.rect = rect;
+            }
+            else // add pillarbox
+            {
+                float scalewidth = 1.0f / scaleheight;
 
-            TempCamera.rect = rect;
+                Rect rect = TempCamera.rect;
+
+                rect.width = scalewidth;
+                rect.height = 1.0f;
+
+                rect.x = (1.0f - scalewidth) / 2.0f;
+                rect.y = 0;
+
+                TempCamera.rect = rect;
+            }
         }
     }
 }
