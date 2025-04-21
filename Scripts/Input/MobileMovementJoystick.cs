@@ -115,6 +115,7 @@ namespace Insthync.CameraAndInput
                 controllerHandler.anchorMin = Vector2.one * 0.5f;
                 controllerHandler.anchorMax = Vector2.one * 0.5f;
                 controllerHandler.pivot = Vector2.one * 0.5f;
+                controllerHandler.anchoredPosition = Vector2.zero;
                 // Get canvas group, will use it to change alpha later
                 _handlerCanvasGroup = controllerHandler.GetComponent<CanvasGroup>();
                 if (_handlerCanvasGroup != null)
@@ -130,6 +131,7 @@ namespace Insthync.CameraAndInput
                 controllerBackground.anchorMin = Vector2.one * 0.5f;
                 controllerBackground.anchorMax = Vector2.one * 0.5f;
                 controllerBackground.pivot = Vector2.one * 0.5f;
+                controllerBackground.anchoredPosition = Vector2.zero;
                 // Prepare background offset, it will be used to calculate joystick movement
                 _backgroundOffset = controllerBackground.position - controllerHandler.position;
                 // Get canvas group, will use it to change alpha later
