@@ -107,7 +107,7 @@ namespace Insthync.CameraAndInput
             }
         }
 
-        private void Update()
+        protected override void Update()
         {
             float deltaTime = Time.deltaTime;
 
@@ -174,6 +174,8 @@ namespace Insthync.CameraAndInput
                 ZoomVelocity = Mathf.Lerp(ZoomVelocity, 0, deltaTime * zoomDeacceleration);
             else
                 ZoomVelocity = 0f;
+
+            base.Update();
         }
 
         public void Recoil(float x, float y, float z)

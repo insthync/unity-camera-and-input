@@ -10,6 +10,9 @@ namespace Insthync.CameraAndInput
         public Camera targetCamera;
         public Transform target;
         public Vector3 targetOffset;
+        public bool updateCameraOnUpdate = false;
+        public bool updateCameraOnLateUpdate = true;
+        public bool updateCameraOnFixedUpdate = false;
         [Header("Follow smoothness")]
         public bool smoothFollow;
         public float followSmoothing = 10.0f;
@@ -76,6 +79,10 @@ namespace Insthync.CameraAndInput
             CacheCameraTransform = CacheCamera.transform;
             if (_targetFollower == null && Application.isPlaying)
                 _targetFollower = new GameObject("_CameraTargetFollower");
+            if (!updateCameraOnUpdate &&
+                !updateCameraOnLateUpdate &&
+                !updateCameraOnFixedUpdate)
+                updateCameraOnLateUpdate = true;
         }
 
         private void OnDestroy()
@@ -84,7 +91,25 @@ namespace Insthync.CameraAndInput
                 Destroy(_targetFollower);
         }
 
+        protected virtual void Update()
+        {
+            if (updateCameraOnUpdate)
+                UpdateCamera(Time.deltaTime);
+        }
+
         protected virtual void LateUpdate()
+        {
+            if (updateCameraOnLateUpdate)
+                UpdateCamera(Time.deltaTime);
+        }
+
+        protected virtual void FixedUpdate()
+        {
+            if (updateCameraOnFixedUpdate)
+                UpdateCamera(Time.fixedDeltaTime);
+        }
+
+        protected virtual void UpdateCamera(float deltaTime)
         {
             if (Application.isPlaying)
             {
@@ -97,7 +122,7 @@ namespace Insthync.CameraAndInput
                     }
                     else
                     {
-                        _targetFollower.transform.position = Vector3.Lerp(_targetFollower.transform.position, target.transform.position, followSmoothing * Time.deltaTime);
+                        _targetFollower.transform.position = Vector3.Lerp(_targetFollower.transform.position, target.transform.position, followSmoothing * deltaTime);
                         _targetFollower.transform.eulerAngles = target.transform.eulerAngles;
                     }
                     _targetPosition = _targetFollower.transform.position;
