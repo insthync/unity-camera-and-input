@@ -28,7 +28,6 @@ namespace Insthync.CameraAndInput
         }
 
         private Graphic _graphic;
-        private Vector2? _previousTouchPosition;
         private PointerEventData _previousPointer;
         private int _lastDragFrame;
 
@@ -50,8 +49,6 @@ namespace Insthync.CameraAndInput
             if (_previousPointer != null)
                 return;
             _previousPointer = eventData;
-            _previousTouchPosition = null;
-            IsSwiping = true;
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -59,12 +56,12 @@ namespace Insthync.CameraAndInput
             if (_previousPointer == null || _previousPointer.pointerId != eventData.pointerId)
                 return;
             _previousPointer = eventData;
-            if (!_previousTouchPosition.HasValue)
-                _previousTouchPosition = eventData.position;
-            // Use previous position to find delta from last frame
-            Vector2 pointerDelta = eventData.position - _previousTouchPosition.Value;
-            // Set position to use next frame
-            _previousTouchPosition = eventData.position;
+            OnDrag(eventData.delta);
+            IsSwiping = true;
+        }
+
+        public void OnDrag(Vector2 pointerDelta)
+        {
             UpdateVirtualAxes(new Vector2(pointerDelta.x * xSensitivity, pointerDelta.y * ySensitivity) * Time.deltaTime * 100f);
             // Update dragging state
             InputManager.UpdateMobileInputDragging();
@@ -73,8 +70,8 @@ namespace Insthync.CameraAndInput
 
         private void Update()
         {
-            if (IsSwiping && Time.frameCount > _lastDragFrame && _previousPointer != null)
-                OnDrag(_previousPointer);
+            if (IsSwiping && Time.frameCount > _lastDragFrame)
+                OnDrag(Vector2.zero);
         }
 
         public void OnPointerUp(PointerEventData eventData)

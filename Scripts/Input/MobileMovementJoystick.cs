@@ -96,7 +96,6 @@ namespace Insthync.CameraAndInput
         private CanvasGroup _backgroundCanvasGroup;
         private CanvasGroup _handlerCanvasGroup;
         private MobileInputConfig _config;
-        private Vector2? _previousTouchPosition;
         private PointerEventData _previousPointer;
         private int _lastDragFrame;
         private bool _isResettingSiblingIndex;
@@ -181,7 +180,6 @@ namespace Insthync.CameraAndInput
             if (_previousPointer != null)
                 return;
             _previousPointer = eventData;
-            _previousTouchPosition = null;
             InputManager.touchedPointerIds[eventData.pointerId] = gameObject;
 
             // Simulate button pressing
@@ -225,7 +223,7 @@ namespace Insthync.CameraAndInput
             _startDragPosition = controllerHandler.position;
             _startDragLocalPosition = controllerHandler.localPosition;
             SetDraggingState();
-            IsDragging = true;
+            CurrentPosition = eventData.position;
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -233,19 +231,13 @@ namespace Insthync.CameraAndInput
             if (_previousPointer == null || _previousPointer.pointerId != eventData.pointerId)
                 return;
             _previousPointer = eventData;
-            OnDrag(eventData.position);
+            OnDrag(eventData.position, eventData.delta);
+            IsDragging = true;
         }
 
-        public void OnDrag(Vector2 pointerPosition)
+        public void OnDrag(Vector2 pointerPosition, Vector2 pointerDelta)
         {
-            if (!_previousTouchPosition.HasValue)
-                _previousTouchPosition = pointerPosition;
             CurrentPosition = pointerPosition;
-
-            // Use previous position to find delta from last frame
-            Vector2 pointerDelta = pointerPosition - _previousTouchPosition.Value;
-            // Set position to use next frame
-            _previousTouchPosition = pointerPosition;
 
             // Find distance from start position, it will be used to find move direction
             Vector2 distanceFromStartPosition = pointerPosition - _startDragPosition;
@@ -289,11 +281,11 @@ namespace Insthync.CameraAndInput
                 {
                     _startDragLocalPosition = controllerHandler.localPosition = _defaultControllerLocalPosition;
                     _startDragPosition = controllerHandler.position;
-                    _previousTouchPosition = controllerHandler.position;
-                    Vector2 dir = ((Vector2)controllerToggler.position - _startDragPosition).normalized;
+                    Vector2 delta = (Vector2)controllerToggler.position - _startDragPosition;
+                    Vector2 dir = delta.normalized;
                     Vector2 newPosition = _startDragPosition + dir * movementRange;
                     controllerHandler.position = newPosition;
-                    OnDrag(controllerToggler.position);
+                    OnDrag(controllerToggler.position, delta);
                 }
                 // Toggled
                 if (toggleKeyNames != null && toggleKeyNames.Length > 0)
@@ -318,8 +310,8 @@ namespace Insthync.CameraAndInput
             _prevToggled = IsToggled || PreToggled;
             if (_prevToggled)
                 return;
-            if (IsDragging && Time.frameCount > _lastDragFrame && _previousPointer != null)
-                OnDrag(_previousPointer);
+            if (IsDragging && Time.frameCount > _lastDragFrame)
+                OnDrag(CurrentPosition, Vector2.zero);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -422,6 +414,34 @@ namespace Insthync.CameraAndInput
         public void OnLoadAlpha(float alpha)
         {
             _defaultCanvasGroupAlpha = alpha;
+        }
+
+        public void OnSetToggleOff(bool state)
+        {
+            if (!state)
+            {
+                if (controllerHandler != null)
+                    controllerHandler.localPosition = _defaultControllerLocalPosition;
+
+                // Reset background position
+                if (controllerBackground != null)
+                    controllerBackground.position = _backgroundOffset + controllerHandler.position;
+
+                // Reset canvas alpha
+                if (_backgroundCanvasGroup != null)
+                    _backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
+
+                if (_handlerCanvasGroup != null)
+                    _handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
+
+                SetIdleState();
+
+                InputManager.SetAxis(axisXName, 0);
+                InputManager.SetAxis(axisYName, 0);
+
+                PreToggled = false;
+                UpdateToggle(false);
+            }
         }
     }
 }
