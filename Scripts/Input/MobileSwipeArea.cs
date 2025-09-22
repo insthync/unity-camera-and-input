@@ -26,7 +26,7 @@ namespace Insthync.CameraAndInput
         {
             get => _isSwiping && Interactable; private set => _isSwiping = value;
         }
-
+        public Vector2 Movement { get; private set; }
         private Graphic _graphic;
         private PointerEventData _previousPointer;
         private int _lastDragFrame;
@@ -87,6 +87,8 @@ namespace Insthync.CameraAndInput
         {
             if (!Interactable)
                 value = Vector2.zero;
+
+            Movement = value;
 
             if (useAxisX)
                 InputManager.SetAxis(axisXName, value.x);

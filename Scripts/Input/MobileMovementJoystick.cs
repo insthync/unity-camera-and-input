@@ -81,8 +81,8 @@ namespace Insthync.CameraAndInput
         {
             get => _isDragging && Interactable; private set => _isDragging = value;
         }
-
         public Vector2 CurrentPosition { get; private set; }
+        public Vector2 Movement { get; private set; }
         public bool PreToggled { get; private set; }
         public bool IsToggled { get; private set; }
 
@@ -370,7 +370,9 @@ namespace Insthync.CameraAndInput
         public void UpdateVirtualAxes(Vector2 value)
         {
             if (!IsDragging && !IsToggled)
-                return;
+                value = Vector2.zero;
+
+            Movement = value;
 
             if (useAxisX)
                 InputManager.SetAxis(axisXName, value.x * (mode == EMode.SwipeArea ? 1f : axisXScale));
