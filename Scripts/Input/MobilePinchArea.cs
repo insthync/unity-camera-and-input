@@ -7,6 +7,8 @@ namespace Insthync.CameraAndInput
 {
     public class MobilePinchArea : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
+        public static readonly HashSet<int> Touches = new HashSet<int>();
+
         public string axisName = "Mouse ScrollWheel";
         public float sensitivity = 1f;
         [SerializeField]
@@ -48,6 +50,7 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            Touches.Add(eventData.pointerId);
             if (!Application.isMobilePlatform)
                 return;
             if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
@@ -129,6 +132,7 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            Touches.Remove(eventData.pointerId);
             if (!Application.isMobilePlatform)
                 return;
             if (eventData == null)

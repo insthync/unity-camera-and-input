@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -6,6 +7,8 @@ namespace Insthync.CameraAndInput
 {
     public class MobileSwipeArea : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
+        public static readonly HashSet<int> Touches = new HashSet<int>();
+
         public bool useAxisX = true;
         public bool useAxisY = true;
         public string axisXName = "Horizontal";
@@ -44,6 +47,7 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            Touches.Add(eventData.pointerId);
             if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
                 return;
             if (_previousPointer != null)
@@ -76,6 +80,7 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            Touches.Remove(eventData.pointerId);
             if (_previousPointer != null && eventData != null && _previousPointer.pointerId != eventData.pointerId)
                 return;
             IsSwiping = false;

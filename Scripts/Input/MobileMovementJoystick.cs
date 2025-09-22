@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -7,6 +8,8 @@ namespace Insthync.CameraAndInput
 {
     public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
+        public static readonly HashSet<int> Touches = new HashSet<int>();
+
         public enum EMode
         {
             Default,
@@ -174,6 +177,7 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            Touches.Add(eventData.pointerId);
             if (!Interactable)
                 return;
 
@@ -316,6 +320,7 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            Touches.Remove(eventData.pointerId);
             if (_previousPointer != null && eventData != null && _previousPointer.pointerId != eventData.pointerId)
                 return;
             if (_previousPointer != null)
