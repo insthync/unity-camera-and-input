@@ -47,7 +47,8 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            Touches.Add(eventData.pointerId);
+            if (eventData != null)
+                Touches.Add(eventData.pointerId);
             if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
                 return;
             if (_previousPointer != null)
@@ -80,7 +81,8 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            Touches.Remove(eventData.pointerId);
+            if (eventData != null)
+                Touches.Remove(eventData.pointerId);
             if (_previousPointer != null && eventData != null && _previousPointer.pointerId != eventData.pointerId)
                 return;
             IsSwiping = false;

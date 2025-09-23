@@ -177,7 +177,8 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            Touches.Add(eventData.pointerId);
+            if (eventData != null)
+                Touches.Add(eventData.pointerId);
             if (!Interactable)
                 return;
 
@@ -320,7 +321,8 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            Touches.Remove(eventData.pointerId);
+            if (eventData != null)
+                Touches.Remove(eventData.pointerId);
             if (_previousPointer != null && eventData != null && _previousPointer.pointerId != eventData.pointerId)
                 return;
             if (_previousPointer != null)

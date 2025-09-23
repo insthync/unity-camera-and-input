@@ -50,7 +50,8 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            Touches.Add(eventData.pointerId);
+            if (eventData != null)
+                Touches.Add(eventData.pointerId);
             if (!Application.isMobilePlatform)
                 return;
             if (InputManager.touchedPointerIds.TryGetValue(eventData.pointerId, out GameObject touchedObject) && touchedObject != gameObject)
@@ -132,7 +133,8 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            Touches.Remove(eventData.pointerId);
+            if (eventData != null)
+                Touches.Remove(eventData.pointerId);
             if (!Application.isMobilePlatform)
                 return;
             if (eventData == null)
