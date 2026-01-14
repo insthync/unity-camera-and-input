@@ -82,7 +82,7 @@ namespace Insthync.CameraAndInput
         public static bool IsUseMobileInput()
         {
 #if VR_BUILD
-        return false;
+            return false;
 #else
             return Application.isMobilePlatform || UseMobileInputOnNonMobile;
 #endif
@@ -91,7 +91,7 @@ namespace Insthync.CameraAndInput
         public static bool IsUseNonMobileInput()
         {
 #if VR_BUILD
-        return true;
+            return true;
 #else
             return !Application.isMobilePlatform && (!UseMobileInputOnNonMobile || UseNonMobileInput);
 #endif
@@ -123,8 +123,13 @@ namespace Insthync.CameraAndInput
         }
 #endif
 
+        public static bool IsUpdatingMobileAxis(string axis)
+        {
+            return simulateAxis.TryGetValue(axis, out SimulateAxis simAxis) && Time.frameCount - simAxis.UpdatedFrame <= 1;
+        }
+
 #if USE_REWIRED
-    public static float GetAxis(string name, bool raw, int playerId = 0)
+        public static float GetAxis(string name, bool raw, int playerId = 0)
 #else
         public static float GetAxis(string name, bool raw)
 #endif
@@ -133,14 +138,14 @@ namespace Insthync.CameraAndInput
             if (IsUseNonMobileInput())
             {
 #if USE_REWIRED
-            try
-            {
-                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-                float axis = raw ? player.GetAxisRaw(name) : player.GetAxis(name);
-                if (Mathf.Abs(axis) > 0.00001f)
-                    return axis;
-            }
-            catch { }
+                try
+                {
+                    Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                    float axis = raw ? player.GetAxisRaw(name) : player.GetAxis(name);
+                    if (Mathf.Abs(axis) > 0.00001f)
+                        return axis;
+                }
+                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -160,13 +165,13 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                float axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
-                if (Mathf.Abs(axis) > 0.00001f)
-                    return axis;
-            }
-            catch { }
+                try
+                {
+                    float axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
+                    if (Mathf.Abs(axis) > 0.00001f)
+                        return axis;
+                }
+                catch { }
 #endif
             }
 
@@ -200,12 +205,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                if (Input.GetKey(key))
-                    return true;
-            }
-            catch { }
+                try
+                {
+                    if (Input.GetKey(key))
+                        return true;
+                }
+                catch { }
 #endif
             }
 
@@ -230,12 +235,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                if (Input.GetKeyDown(key))
-                    return true;
-            }
-            catch { }
+                try
+                {
+                    if (Input.GetKeyDown(key))
+                        return true;
+                }
+                catch { }
 #endif
             }
 
@@ -260,12 +265,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                if (Input.GetKeyUp(key))
-                    return true;
-            }
-            catch { }
+                try
+                {
+                    if (Input.GetKeyUp(key))
+                        return true;
+                }
+                catch { }
 #endif
             }
 
@@ -293,7 +298,7 @@ namespace Insthync.CameraAndInput
         }
 
 #if USE_REWIRED
-    public static bool GetButton(string name, int playerId = 0)
+        public static bool GetButton(string name, int playerId = 0)
 #else
         public static bool GetButton(string name)
 #endif
@@ -305,13 +310,13 @@ namespace Insthync.CameraAndInput
             {
                 // Try get input by rewired system
 #if USE_REWIRED
-            try
-            {
-                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-                if (player.GetButton(name))
-                    return true;
-            }
-            catch { }
+                try
+                {
+                    Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                    if (player.GetButton(name))
+                        return true;
+                }
+                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -323,14 +328,14 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                if (Input.GetButton(name))
+                try
+                {
+                    if (Input.GetButton(name))
+                        return true;
+                }
+                catch { }
+                if (IsKeyFromSettingActivated(name, GetKey))
                     return true;
-            }
-            catch { }
-            if (IsKeyFromSettingActivated(name, GetKey))
-                return true;
 #endif
             }
 
@@ -349,7 +354,7 @@ namespace Insthync.CameraAndInput
         }
 
 #if USE_REWIRED
-    public static bool GetButtonDown(string name, int playerId = 0)
+        public static bool GetButtonDown(string name, int playerId = 0)
 #else
         public static bool GetButtonDown(string name)
 #endif
@@ -361,13 +366,13 @@ namespace Insthync.CameraAndInput
             {
                 // Try get input by rewired system
 #if USE_REWIRED
-            try
-            {
-                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-                if (player.GetButtonDown(name))
-                    return true;
-            }
-            catch { }
+                try
+                {
+                    Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                    if (player.GetButtonDown(name))
+                        return true;
+                }
+                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -379,14 +384,14 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                if (Input.GetButtonDown(name))
+                try
+                {
+                    if (Input.GetButtonDown(name))
+                        return true;
+                }
+                catch { }
+                if (IsKeyFromSettingActivated(name, GetKeyDown))
                     return true;
-            }
-            catch { }
-            if (IsKeyFromSettingActivated(name, GetKeyDown))
-                return true;
 #endif
             }
 
@@ -405,7 +410,7 @@ namespace Insthync.CameraAndInput
         }
 
 #if USE_REWIRED
-    public static bool GetButtonUp(string name, int playerId = 0)
+        public static bool GetButtonUp(string name, int playerId = 0)
 #else
         public static bool GetButtonUp(string name)
 #endif
@@ -418,13 +423,13 @@ namespace Insthync.CameraAndInput
             {
                 // Try get input by rewired system
 #if USE_REWIRED
-            try
-            {
-                Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
-                if (player.GetButtonUp(name))
-                    return true;
-            }
-            catch { }
+                try
+                {
+                    Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
+                    if (player.GetButtonUp(name))
+                        return true;
+                }
+                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -436,14 +441,14 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            try
-            {
-                if (Input.GetButtonUp(name))
+                try
+                {
+                    if (Input.GetButtonUp(name))
+                        return true;
+                }
+                catch { }
+                if (IsKeyFromSettingActivated(name, GetKeyUp))
                     return true;
-            }
-            catch { }
-            if (IsKeyFromSettingActivated(name, GetKeyUp))
-                return true;
 #endif
             }
 
@@ -540,7 +545,7 @@ namespace Insthync.CameraAndInput
                 return Touchscreen.current.primaryTouch.position.value;
             return Mouse.current.position.value;
 #else
-        return Input.mousePosition;
+            return Input.mousePosition;
 #endif
         }
 
@@ -560,7 +565,7 @@ namespace Insthync.CameraAndInput
             }
             return false;
 #else
-        return Input.GetMouseButtonDown(button);
+            return Input.GetMouseButtonDown(button);
 #endif
         }
 
@@ -580,7 +585,7 @@ namespace Insthync.CameraAndInput
             }
             return false;
 #else
-        return Input.GetMouseButtonUp(button);
+            return Input.GetMouseButtonUp(button);
 #endif
         }
 
@@ -600,48 +605,50 @@ namespace Insthync.CameraAndInput
             }
             return false;
 #else
-        return Input.GetMouseButton(button);
+            return Input.GetMouseButton(button);
 #endif
         }
 
         public class SimulateButton
         {
-            private int lastPressedFrame = -5;
-            private int releasedFrame = -5;
-
-            public bool Pressed { get; private set; }
+            public int PressedFrame { get; private set; } = -1;
+            public int ReleasedFrame { get; private set; } = -1;
+            public bool Pressed { get; private set; } = false;
 
             public void Press()
             {
                 if (Pressed)
                     return;
                 Pressed = true;
-                lastPressedFrame = Time.frameCount;
+                PressedFrame = Time.frameCount;
             }
 
             public void Release()
             {
                 Pressed = false;
-                releasedFrame = Time.frameCount;
+                ReleasedFrame = Time.frameCount;
             }
 
             public bool ButtonDown
             {
-                get { return lastPressedFrame - Time.frameCount == -1; }
+                get { return PressedFrame - Time.frameCount == -1; }
             }
 
             public bool ButtonUp
             {
-                get { return releasedFrame == Time.frameCount - 1; }
+                get { return ReleasedFrame == Time.frameCount - 1; }
             }
         }
 
         public class SimulateAxis
         {
+            public int UpdatedFrame { get; private set; } = -1;
             public float Value { get; private set; }
+
             public void Update(float value)
             {
                 Value = value;
+                UpdatedFrame = Time.frameCount;
             }
         }
     }
