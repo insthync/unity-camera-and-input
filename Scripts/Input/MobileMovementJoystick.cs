@@ -229,6 +229,7 @@ namespace Insthync.CameraAndInput
             _startDragLocalPosition = controllerHandler.localPosition;
             SetDraggingState();
             CurrentPosition = eventData.position;
+            OnDrag(eventData);
         }
 
         public void OnDrag(PointerEventData eventData)
