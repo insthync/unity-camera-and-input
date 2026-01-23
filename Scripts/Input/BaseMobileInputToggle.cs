@@ -22,10 +22,21 @@ namespace Insthync.CameraAndInput
         public float alphaWhileOff = 0.75f;
         [Range(0f, 1f)]
         public float alphaWhileOn = 1f;
+        public bool interactable = true;
         public ToggleColorSetting[] toggleColorSettings = new ToggleColorSetting[0];
+
+        [Header("Events")]
         public BoolEvent onToggle = new BoolEvent();
+        public UnityEvent onPointerDown = new UnityEvent();
+        public UnityEvent onPointerUp = new UnityEvent();
         [SerializeField]
         private bool isOn = false;
+
+        public bool Interactable
+        {
+            get { return interactable; }
+            set { interactable = value; }
+        }
 
         private bool _dirtyIsOn = false;
         public bool IsOn
@@ -97,12 +108,18 @@ namespace Insthync.CameraAndInput
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!Interactable)
+                return;
             IsOn = !IsOn;
+            if (eventData != null)
+                onPointerDown?.Invoke();
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             // TODO: May have setting to toggle when pointer up
+            if (eventData != null)
+                onPointerUp?.Invoke();
         }
 
         public void OnLoadAlpha(float alpha)
