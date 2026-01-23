@@ -354,7 +354,7 @@ namespace Insthync.CameraAndInput
 
             // Update toggling
             if (controllerToggler != null)
-                UpdateToggle(controllerToggler.gameObject.activeSelf && RectTransformUtility.RectangleContainsScreenPoint(controllerToggler, eventData.position));
+                UpdateToggle(controllerToggler.gameObject.activeSelf && PreToggled);
 
             // Reset handler position
             controllerHandler.localPosition = _defaultControllerLocalPosition;
@@ -407,6 +407,13 @@ namespace Insthync.CameraAndInput
             }
             if (controllerToggler != null)
                 controllerToggler.gameObject.SetActive(isOn);
+        }
+
+        public void UnToggle()
+        {
+            OnPointerUp(new PointerEventData(EventSystem.current));
+            onPointerUp?.Invoke();
+            UpdateToggle(false);
         }
 
         private void SetIdleState()
