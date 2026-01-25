@@ -51,7 +51,8 @@ namespace Insthync.CameraAndInput
         private static HashSet<string> alreadyFindInputActionNames = new HashSet<string>();
         private static Dictionary<string, InputAction> foundInputActions = new Dictionary<string, InputAction>();
 #endif
-
+        private static readonly Dictionary<string, bool> s_validButtons = new Dictionary<string, bool>();
+        private static readonly Dictionary<string, bool> s_validAxes = new Dictionary<string, bool>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Initialize()
@@ -67,6 +68,42 @@ namespace Insthync.CameraAndInput
             alreadyFindInputActionNames.Clear();
             foundInputActions.Clear();
 #endif
+        }
+
+        public static bool IsValidButton(string name)
+        {
+            if (s_validButtons.TryGetValue(name, out bool valid))
+                return valid;
+
+            try
+            {
+                Input.GetButton(name);
+                s_validButtons[name] = true;
+                return true;
+            }
+            catch
+            {
+                s_validButtons[name] = false;
+                return false;
+            }
+        }
+
+        public static bool IsValidAxis(string name)
+        {
+            if (s_validAxes.TryGetValue(name, out bool valid))
+                return valid;
+
+            try
+            {
+                Input.GetAxis(name);
+                s_validAxes[name] = true;
+                return true;
+            }
+            catch
+            {
+                s_validAxes[name] = false;
+                return false;
+            }
         }
 
         public static void UpdateMobileInputDragging()
@@ -138,14 +175,13 @@ namespace Insthync.CameraAndInput
             if (IsUseNonMobileInput())
             {
 #if USE_REWIRED
-                try
+                if (IsValidAxis(name))
                 {
                     Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
                     float axis = raw ? player.GetAxisRaw(name) : player.GetAxis(name);
                     if (Mathf.Abs(axis) > 0.00001f)
                         return axis;
                 }
-                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -165,13 +201,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
+                if (IsValidAxis(name))
                 {
                     float axis = raw ? Input.GetAxisRaw(name) : Input.GetAxis(name);
                     if (Mathf.Abs(axis) > 0.00001f)
                         return axis;
                 }
-                catch { }
 #endif
             }
 
@@ -205,12 +240,8 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
-                {
-                    if (Input.GetKey(key))
-                        return true;
-                }
-                catch { }
+                if (Input.GetKey(key))
+                    return true;
 #endif
             }
 
@@ -235,12 +266,8 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
-                {
-                    if (Input.GetKeyDown(key))
-                        return true;
-                }
-                catch { }
+                if (Input.GetKeyDown(key))
+                    return true;
 #endif
             }
 
@@ -265,12 +292,8 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
-                {
-                    if (Input.GetKeyUp(key))
-                        return true;
-                }
-                catch { }
+                if (Input.GetKeyUp(key))
+                    return true;
 #endif
             }
 
@@ -283,15 +306,27 @@ namespace Insthync.CameraAndInput
             return false;
         }
 
-        private static bool IsKeyFromSettingActivated(string name, System.Func<KeyCode, bool> func)
+        private static bool IsKeyFromSettingActivated(string name, ButtonEvent btnEvent)
         {
-            if (HasInputSetting(name))
+            if (InputSettingManager.Singleton.Settings.TryGetValue(name, out List<KeyCode> keyCodes))
             {
-                List<KeyCode> keyCodes = InputSettingManager.Singleton.Settings[name];
                 foreach (KeyCode keyCode in keyCodes)
                 {
-                    if (func.Invoke(keyCode))
-                        return true;
+                    switch (btnEvent)
+                    {
+                        case ButtonEvent.Down:
+                            if (GetKeyDown(keyCode))
+                                return true;
+                            break;
+                        case ButtonEvent.Up:
+                            if (GetKeyUp(keyCode))
+                                return true;
+                            break;
+                        default:
+                            if (GetKey(keyCode))
+                                return true;
+                            break;
+                    }
                 }
             }
             return false;
@@ -310,13 +345,12 @@ namespace Insthync.CameraAndInput
             {
                 // Try get input by rewired system
 #if USE_REWIRED
-                try
+                if (IsValidButton(name))
                 {
                     Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
                     if (player.GetButton(name))
                         return true;
                 }
-                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -328,13 +362,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
+                if (IsValidButton(name))
                 {
                     if (Input.GetButton(name))
                         return true;
                 }
-                catch { }
-                if (IsKeyFromSettingActivated(name, GetKey))
+                if (IsKeyFromSettingActivated(name, ButtonEvent.Pressed))
                     return true;
 #endif
             }
@@ -346,7 +379,7 @@ namespace Insthync.CameraAndInput
                     return true;
                 if (!IsUseNonMobileInput())
                 {
-                    if (IsKeyFromSettingActivated(name, GetKey))
+                    if (IsKeyFromSettingActivated(name, ButtonEvent.Pressed))
                         return true;
                 }
             }
@@ -366,13 +399,12 @@ namespace Insthync.CameraAndInput
             {
                 // Try get input by rewired system
 #if USE_REWIRED
-                try
+                if (IsValidButton(name))
                 {
                     Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
                     if (player.GetButtonDown(name))
                         return true;
                 }
-                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -384,13 +416,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
+                if (IsValidButton(name))
                 {
                     if (Input.GetButtonDown(name))
                         return true;
                 }
-                catch { }
-                if (IsKeyFromSettingActivated(name, GetKeyDown))
+                if (IsKeyFromSettingActivated(name, ButtonEvent.Down))
                     return true;
 #endif
             }
@@ -402,7 +433,7 @@ namespace Insthync.CameraAndInput
                     return true;
                 if (!IsUseNonMobileInput())
                 {
-                    if (IsKeyFromSettingActivated(name, GetKeyDown))
+                    if (IsKeyFromSettingActivated(name, ButtonEvent.Down))
                         return true;
                 }
             }
@@ -423,13 +454,12 @@ namespace Insthync.CameraAndInput
             {
                 // Try get input by rewired system
 #if USE_REWIRED
-                try
+                if (IsValidButton(name))
                 {
                     Rewired.Player player = Rewired.ReInput.players.GetPlayer(playerId);
                     if (player.GetButtonUp(name))
                         return true;
                 }
-                catch { }
 #endif
 
 #if ENABLE_INPUT_SYSTEM
@@ -441,13 +471,12 @@ namespace Insthync.CameraAndInput
 #endif
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-                try
+                if (IsValidButton(name))
                 {
                     if (Input.GetButtonUp(name))
                         return true;
                 }
-                catch { }
-                if (IsKeyFromSettingActivated(name, GetKeyUp))
+                if (IsKeyFromSettingActivated(name, ButtonEvent.Up))
                     return true;
 #endif
             }
@@ -459,7 +488,7 @@ namespace Insthync.CameraAndInput
                     return true;
                 if (!IsUseNonMobileInput())
                 {
-                    if (IsKeyFromSettingActivated(name, GetKeyUp))
+                    if (IsKeyFromSettingActivated(name, ButtonEvent.Up))
                         return true;
                 }
             }
@@ -650,6 +679,13 @@ namespace Insthync.CameraAndInput
                 Value = value;
                 UpdatedFrame = Time.frameCount;
             }
+        }
+
+        private enum ButtonEvent
+        {
+            Pressed,
+            Down,
+            Up,
         }
     }
 }
