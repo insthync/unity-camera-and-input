@@ -92,18 +92,23 @@ namespace Insthync.CameraAndInput
         private Vector3 _currentRecoilRotation;
         // Being used in Update and DrawGizmos functions
         private RaycastHit _aimAssistCastHit;
+        private string _xRotationSaveKey;
+        private string _yRotationSaveKey;
+        private string _zoomDistanceSaveKey;
 
         private void Start()
         {
             xRotation = startXRotation;
             yRotation = startYRotation;
             zoomDistance = startZoomDistance;
-
+            _xRotationSaveKey = savePrefsPrefix + "_XRotation";
+            _yRotationSaveKey = savePrefsPrefix + "_YRotation";
+            _zoomDistanceSaveKey = savePrefsPrefix + "_ZoomDistance";
             if (isSaveCamera)
             {
-                xRotation = PlayerPrefs.GetFloat(savePrefsPrefix + "_XRotation", xRotation);
-                yRotation = PlayerPrefs.GetFloat(savePrefsPrefix + "_YRotation", yRotation);
-                zoomDistance = PlayerPrefs.GetFloat(savePrefsPrefix + "_ZoomDistance", zoomDistance);
+                xRotation = PlayerPrefs.GetFloat(_xRotationSaveKey, xRotation);
+                yRotation = PlayerPrefs.GetFloat(_yRotationSaveKey, yRotation);
+                zoomDistance = PlayerPrefs.GetFloat(_zoomDistanceSaveKey, zoomDistance);
             }
         }
 
@@ -113,9 +118,9 @@ namespace Insthync.CameraAndInput
 
             if (isSaveCamera)
             {
-                PlayerPrefs.SetFloat(savePrefsPrefix + "_XRotation", xRotation);
-                PlayerPrefs.SetFloat(savePrefsPrefix + "_YRotation", yRotation);
-                PlayerPrefs.SetFloat(savePrefsPrefix + "_ZoomDistance", zoomDistance);
+                PlayerPrefs.SetFloat(_xRotationSaveKey, xRotation);
+                PlayerPrefs.SetFloat(_yRotationSaveKey, yRotation);
+                PlayerPrefs.SetFloat(_zoomDistanceSaveKey, zoomDistance);
                 PlayerPrefs.Save();
             }
 
