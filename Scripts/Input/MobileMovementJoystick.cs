@@ -101,6 +101,7 @@ namespace Insthync.CameraAndInput
         private MobileInputConfig _config;
         private PointerEventData _previousPointer;
         private int _lastDragFrame;
+        private int _lastEnabledFrame;
         private bool _isResettingSiblingIndex;
         private bool _prevToggled;
 
@@ -168,11 +169,13 @@ namespace Insthync.CameraAndInput
                 _isResettingSiblingIndex = false;
                 transform.SetSiblingIndex(_defaultSiblingIndex);
             }
+            _lastEnabledFrame = Time.frameCount;
         }
 
         private void OnDisable()
         {
-            OnPointerUp(null);
+            if (Time.frameCount > _lastEnabledFrame)
+                OnPointerUp(null);
         }
 
         public void OnPointerDown(PointerEventData eventData)
