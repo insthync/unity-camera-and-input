@@ -9,6 +9,7 @@ namespace Insthync.CameraAndInput
     public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
         public static readonly HashSet<int> Touches = new HashSet<int>();
+        public static bool DisableToggling { get; set; } = false;
 
         public enum EMode
         {
@@ -154,12 +155,15 @@ namespace Insthync.CameraAndInput
             _defaultControllerLocalPosition = controllerHandler.localPosition;
             _defaultSiblingIndex = transform.GetSiblingIndex();
             SetIdleState();
+            MobileMovementJoystickInstanceManager.Add(this);
         }
 
         private void OnDestroy()
         {
             if (_config != null)
                 _config.onLoadAlpha -= OnLoadAlpha;
+            SetAllButtonsUp();
+            MobileMovementJoystickInstanceManager.Remove(this);
         }
 
         private void OnEnable()
@@ -191,7 +195,7 @@ namespace Insthync.CameraAndInput
             InputManager.touchedPointerIds[eventData.pointerId] = gameObject;
 
             // Simulate button pressing
-            if (useButtons && buttonKeyNames != null)
+            if (useButtons && buttonKeyNames != null && buttonKeyNames.Length > 0)
             {
                 foreach (string buttonKeyName in buttonKeyNames)
                 {
@@ -273,7 +277,7 @@ namespace Insthync.CameraAndInput
             {
                 Vector2 direction = movement.normalized;
                 float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                PreToggled = angle > toggleAngleRangeMin && angle < toggleAngleRangeMax && Vector3.Distance(pointerPosition, _startDragPosition) > toggleDistanceRangeMin;
+                PreToggled = !DisableToggling && angle > toggleAngleRangeMin && angle < toggleAngleRangeMax && Vector3.Distance(pointerPosition, _startDragPosition) > toggleDistanceRangeMin;
                 controllerToggler.gameObject.SetActive(PreToggled);
             }
 
@@ -336,7 +340,7 @@ namespace Insthync.CameraAndInput
             // Simulate button pressing
             if (eventData != null)
             {
-                if (useButtons && toggleKeyNames != null)
+                if (useButtons && buttonKeyNames != null && buttonKeyNames.Length > 0)
                 {
                     foreach (string buttonKeyName in buttonKeyNames)
                     {
@@ -461,6 +465,25 @@ namespace Insthync.CameraAndInput
 
                 PreToggled = false;
                 UpdateToggle(false);
+            }
+        }
+
+        private void SetAllButtonsUp()
+        {
+            if (buttonKeyNames != null && buttonKeyNames.Length > 0)
+            {
+                foreach (string buttonKeyName in buttonKeyNames)
+                {
+                    InputManager.SetButtonUp(buttonKeyName);
+                }
+            }
+
+            if (toggleKeyNames != null && toggleKeyNames.Length > 0)
+            {
+                foreach (string toggleKeyName in toggleKeyNames)
+                {
+                    InputManager.SetButtonUp(toggleKeyName);
+                }
             }
         }
     }
