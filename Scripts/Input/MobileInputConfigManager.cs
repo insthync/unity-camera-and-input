@@ -5,6 +5,8 @@ namespace Insthync.CameraAndInput
 {
     public class MobileInputConfigManager : MonoBehaviour
     {
+    	public const string RESET_MOBILE_INPUT_SAVE_KEY = "RESET_MOBILE_INPUT";
+    
         public static MobileInputConfigManager Instance { get; private set; }
 
         [Header("Editing UI Element")]
@@ -15,6 +17,7 @@ namespace Insthync.CameraAndInput
 
         private void OnEnable()
         {
+        	ResetAllMobileInputsOnce();
             if (uiRoot)
             {
                 uiRoot.SetActive(false);
@@ -120,6 +123,34 @@ namespace Insthync.CameraAndInput
                 uiRoot.SetActive(false);
             }
         }
+
+	    public static void ResetAllMobileInputsOnce()
+	    {
+	        if (PlayerPrefs.GetInt(RESET_MOBILE_INPUT_SAVE_KEY, 0) == 0)
+	        {
+	            var inputs = FindObjectsOfType<MobileInputConfig>();
+	            foreach (var input in inputs)
+	            {
+	                if (!input.isEditMode)
+	                {
+	                    input.isEditMode = true;
+	                    input.ResetPosition();
+	                    input.ResetScale();
+	                    input.ResetAlpha();
+
+	                    input.SavePosition();
+	                    input.SaveScale();
+	                    input.SaveAlpha();
+
+	                    input.LoadPosition();
+	                    input.LoadScale();
+	                    input.LoadAlpha();
+	                    input.isEditMode = false;
+	                }
+	            }
+	            PlayerPrefs.SetInt(RESET_MOBILE_INPUT_SAVE_KEY, 1);
+	        }
+	    }
 
         [ContextMenu("Delete all child's buttons")]
         public void DeleteAllChildsButtons()
