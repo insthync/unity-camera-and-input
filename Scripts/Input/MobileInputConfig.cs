@@ -222,7 +222,7 @@ namespace Insthync.CameraAndInput
         [ContextMenu("Set Default Position By Current Position To All Objects", false, 1000000)]
         public void SetDefaultPositionByCurrentPositionToAllObjects()
         {
-            var objs = FindObjectsOfType<MobileInputConfig>();
+            var objs = FindObjectsByType<MobileInputConfig>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var obj in objs)
             {
                 obj.SetDefaultPositionByCurrentPosition();
@@ -232,7 +232,7 @@ namespace Insthync.CameraAndInput
         [ContextMenu("Set Default Scale By Current Scale To All Objects", false, 1000001)]
         public void SetDefaultScaleByCurrentScaleToAllObjects()
         {
-            var objs = FindObjectsOfType<MobileInputConfig>();
+            var objs = FindObjectsByType<MobileInputConfig>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var obj in objs)
             {
                 obj.SetDefaultScaleByCurrentScale();
@@ -242,7 +242,7 @@ namespace Insthync.CameraAndInput
         [ContextMenu("Set Default Alpha By Current Alpha To All Objects", false, 1000002)]
         public void SetDefaultAlphaByCurrentAlphaToAllObjects()
         {
-            var objs = FindObjectsOfType<MobileInputConfig>();
+            var objs = FindObjectsByType<MobileInputConfig>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var obj in objs)
             {
                 obj.SetDefaultAlphaByCurrentAlpha();

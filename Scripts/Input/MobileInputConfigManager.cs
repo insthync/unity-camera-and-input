@@ -5,8 +5,6 @@ namespace Insthync.CameraAndInput
 {
     public class MobileInputConfigManager : MonoBehaviour
     {
-    	public const string RESET_MOBILE_INPUT_SAVE_KEY = "RESET_MOBILE_INPUT";
-    
         public static MobileInputConfigManager Instance { get; private set; }
 
         [Header("Editing UI Element")]
@@ -15,9 +13,37 @@ namespace Insthync.CameraAndInput
         public Slider alphaSlider;
         public bool turnOnEditModeOnEnable;
 
+        [Header("Other")]
+        public string InitializeKey = "CONFIG_INITIALIZE_KEY";
+
+        public void Initialize()
+        {
+            if (PlayerPrefs.GetInt(InitializeKey, 0) == 0)
+            {
+                var inputs = FindObjectsByType<MobileInputConfig>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var input in inputs)
+                {
+                    input.isEditMode = true;
+                    input.ResetPosition();
+                    input.ResetScale();
+                    input.ResetAlpha();
+
+                    input.SavePosition();
+                    input.SaveScale();
+                    input.SaveAlpha();
+
+                    input.LoadPosition();
+                    input.LoadScale();
+                    input.LoadAlpha();
+                    input.isEditMode = false;
+                }
+                PlayerPrefs.SetInt(InitializeKey, 1);
+            }
+        }
+
         private void OnEnable()
         {
-        	ResetAllMobileInputsOnce();
+            Initialize();
             if (uiRoot)
             {
                 uiRoot.SetActive(false);
@@ -55,7 +81,7 @@ namespace Insthync.CameraAndInput
 
         public void LoadConfig()
         {
-            var comps = FindObjectsOfType<MobileInputConfig>();
+            var comps = FindObjectsByType<MobileInputConfig>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var comp in comps)
             {
                 comp.LoadPosition();
@@ -123,34 +149,6 @@ namespace Insthync.CameraAndInput
                 uiRoot.SetActive(false);
             }
         }
-
-	    public static void ResetAllMobileInputsOnce()
-	    {
-	        if (PlayerPrefs.GetInt(RESET_MOBILE_INPUT_SAVE_KEY, 0) == 0)
-	        {
-	            var inputs = FindObjectsOfType<MobileInputConfig>();
-	            foreach (var input in inputs)
-	            {
-	                if (!input.isEditMode)
-	                {
-	                    input.isEditMode = true;
-	                    input.ResetPosition();
-	                    input.ResetScale();
-	                    input.ResetAlpha();
-
-	                    input.SavePosition();
-	                    input.SaveScale();
-	                    input.SaveAlpha();
-
-	                    input.LoadPosition();
-	                    input.LoadScale();
-	                    input.LoadAlpha();
-	                    input.isEditMode = false;
-	                }
-	            }
-	            PlayerPrefs.SetInt(RESET_MOBILE_INPUT_SAVE_KEY, 1);
-	        }
-	    }
 
         [ContextMenu("Delete all child's buttons")]
         public void DeleteAllChildsButtons()
