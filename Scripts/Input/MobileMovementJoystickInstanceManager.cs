@@ -4,34 +4,25 @@ namespace Insthync.CameraAndInput
 {
     public static class MobileMovementJoystickInstanceManager
     {
-        private static List<MobileMovementJoystick> _joystickInstances = new();
-        public static void Add(MobileMovementJoystick joystick)
-        {
-            if (joystick == null)
-                return;
+        private static HashSet<MobileMovementJoystick> _instances = new HashSet<MobileMovementJoystick>();
 
-            if (!_joystickInstances.Contains(joystick))
-                _joystickInstances.Add(joystick);
+        public static void Add(MobileMovementJoystick instance)
+        {
+            if (instance == null)
+                return;
+            _instances.Add(instance);
         }
 
-        public static void Remove(MobileMovementJoystick joystick)
+        public static void Remove(MobileMovementJoystick instance)
         {
-            if (joystick == null)
+            if (instance == null)
                 return;
-
-            if (_joystickInstances.Contains(joystick))
-                _joystickInstances.Remove(joystick);
+            _instances.Remove(instance);
         }
 
         public static void Clear()
         {
-            _joystickInstances.Clear();
-        }
-
-        public static void UnToggleAll()
-        {
-            foreach (var joyInstance in _joystickInstances)
-                joyInstance.UnToggle();
+            _instances.Clear();
         }
     }
 }

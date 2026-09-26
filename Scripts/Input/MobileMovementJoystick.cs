@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace Insthync.CameraAndInput
 {
-    public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IDragHandler, IPointerUpHandler
+    public class MobileMovementJoystick : MonoBehaviour, IMobileInputArea, IMobileInputToggle, IPointerDownHandler, IDragHandler, IPointerUpHandler
     {
         public static readonly HashSet<int> Touches = new HashSet<int>();
         public static bool DisableToggling { get; set; } = false;
@@ -60,6 +60,7 @@ namespace Insthync.CameraAndInput
         public float handlerAlphaWhileMoving = 1f;
 
         [Header("Toggling")]
+        public string toggleGroupName;
         public RectTransform controllerToggler = null;
         public float toggleAngleRangeMin = 75f;
         public float toggleAngleRangeMax = 105f;
@@ -73,6 +74,7 @@ namespace Insthync.CameraAndInput
         public UnityEvent onPointerUp = new UnityEvent();
         public UnityEvent onToggleOn = new UnityEvent();
         public UnityEvent onToggleOff = new UnityEvent();
+        public UnityEvent<bool> onToggle = new UnityEvent<bool>();
 
         public bool Interactable
         {
@@ -105,6 +107,8 @@ namespace Insthync.CameraAndInput
         private int _lastEnabledFrame;
         private bool _isResettingSiblingIndex;
         private bool _prevToggled;
+
+        public string ToggleGroupName => toggleGroupName;
 
         private void Start()
         {
@@ -156,6 +160,7 @@ namespace Insthync.CameraAndInput
             _defaultSiblingIndex = transform.GetSiblingIndex();
             SetIdleState();
             MobileMovementJoystickInstanceManager.Add(this);
+            MobileInputToggleInstanceManager.Add(this);
         }
 
         private void OnDestroy()
@@ -164,6 +169,7 @@ namespace Insthync.CameraAndInput
                 _config.onLoadAlpha -= OnLoadAlpha;
             SetAllButtonsUp();
             MobileMovementJoystickInstanceManager.Remove(this);
+            MobileInputToggleInstanceManager.Remove(this);
         }
 
         private void OnEnable()
@@ -207,6 +213,7 @@ namespace Insthync.CameraAndInput
             // Update toggling
             if (controllerToggler != null)
             {
+                MobileInputToggleInstanceManager.UnToggle(this);
                 UpdateToggle(false);
                 controllerToggler.gameObject.SetActive(false);
             }
@@ -398,11 +405,22 @@ namespace Insthync.CameraAndInput
 
         public void UpdateToggle(bool isOn)
         {
+            bool isDirty = IsToggled != isOn;
             IsToggled = isOn;
-            if (isOn)
-                onToggleOn.Invoke();
-            else
-                onToggleOff.Invoke();
+            if (isDirty)
+            {
+                if (isOn)
+                {
+                    onToggleOn.Invoke();
+                    MobileInputToggleInstanceManager.Toggle(this);
+                }
+                else
+                {
+                    onToggleOff.Invoke();
+                    MobileInputToggleInstanceManager.UnToggle(this);
+                }
+                onToggle.Invoke(isOn);
+            }
             int i;
             for (i = 0; i < toggleSigns.Length; ++i)
             {
@@ -414,6 +432,11 @@ namespace Insthync.CameraAndInput
             }
             if (controllerToggler != null)
                 controllerToggler.gameObject.SetActive(isOn);
+        }
+
+        public void Toggle()
+        {
+            UpdateToggle(true);
         }
 
         public void UnToggle()
@@ -438,34 +461,6 @@ namespace Insthync.CameraAndInput
         public void OnLoadAlpha(float alpha)
         {
             _defaultCanvasGroupAlpha = alpha;
-        }
-
-        public void OnSetToggleOff(bool state)
-        {
-            if (!state)
-            {
-                if (controllerHandler != null)
-                    controllerHandler.localPosition = _defaultControllerLocalPosition;
-
-                // Reset background position
-                if (controllerBackground != null)
-                    controllerBackground.position = _backgroundOffset + controllerHandler.position;
-
-                // Reset canvas alpha
-                if (_backgroundCanvasGroup != null)
-                    _backgroundCanvasGroup.alpha = backgroundAlphaWhileIdling;
-
-                if (_handlerCanvasGroup != null)
-                    _handlerCanvasGroup.alpha = handlerAlphaWhileIdling;
-
-                SetIdleState();
-
-                InputManager.SetAxis(axisXName, 0);
-                InputManager.SetAxis(axisYName, 0);
-
-                PreToggled = false;
-                UpdateToggle(false);
-            }
         }
 
         private void SetAllButtonsUp()

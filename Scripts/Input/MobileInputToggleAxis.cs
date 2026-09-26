@@ -11,12 +11,6 @@ namespace Insthync.CameraAndInput
         [SerializeField]
         private float axisValueWhileOn = 0f;
 
-        private void Update()
-        {
-            if (IsOn)
-                InputManager.SetAxis(axisName, axisValueWhileOn);
-        }
-
         protected override void OnToggle(bool isOn)
         {
             InputManager.SetAxis(axisName, isOn ? axisValueWhileOn : axisValueWhenOff);

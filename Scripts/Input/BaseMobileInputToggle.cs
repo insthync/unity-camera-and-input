@@ -5,11 +5,8 @@ using UnityEngine.UI;
 
 namespace Insthync.CameraAndInput
 {
-    public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
+    public abstract class BaseMobileInputToggle : MonoBehaviour, IMobileInputToggle, IMobileInputArea, IPointerDownHandler, IPointerUpHandler
     {
-        [System.Serializable]
-        public class BoolEvent : UnityEvent<bool> { }
-
         [System.Serializable]
         public class ToggleColorSetting
         {
@@ -18,6 +15,7 @@ namespace Insthync.CameraAndInput
             public Color colorWhileUntoggled = Color.white;
         }
 
+        public string toggleGroupName = string.Empty;
         [Range(0f, 1f)]
         public float alphaWhileOff = 0.75f;
         [Range(0f, 1f)]
@@ -26,9 +24,12 @@ namespace Insthync.CameraAndInput
         public ToggleColorSetting[] toggleColorSettings = new ToggleColorSetting[0];
 
         [Header("Events")]
-        public BoolEvent onToggle = new BoolEvent();
         public UnityEvent onPointerDown = new UnityEvent();
         public UnityEvent onPointerUp = new UnityEvent();
+        public UnityEvent onToggleOn = new UnityEvent();
+        public UnityEvent onToggleOff = new UnityEvent();
+        public UnityEvent<bool> onToggle = new UnityEvent<bool>();
+
         [SerializeField]
         private bool isOn = false;
 
@@ -48,10 +49,19 @@ namespace Insthync.CameraAndInput
                 if (_dirtyIsOn != value)
                 {
                     _dirtyIsOn = value;
-                    UpdateGraphics();
+                    if (isOn)
+                    {
+                        onToggleOn.Invoke();
+                        MobileInputToggleInstanceManager.Toggle(this);
+                    }
+                    else
+                    {
+                        onToggleOff.Invoke();
+                        MobileInputToggleInstanceManager.UnToggle(this);
+                    }
+                    onToggle.Invoke(value);
                     OnToggle(value);
-                    if (onToggle != null)
-                        onToggle.Invoke(value);
+                    UpdateGraphics();
                 }
             }
         }
@@ -59,6 +69,19 @@ namespace Insthync.CameraAndInput
         private CanvasGroup _canvasGroup;
         private MobileInputConfig _config;
         private float _alphaMultiplier = 1f;
+
+        public string ToggleGroupName => toggleGroupName;
+        public bool IsToggled => IsOn;
+
+        public void Toggle()
+        {
+            IsOn = true;
+        }
+
+        public void UnToggle()
+        {
+            IsOn = false;
+        }
 
         protected virtual void Start()
         {
@@ -73,12 +96,14 @@ namespace Insthync.CameraAndInput
                 // Updating default canvas group alpha when loading new config
                 _config.onLoadAlpha += OnLoadAlpha;
             }
+            MobileInputToggleInstanceManager.Add(this);
         }
 
         protected virtual void OnDestroy()
         {
             if (_config != null)
                 _config.onLoadAlpha -= OnLoadAlpha;
+            MobileInputToggleInstanceManager.Remove(this);
         }
 
         public void SetIsOnWithoutNotify(bool value)
