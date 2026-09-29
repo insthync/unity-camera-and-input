@@ -70,7 +70,11 @@ namespace Insthync.CameraAndInput
         public GameObject[] unToggleSigns = new GameObject[0];
 
         [Header("Events")]
+        public UnityEvent onBeforeSetButtonDown = new UnityEvent();
+        public UnityEvent onAfterSetButtonDown = new UnityEvent();
         public UnityEvent onPointerDown = new UnityEvent();
+        public UnityEvent onBeforeSetButtonUp = new UnityEvent();
+        public UnityEvent onAfterSetButtonUp = new UnityEvent();
         public UnityEvent onPointerUp = new UnityEvent();
         public UnityEvent onToggleOn = new UnityEvent();
         public UnityEvent onToggleOff = new UnityEvent();
@@ -200,14 +204,9 @@ namespace Insthync.CameraAndInput
             _previousPointer = eventData;
             InputManager.touchedPointerIds[eventData.pointerId] = gameObject;
 
-            // Simulate button pressing
-            if (useButtons && buttonKeyNames != null && buttonKeyNames.Length > 0)
-            {
-                foreach (string buttonKeyName in buttonKeyNames)
-                {
-                    InputManager.SetButtonDown(buttonKeyName);
-                }
-            }
+            onBeforeSetButtonDown.Invoke();
+            SetButtonDown();
+            onAfterSetButtonDown.Invoke();
             onPointerDown.Invoke();
 
             // Update toggling
@@ -244,6 +243,17 @@ namespace Insthync.CameraAndInput
             SetDraggingState();
             CurrentPosition = eventData.position;
             OnDrag(eventData);
+        }
+
+        public void SetButtonDown()
+        {
+            if (useButtons && buttonKeyNames != null && buttonKeyNames.Length > 0)
+            {
+                foreach (string buttonKeyName in buttonKeyNames)
+                {
+                    InputManager.SetButtonDown(buttonKeyName);
+                }
+            }
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -347,13 +357,9 @@ namespace Insthync.CameraAndInput
             // Simulate button pressing
             if (eventData != null)
             {
-                if (useButtons && buttonKeyNames != null && buttonKeyNames.Length > 0)
-                {
-                    foreach (string buttonKeyName in buttonKeyNames)
-                    {
-                        InputManager.SetButtonUp(buttonKeyName);
-                    }
-                }
+                onBeforeSetButtonUp.Invoke();
+                SetButtonUp();
+                onAfterSetButtonUp.Invoke();
                 onPointerUp.Invoke();
             }
 
@@ -387,6 +393,17 @@ namespace Insthync.CameraAndInput
             UpdateVirtualAxes(Vector3.zero);
             SetIdleState();
             IsDragging = false;
+        }
+
+        public void SetButtonUp()
+        {
+            if (useButtons && buttonKeyNames != null && buttonKeyNames.Length > 0)
+            {
+                foreach (string buttonKeyName in buttonKeyNames)
+                {
+                    InputManager.SetButtonUp(buttonKeyName);
+                }
+            }
         }
 
         public void UpdateVirtualAxes(Vector2 value)
