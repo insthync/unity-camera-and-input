@@ -134,6 +134,94 @@ namespace Insthync.CameraAndInput
 #endif
         }
 
+        public static bool IsGyroscopeSupported()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return UnityEngine.InputSystem.Gyroscope.current != null;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return SystemInfo.supportsGyroscope;
+#else
+            return false;
+#endif
+        }
+
+        public static bool IsGyroscopeEnabled()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var gyroscope = UnityEngine.InputSystem.Gyroscope.current;
+            return gyroscope != null && gyroscope.enabled;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return SystemInfo.supportsGyroscope && Input.gyro.enabled;
+#else
+            return false;
+#endif
+        }
+
+        public static void SetGyroscopeEnabled(bool enabled)
+        {
+#if ENABLE_INPUT_SYSTEM
+            // Legacy gyro data is provided by separate devices in the Input System.
+            SetSensorEnabled(UnityEngine.InputSystem.Gyroscope.current, enabled);
+            SetSensorEnabled(AttitudeSensor.current, enabled);
+            SetSensorEnabled(GravitySensor.current, enabled);
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            if (SystemInfo.supportsGyroscope && Input.gyro.enabled != enabled)
+                Input.gyro.enabled = enabled;
+#endif
+        }
+
+#if ENABLE_INPUT_SYSTEM
+        private static void SetSensorEnabled(Sensor sensor, bool enabled)
+        {
+            if (sensor == null || sensor.enabled == enabled)
+                return;
+            if (enabled)
+                InputSystem.EnableDevice(sensor);
+            else
+                InputSystem.DisableDevice(sensor);
+        }
+#endif
+
+        /// <summary>
+        /// Returns angular velocity in radians per second. The legacy backend uses
+        /// rotationRateUnbiased; the Input System has no direct unbiased equivalent.
+        /// </summary>
+        public static Vector3 GetGyroscopeRotationRate()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var gyroscope = UnityEngine.InputSystem.Gyroscope.current;
+            return gyroscope != null && gyroscope.enabled ? gyroscope.angularVelocity.ReadValue() : Vector3.zero;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return IsGyroscopeEnabled() ? Input.gyro.rotationRateUnbiased : Vector3.zero;
+#else
+            return Vector3.zero;
+#endif
+        }
+
+        public static Quaternion GetGyroscopeAttitude()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var attitudeSensor = AttitudeSensor.current;
+            return attitudeSensor != null && attitudeSensor.enabled ? attitudeSensor.attitude.ReadValue() : Quaternion.identity;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return IsGyroscopeEnabled() ? Input.gyro.attitude : Quaternion.identity;
+#else
+            return Quaternion.identity;
+#endif
+        }
+
+        public static Vector3 GetGyroscopeGravity()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var gravitySensor = GravitySensor.current;
+            return gravitySensor != null && gravitySensor.enabled ? gravitySensor.gravity.ReadValue() : Vector3.zero;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return IsGyroscopeEnabled() ? Input.gyro.gravity : Vector3.zero;
+#else
+            return Vector3.zero;
+#endif
+        }
+
 #if ENABLE_INPUT_SYSTEM
         public static bool TryGetInputAction(string name, out InputAction inputAction)
         {
