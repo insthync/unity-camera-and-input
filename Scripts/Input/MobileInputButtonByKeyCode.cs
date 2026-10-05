@@ -4,7 +4,6 @@ namespace Insthync.CameraAndInput
 {
     public class MobileInputButtonByKeyCode : BaseMobileInputButton
     {
-        [Header("Key")]
         public KeyCode keyCode = KeyCode.None;
 
         protected override void OnButtonDown()
